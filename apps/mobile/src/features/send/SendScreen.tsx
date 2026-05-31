@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -21,6 +21,7 @@ import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useDemoState } from "@/providers/DemoStateProvider";
 import { useSheets } from "@/providers/SheetProvider";
+import { useApp } from "@/providers/AppProvider";
 import { fmtUSD, fmtToken, shortAddr } from "@/utils/format";
 import { CHAINS, tokenById, RECIPIENTS, chainBadgeColor, type DemoToken, type ChainId } from "@/features/wallet/data";
 import { assessRecipient, recipientNetwork, type AddressRisk } from "@/features/wallet/risk";
@@ -57,6 +58,8 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
   const { t } = useTranslation();
   const { backend, sendSim, sendOutcome } = useDemoState();
   const sheets = useSheets();
+  const { logEvent } = useApp();
+  const logged = useRef<Set<string>>(new Set());
 
   const [step, setStep] = useState<Step>("to");
   const [token, setToken] = useState<DemoToken>(tokenId ? tokenById(tokenId) : tokenById("eth"));
@@ -82,6 +85,21 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
   const netMismatch = !!(recipientNet && recipientNet !== token.chain);
   const simStatus = !checksAvailable ? "unavailable" : sendSim === "fail" ? "failed" : "passed";
   const balanceAfter = Math.max(0, token.amount - amtNum);
+
+  // Record system protections once per occurrence into the security log.
+  useEffect(() => {
+    if (blocked && !logged.current.has("block")) {
+      logged.current.add("block");
+      logEvent("risk_block");
+    }
+  }, [blocked, logEvent]);
+
+  useEffect(() => {
+    if (step === "review" && simStatus === "failed" && !logged.current.has("sim")) {
+      logged.current.add("sim");
+      logEvent("sim_fail");
+    }
+  }, [step, simStatus, logEvent]);
 
   const onKey = (k: string) => {
     setAmt((prev) => {
@@ -225,7 +243,13 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
           <Button
             label={blocked ? t("send.to.blocked") : t("send.to.continue")}
             disabled={!toValid || blocked}
-            onPress={() => setStep("amount")}
+            onPress={() => {
+              if (risk && !logged.current.has("check")) {
+                logged.current.add("check");
+                logEvent("risk_check", { detail: shortAddr(trimmedTo, 8, 6) });
+              }
+              setStep("amount");
+            }}
           />
         </FooterButton>
       )}

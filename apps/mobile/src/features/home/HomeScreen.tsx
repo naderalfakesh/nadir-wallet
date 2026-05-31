@@ -23,6 +23,7 @@ import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useSheets } from "@/providers/SheetProvider";
 import { useDemoState } from "@/providers/DemoStateProvider";
+import { useApp } from "@/providers/AppProvider";
 import { fmtUSD, fmtToken } from "@/utils/format";
 import {
   ACCOUNT,
@@ -87,8 +88,9 @@ export function HomeScreen() {
   const { t } = useTranslation();
   const sheets = useSheets();
   const { backend, price, retry } = useDemoState();
+  const { prefs, setPref } = useApp();
   const [range, setRange] = useState<Range>("1W");
-  const [hidden, setHidden] = useState(false);
+  const hidden = prefs.hideBalances;
 
   const priceUnavail = price === "unavailable";
   const dimChart = backend === "rpc_unavailable" || priceUnavail;
@@ -139,7 +141,7 @@ export function HomeScreen() {
           <View style={{ flex: 1 }} />
           <IconButton
             name={hidden ? "eyeOff" : "eye"}
-            onPress={() => setHidden((h) => !h)}
+            onPress={() => setPref("hideBalances", !hidden)}
             accessibilityLabel={hidden ? "Show balances" : "Hide balances"}
           />
           <IconButton name="scan" accessibilityLabel="Scan QR code" onPress={() => sheets.open("scan")} />

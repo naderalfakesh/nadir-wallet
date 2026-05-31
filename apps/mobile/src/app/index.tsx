@@ -1,7 +1,10 @@
 import { Redirect } from "expo-router";
+import { useApp } from "@/providers/AppProvider";
 
-// First launch lands on onboarding; once a wallet exists this will route
-// straight to the locked app instead.
+// Route on launch from persisted state: first run → onboarding, otherwise lock
+// before the wallet (biometric if enabled, passcode fallback either way).
 export default function Index() {
-  return <Redirect href="/onboarding" />;
+  const { prefs } = useApp();
+  if (!prefs.onboardingCompleted) return <Redirect href="/onboarding" />;
+  return <Redirect href="/lock" />;
 }

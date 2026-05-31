@@ -3,6 +3,17 @@
   "locked": "Wallet locked",
   "unlockFaceId": "Unlock with Face ID",
   "scanning": "Scanning…",
+  "authenticating": "Authenticating…",
   "useFaceId": "Use Face ID",
-  "usePasscode": "Use passcode instead"
+  "usePasscode": "Use passcode instead",
+  "useFaceIdInstead": "Use Face ID instead",
+  "tryAgain": "Try again",
+  "enterPasscode": "Enter passcode",
+  "unlockWallet": "Unlock your wallet",
+  "incorrect": "Incorrect passcode · {{count}} left",
+  "lockout": "Too many attempts · try again in {{seconds}}s",
+  "demoPasscode": "Demo passcode · 123456",
+  "biometricUnavailable": "Face ID isn't set up on this device — use your passcode.",
+  "biometricFailed": "Face ID didn't match. Try again or use your passcode.",
+  "biometricCancelled": "Face ID cancelled. Try again or use your passcode."
 }

@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { storage } from "@/services/storage";
 import { palettes, type ColorScheme, type ThemeColors } from "./colors";
 import { spacing } from "./spacing";
 import { radius } from "./radius";
@@ -42,16 +43,25 @@ export function ThemeProvider({
   children: React.ReactNode;
   initialScheme?: ColorScheme;
 }) {
-  const [scheme, setScheme] = useState<ColorScheme>(initialScheme);
+  const [scheme, setSchemeState] = useState<ColorScheme>(initialScheme);
+
+  const setScheme = useCallback((next: ColorScheme) => {
+    setSchemeState(next);
+    void storage.saveTheme(next);
+  }, []);
 
   const toggleScheme = useCallback(
-    () => setScheme((s) => (s === "dark" ? "light" : "dark")),
+    () => setSchemeState((s) => {
+      const next = s === "dark" ? "light" : "dark";
+      void storage.saveTheme(next);
+      return next;
+    }),
     [],
   );
 
   const value = useMemo<ThemeContextValue>(
     () => ({ theme: buildTheme(scheme), scheme, setScheme, toggleScheme }),
-    [scheme, toggleScheme],
+    [scheme, setScheme, toggleScheme],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

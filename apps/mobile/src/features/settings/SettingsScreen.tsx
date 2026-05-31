@@ -17,6 +17,7 @@ import { useTheme, useThemeControls } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useSheets } from "@/providers/SheetProvider";
 import { displayAddress } from "@/services/wallet/account";
+import { copyText } from "@/services/device";
 import { ACCOUNT } from "@/features/wallet/data";
 import { DemoControls } from "./DemoControls";
 
@@ -29,6 +30,7 @@ export function SettingsScreen() {
   const [copied, setCopied] = useState(false);
 
   const copy = () => {
+    void copyText(ACCOUNT.address);
     setCopied(true);
     setTimeout(() => setCopied(false), 1400);
   };

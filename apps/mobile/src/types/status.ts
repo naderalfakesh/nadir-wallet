@@ -11,8 +11,12 @@ export type SimulationStatus = "passed" | "failed" | "unavailable";
 export type RiskLevel = AddressRiskLevel;
 
 export type SecurityEventType =
+  | "created"
+  | "imported"
   | "unlock"
   | "backup"
+  | "biometric_on"
+  | "biometric_off"
   | "risk_check"
   | "risk_block"
   | "sim_fail"

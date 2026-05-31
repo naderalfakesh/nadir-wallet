@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen, AppText, Button, Icon, StatusPill } from "@/components";
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
+import { openExplorer } from "@/services/device";
 import { fmtUSD, fmtToken, shortAddr } from "@/utils/format";
 import { CHAINS, type DemoToken } from "@/features/wallet/data";
 import type { SendOutcome } from "@/providers/DemoStateProvider";
@@ -131,7 +132,12 @@ export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fi
           </View>
         </Centered>
         <View style={{ paddingHorizontal: theme.spacing.pad, paddingBottom: insets.bottom + theme.spacing.pad, gap: 10 }}>
-          <Button label={t("send.overlay.viewOn", { explorer: chain.explorerName })} icon="external" variant="ghost" />
+          <Button
+            label={t("send.overlay.viewOn", { explorer: chain.explorerName })}
+            icon="external"
+            variant="ghost"
+            onPress={() => void openExplorer(chain.explorerHost, `tx/${hash}`)}
+          />
           <Button label={t("send.overlay.backToWallet")} onPress={goWallet} />
         </View>
       </Screen>

@@ -3,6 +3,7 @@ import { Pressable, View } from "react-native";
 import { SheetHeader, AppText, Button, Icon, QRCode, TestnetBadge } from "@/components";
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
+import { copyText, shareText } from "@/services/device";
 import { ACCOUNT, CHAINS, TOKENS, type ChainId } from "@/features/wallet/data";
 import type { SheetBodyProps } from "./types";
 
@@ -53,7 +54,7 @@ export function ReceiveSheet({ params, close }: SheetBodyProps) {
 
       <View style={{ alignItems: "center" }}>
         <View style={{ padding: 16, backgroundColor: "#fff", borderRadius: 22 }}>
-          <QRCode size={188} />
+          <QRCode value={ACCOUNT.address} size={188} />
         </View>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 16 }}>
           <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: ch.color }} />
@@ -86,11 +87,12 @@ export function ReceiveSheet({ params, close }: SheetBodyProps) {
           height={52}
           style={{ flex: 1 }}
           onPress={() => {
+            void copyText(ACCOUNT.address);
             setCopied(true);
             setTimeout(() => setCopied(false), 1500);
           }}
         />
-        <Button label={t("common.actions.share")} icon="external" height={52} style={{ flex: 1 }} />
+        <Button label={t("common.actions.share")} icon="external" height={52} style={{ flex: 1 }} onPress={() => void shareText(ACCOUNT.address)} />
       </View>
 
       <View style={{ flexDirection: "row", gap: 9, marginTop: 14, paddingHorizontal: 2 }}>

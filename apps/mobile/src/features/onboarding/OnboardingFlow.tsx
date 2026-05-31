@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen, ScreenHeader, AppText, Button, Card, Icon, type IconName } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
+import { useApp } from "@/providers/AppProvider";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { ImportScreen } from "./ImportScreen";
 import { CreatePasscode } from "./CreatePasscode";
@@ -18,13 +19,32 @@ export function OnboardingFlow() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { setPref, setPasscode, logEvent } = useApp();
   const [step, setStep] = useState<Step>("welcome");
+  const [viaImport, setViaImport] = useState(false);
 
-  const finish = () => router.replace("/home");
+  const finish = () => {
+    setPref("onboardingCompleted", true);
+    // Create flow verifies the phrase; import assumes the user already has it.
+    setPref("backupConfirmed", !viaImport);
+    logEvent(viaImport ? "imported" : "created");
+    router.replace("/home");
+  };
   const pad = theme.spacing.pad;
 
   if (step === "welcome") {
-    return <WelcomeScreen onCreate={() => setStep("explain")} onImport={() => setStep("import")} />;
+    return (
+      <WelcomeScreen
+        onCreate={() => {
+          setViaImport(false);
+          setStep("explain");
+        }}
+        onImport={() => {
+          setViaImport(true);
+          setStep("import");
+        }}
+      />
+    );
   }
 
   if (step === "explain") {
@@ -103,7 +123,13 @@ export function OnboardingFlow() {
   if (step === "passcode") {
     return (
       <Screen>
-        <CreatePasscode onDone={() => setStep("biometric")} onBack={() => setStep("welcome")} />
+        <CreatePasscode
+          onDone={(pin) => {
+            setPasscode(pin);
+            setStep("biometric");
+          }}
+          onBack={() => setStep("welcome")}
+        />
       </Screen>
     );
   }
@@ -132,8 +158,24 @@ export function OnboardingFlow() {
           </AppText>
         </View>
         <View style={{ paddingHorizontal: pad, paddingBottom: insets.bottom + pad, gap: 11 }}>
-          <Button label={t("onboarding.biometric.enable")} icon="faceid" onPress={() => setStep("ready")} />
-          <Button label={t("onboarding.biometric.later")} variant="ghost" onPress={() => setStep("ready")} height={50} />
+          <Button
+            label={t("onboarding.biometric.enable")}
+            icon="faceid"
+            onPress={() => {
+              setPref("biometricEnabled", true);
+              logEvent("biometric_on");
+              setStep("ready");
+            }}
+          />
+          <Button
+            label={t("onboarding.biometric.later")}
+            variant="ghost"
+            onPress={() => {
+              setPref("biometricEnabled", false);
+              setStep("ready");
+            }}
+            height={50}
+          />
         </View>
       </Screen>
     );

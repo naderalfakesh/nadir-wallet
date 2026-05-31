@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { SheetHeader, AppText, Button, Card, Row, Icon, TxIcon, StatusPill } from "@/components";
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
+import { copyText, openExplorer } from "@/services/device";
 import { fmtUSD, fmtToken, shortAddr } from "@/utils/format";
 import { CHAINS, TRANSACTIONS, type TxType } from "@/features/wallet/data";
 import type { SheetBodyProps } from "./types";
@@ -83,6 +84,7 @@ export function TxDetailSheet({ params, close }: SheetBodyProps) {
           title={t("tx.hash")}
           last
           onPress={() => {
+            void copyText(tx.hash);
             setCopied(true);
             setTimeout(() => setCopied(false), 1500);
           }}
@@ -97,7 +99,13 @@ export function TxDetailSheet({ params, close }: SheetBodyProps) {
         />
       </Card>
 
-      <Button label={t("tx.viewOn", { explorer: chain.explorerName })} icon="external" variant="ghost" style={{ marginTop: 14 }} />
+      <Button
+        label={t("tx.viewOn", { explorer: chain.explorerName })}
+        icon="external"
+        variant="ghost"
+        style={{ marginTop: 14 }}
+        onPress={() => void openExplorer(chain.explorerHost, `tx/${tx.hash}`)}
+      />
     </View>
   );
 }

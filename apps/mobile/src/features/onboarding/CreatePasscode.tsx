@@ -6,8 +6,9 @@ import { useTranslation } from "@/i18n/useTranslation";
 import { PinDots, PinKeypad } from "@/features/auth/PinPad";
 
 // Demo-only passcode setup — nothing is persisted. The flow exists to mirror
-// the design's app-lock step.
-export function CreatePasscode({ onDone, onBack }: { onDone: () => void; onBack: () => void }) {
+// the design's app-lock step. The PIN is handed back so the flow can store it
+// in the device keychain.
+export function CreatePasscode({ onDone, onBack }: { onDone: (pin: string) => void; onBack: () => void }) {
   const theme = useTheme();
   const { t } = useTranslation();
   const [stage, setStage] = useState<"set" | "confirm">("set");
@@ -32,7 +33,7 @@ export function CreatePasscode({ onDone, onBack }: { onDone: () => void; onBack:
             setPin("");
             setStage("confirm");
           } else if (next === first) {
-            onDone();
+            onDone(next);
           } else {
             setError(true);
             setShake(true);

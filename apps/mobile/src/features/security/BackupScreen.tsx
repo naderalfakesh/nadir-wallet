@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen, ScreenHeader, AppText, Button, Card, Icon } from "@/components";
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
+import { useApp } from "@/providers/AppProvider";
 import { SeedReveal, SeedVerify } from "@/features/onboarding/SeedComponents";
 import { DEMO_RECOVERY_PHRASE } from "@/features/onboarding/data";
 
@@ -15,8 +16,15 @@ export function BackupScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { setPref, logEvent } = useApp();
   const [step, setStep] = useState<Step>("intro");
   const pad = theme.spacing.pad;
+
+  const confirmBackup = () => {
+    setPref("backupConfirmed", true);
+    logEvent("backup");
+    setStep("done");
+  };
 
   if (step === "intro") {
     return (
@@ -73,7 +81,7 @@ export function BackupScreen() {
       <Screen>
         <ScreenHeader title={t("onboarding.verify.title")} subtitle={t("onboarding.verify.step")} onBack={() => setStep("reveal")} />
         <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: insets.bottom + pad }}>
-          <SeedVerify words={DEMO_RECOVERY_PHRASE} onContinue={() => setStep("done")} />
+          <SeedVerify words={DEMO_RECOVERY_PHRASE} onContinue={confirmBackup} />
         </ScrollView>
       </Screen>
     );

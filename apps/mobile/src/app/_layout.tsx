@@ -1,9 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
+import { AppProvider } from "@/providers/AppProvider";
+import { loadPersistedState, type PersistedState } from "@/services/storage";
 import {
   useFonts,
   PlusJakartaSans_400Regular,
@@ -38,19 +40,27 @@ export default function RootLayout() {
     IBMPlexMono_500Medium,
     IBMPlexMono_600SemiBold,
   });
+  const [boot, setBoot] = useState<PersistedState | null>(null);
 
   useEffect(() => {
-    if (loaded) SplashScreen.hideAsync();
-  }, [loaded]);
+    loadPersistedState().then(setBoot);
+  }, []);
 
-  if (!loaded) return null;
+  const ready = loaded && boot != null;
+
+  useEffect(() => {
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
+
+  if (!ready || !boot) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <ThemeProvider initialScheme="dark">
-          <DemoStateProvider>
-            <SheetProvider>
+        <AppProvider initial={boot}>
+          <ThemeProvider initialScheme={boot.theme}>
+            <DemoStateProvider initial={boot.demo}>
+              <SheetProvider>
               <ThemedStatusBar />
               <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
                 <Stack.Screen name="index" />
@@ -63,10 +73,11 @@ export default function RootLayout() {
                 <Stack.Screen name="reveal" options={{ animation: "slide_from_right" }} />
                 <Stack.Screen name="change-passcode" options={{ animation: "slide_from_right" }} />
               </Stack>
-              <SheetHost />
-            </SheetProvider>
-          </DemoStateProvider>
-        </ThemeProvider>
+                <SheetHost />
+              </SheetProvider>
+            </DemoStateProvider>
+          </ThemeProvider>
+        </AppProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

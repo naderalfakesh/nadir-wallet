@@ -59,6 +59,29 @@
   "events": {
     "title": "Recent security activity"
   },
+  "log": {
+    "createdTitle": "Wallet created",
+    "createdDetail": "Demo wallet set up on this device",
+    "importedTitle": "Wallet imported",
+    "importedDetail": "Recovery phrase imported on this device",
+    "unlockTitle": "Wallet unlocked",
+    "unlockFaceId": "Face ID",
+    "unlockPasscode": "Passcode",
+    "backupTitle": "Recovery phrase backup confirmed",
+    "backupDetail": "Verified on-device",
+    "biometricOnTitle": "Biometric unlock enabled",
+    "biometricOnDetail": "Face ID turned on",
+    "biometricOffTitle": "Biometric unlock disabled",
+    "biometricOffDetail": "Face ID turned off",
+    "riskCheckTitle": "Address risk check completed",
+    "riskBlockTitle": "High-risk recipient blocked",
+    "riskBlockDetail": "Send to a reported address prevented",
+    "simFailTitle": "Transaction simulation failed",
+    "simFailDetail": "Insufficient gas — not submitted",
+    "autolockTitle": "Auto-lock updated",
+    "autolockDetail": "Locks after {{min}} min",
+    "today": "Today"
+  },
   "advanced": {
     "title": "Advanced",
     "reveal": "Reveal recovery phrase",

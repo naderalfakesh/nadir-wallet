@@ -18,10 +18,12 @@ import {
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useSheets } from "@/providers/SheetProvider";
-import { DEFAULT_SECURITY, DEVICE_CHECK_KEYS, SECURITY_EVENTS } from "./data";
+import { useApp } from "@/providers/AppProvider";
+import { DEVICE_CHECK_KEYS } from "./data";
 
 const RING_R = 52;
 const RING_C = 2 * Math.PI * RING_R;
+const AUTO_LOCK_OPTIONS = [1, 5, 15];
 
 export function SecurityScreen() {
   const theme = useTheme();
@@ -29,20 +31,43 @@ export function SecurityScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const sheets = useSheets();
-  const [security, setSecurity] = useState(DEFAULT_SECURITY);
+  const { prefs, setPref, events, logEvent } = useApp();
+  const [txProtection, setTxProtection] = useState(true);
 
-  const items: { key: string; label: string; done: boolean; sub: string; onPress?: () => void }[] = [
+  const toggleBiometric = () => {
+    const next = !prefs.biometricEnabled;
+    setPref("biometricEnabled", next);
+    logEvent(next ? "biometric_on" : "biometric_off");
+  };
+
+  const cycleAutoLock = () => {
+    const idx = AUTO_LOCK_OPTIONS.indexOf(prefs.autoLockMinutes);
+    const next = AUTO_LOCK_OPTIONS[(idx + 1) % AUTO_LOCK_OPTIONS.length];
+    setPref("autoLockMinutes", next);
+    logEvent("autolock", { detailVars: { min: next } });
+  };
+
+  type Item = {
+    key: string;
+    label: string;
+    done: boolean;
+    sub: string;
+    onPress?: () => void;
+    toggle?: () => void;
+    cycle?: boolean;
+  };
+  const items: Item[] = [
     {
       key: "backup",
       label: t("security.protection.backup"),
-      done: security.backedUp,
-      sub: security.backedUp ? t("security.protection.backupDone") : t("security.protection.backupTodo"),
+      done: prefs.backupConfirmed,
+      sub: prefs.backupConfirmed ? t("security.protection.backupDone") : t("security.protection.backupTodo"),
       onPress: () => router.push("/backup"),
     },
-    { key: "bio", label: t("security.protection.biometric"), done: security.biometricOn, sub: t("security.protection.biometricSub") },
-    { key: "pin", label: t("security.protection.pin"), done: security.pinOn, sub: t("security.protection.pinSub") },
-    { key: "autolock", label: t("security.protection.autolock"), done: true, sub: t("security.protection.autolockSub", { min: security.autoLockMin }) },
-    { key: "signing", label: t("security.protection.signing"), done: security.txSigning, sub: t("security.protection.signingSub") },
+    { key: "bio", label: t("security.protection.biometric"), done: prefs.biometricEnabled, sub: t("security.protection.biometricSub"), toggle: toggleBiometric },
+    { key: "pin", label: t("security.protection.pin"), done: true, sub: t("security.protection.pinSub") },
+    { key: "autolock", label: t("security.protection.autolock"), done: true, sub: t("security.protection.autolockSub", { min: prefs.autoLockMinutes }), onPress: cycleAutoLock, cycle: true },
+    { key: "signing", label: t("security.protection.signing"), done: true, sub: t("security.protection.signingSub") },
   ];
   const score = items.filter((i) => i.done).length;
   const pct = score / items.length;
@@ -109,7 +134,7 @@ export function SecurityScreen() {
                   {tier.label}
                 </AppText>
                 <AppText size={13} muted style={{ lineHeight: 18 }}>
-                  {security.backedUp ? t("security.score.protected") : t("security.score.finishBackup")}
+                  {prefs.backupConfirmed ? t("security.score.protected") : t("security.score.finishBackup")}
                 </AppText>
               </View>
             </View>
@@ -162,7 +187,9 @@ export function SecurityScreen() {
                 title={it.label}
                 sub={it.sub}
                 right={
-                  it.onPress ? undefined : (
+                  it.toggle ? (
+                    <Toggle on={it.done} onChange={it.toggle} />
+                  ) : it.onPress ? undefined : (
                     <AppText weight="semibold" size={13} color={it.done ? colors.pos : colors.warn}>
                       {it.done ? t("security.protection.on") : t("security.protection.off")}
                     </AppText>
@@ -220,8 +247,8 @@ export function SecurityScreen() {
                 </AppText>
               </View>
               <Toggle
-                on={security.txProtection}
-                onChange={() => setSecurity((s) => ({ ...s, txProtection: !s.txProtection }))}
+                on={txProtection}
+                onChange={() => setTxProtection((v) => !v)}
               />
             </View>
             <View style={{ borderTopWidth: 1, borderTopColor: colors.hairline, marginTop: 14, paddingTop: 14, gap: 9 }}>
@@ -256,8 +283,8 @@ export function SecurityScreen() {
         <View style={section}>
           <SectionLabel>{t("security.events.title")}</SectionLabel>
           <Card padding={0} style={{ paddingHorizontal: 16 }}>
-            {SECURITY_EVENTS.map((ev, i) => (
-              <SecurityEventRow key={ev.id} event={ev} last={i === SECURITY_EVENTS.length - 1} />
+            {events.map((ev, i) => (
+              <SecurityEventRow key={ev.id} event={ev} last={i === events.length - 1} />
             ))}
           </Card>
         </View>

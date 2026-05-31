@@ -36,6 +36,13 @@
             "imageWidth": 76
           }
         }
+      ],
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Unlock Nadir Wallet and approve transactions with Face ID."
+        }
       ]
     ],
     "experiments": {
