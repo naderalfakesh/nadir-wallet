@@ -5,7 +5,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "dev:api": "turbo run dev --filter=api",
-    "dev:mobile": "turbo run dev --filter=mobile",
+    "dev:mobile": "turbo run dev --filter=@nadir-wallet/mobile",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\""

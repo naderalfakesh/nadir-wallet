@@ -36,10 +36,10 @@ pnpm install
 ### Mobile app
 
 ```sh
-pnpm --filter mobile start      # start the Expo dev server
-pnpm --filter mobile ios        # run on iOS simulator
-pnpm --filter mobile android    # run on Android emulator
-pnpm --filter mobile web        # run in the browser
+pnpm --filter @nadir-wallet/mobile start    # start the Expo dev server
+pnpm --filter @nadir-wallet/mobile ios      # run on iOS simulator
+pnpm --filter @nadir-wallet/mobile android  # run on Android emulator
+pnpm --filter @nadir-wallet/mobile web      # run in the browser
 ```
 
 App code lives in `apps/mobile/src`; only screens and layout files belong in `src/app`.
