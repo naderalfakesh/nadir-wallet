@@ -1,18 +1,19 @@
 import React from "react";
 import { View } from "react-native";
-import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen, Brandmark, AppText, Button, TestnetBadge, TrustNote } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 
-export function WelcomeScreen() {
+interface WelcomeScreenProps {
+  onCreate: () => void;
+  onImport: () => void;
+}
+
+export function WelcomeScreen({ onCreate, onImport }: WelcomeScreenProps) {
   const theme = useTheme();
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-
-  const enter = () => router.replace("/home");
 
   return (
     <Screen>
@@ -41,8 +42,8 @@ export function WelcomeScreen() {
             gap: 11,
           }}
         >
-          <Button label={t("onboarding.welcome.create")} onPress={enter} />
-          <Button label={t("onboarding.welcome.import")} variant="ghost" onPress={enter} />
+          <Button label={t("onboarding.welcome.create")} onPress={onCreate} />
+          <Button label={t("onboarding.welcome.import")} variant="ghost" onPress={onImport} />
           <View style={{ marginTop: 8, gap: 7 }}>
             <TrustNote icon="lock">{t("onboarding.welcome.trustKeys")}</TrustNote>
             <TrustNote icon="info">{t("onboarding.welcome.trustTestnet")}</TrustNote>

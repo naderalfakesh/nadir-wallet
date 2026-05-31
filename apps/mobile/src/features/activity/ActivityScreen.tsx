@@ -11,9 +11,12 @@ import {
   StatusPill,
   SectionLabel,
   EmptyState,
+  BackendNotice,
 } from "@/components";
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
+import { useSheets } from "@/providers/SheetProvider";
+import { useDemoState } from "@/providers/DemoStateProvider";
 import { fmtUSD, fmtToken } from "@/utils/format";
 import { TRANSACTIONS, type DemoTransaction, type TxType } from "@/features/wallet/data";
 
@@ -45,6 +48,8 @@ function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () 
 export function ActivityScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
+  const sheets = useSheets();
+  const { backend, retry } = useDemoState();
   const [filter, setFilter] = useState<Filter>("all");
 
   const verb: Record<TxType, string> = {
@@ -74,6 +79,7 @@ export function ActivityScreen() {
       <Row
         key={tx.id}
         last={last}
+        onPress={() => sheets.open("txDetail", { id: tx.id })}
         left={<TxIcon type={tx.type} />}
         title={`${verb[tx.type]} ${tx.token}`}
         sub={`${partyLabel}  ·  ${tx.when.split(" · ")[1] ?? ""}`}
@@ -104,8 +110,20 @@ export function ActivityScreen() {
     <Screen>
       <ScreenHeader
         title={t("activity.title")}
-        trailing={<IconButton name="search" size={20} accessibilityLabel="Search activity" />}
+        trailing={
+          <IconButton
+            name="search"
+            size={20}
+            accessibilityLabel="Search activity"
+            onPress={() => sheets.open("soon", { title: "Search activity" })}
+          />
+        }
       />
+      {backend !== "online" && (
+        <View style={{ paddingHorizontal: theme.spacing.pad, paddingBottom: 4 }}>
+          <BackendNotice status={backend} onRetry={retry} />
+        </View>
+      )}
       <View style={{ flexDirection: "row", gap: 8, paddingHorizontal: theme.spacing.pad, paddingBottom: 4 }}>
         {filters.map((f) => (
           <Chip key={f.value} label={f.label} on={filter === f.value} onPress={() => setFilter(f.value)} />

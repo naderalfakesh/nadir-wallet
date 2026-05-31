@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
+import { useRouter } from "expo-router";
 import Svg, { Circle } from "react-native-svg";
 import {
   Screen,
@@ -16,6 +17,7 @@ import {
 } from "@/components";
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
+import { useSheets } from "@/providers/SheetProvider";
 import { DEFAULT_SECURITY, DEVICE_CHECK_KEYS, SECURITY_EVENTS } from "./data";
 
 const RING_R = 52;
@@ -25,15 +27,17 @@ export function SecurityScreen() {
   const theme = useTheme();
   const { colors } = theme;
   const { t } = useTranslation();
+  const router = useRouter();
+  const sheets = useSheets();
   const [security, setSecurity] = useState(DEFAULT_SECURITY);
 
-  const items: { key: string; label: string; done: boolean; sub: string; hasAction?: boolean }[] = [
+  const items: { key: string; label: string; done: boolean; sub: string; onPress?: () => void }[] = [
     {
       key: "backup",
       label: t("security.protection.backup"),
       done: security.backedUp,
       sub: security.backedUp ? t("security.protection.backupDone") : t("security.protection.backupTodo"),
-      hasAction: true,
+      onPress: () => router.push("/backup"),
     },
     { key: "bio", label: t("security.protection.biometric"), done: security.biometricOn, sub: t("security.protection.biometricSub") },
     { key: "pin", label: t("security.protection.pin"), done: security.pinOn, sub: t("security.protection.pinSub") },
@@ -153,17 +157,18 @@ export function SecurityScreen() {
               <Row
                 key={it.key}
                 last={i === items.length - 1}
+                onPress={it.onPress}
                 left={<MiniIcon name={it.done ? "checkCircle" : "alert"} tone={it.done ? "pos" : "warn"} />}
                 title={it.label}
                 sub={it.sub}
                 right={
-                  it.hasAction ? undefined : (
+                  it.onPress ? undefined : (
                     <AppText weight="semibold" size={13} color={it.done ? colors.pos : colors.warn}>
                       {it.done ? t("security.protection.on") : t("security.protection.off")}
                     </AppText>
                   )
                 }
-                chevron={it.hasAction}
+                chevron={!!it.onPress}
               />
             ))}
           </Card>
@@ -261,9 +266,9 @@ export function SecurityScreen() {
         <View style={section}>
           <SectionLabel>{t("security.advanced.title")}</SectionLabel>
           <Card padding={0} style={{ paddingHorizontal: 16 }}>
-            <Row left={<MiniIcon name="key" />} title={t("security.advanced.reveal")} sub={t("security.advanced.revealSub")} chevron />
-            <Row left={<MiniIcon name="link" />} title={t("security.advanced.connected")} sub={t("security.advanced.connectedSub")} chevron />
-            <Row left={<MiniIcon name="lock" />} title={t("security.advanced.changePin")} chevron last />
+            <Row onPress={() => router.push("/reveal")} left={<MiniIcon name="key" />} title={t("security.advanced.reveal")} sub={t("security.advanced.revealSub")} chevron />
+            <Row onPress={() => sheets.open("soon", { title: t("security.advanced.connected") })} left={<MiniIcon name="link" />} title={t("security.advanced.connected")} sub={t("security.advanced.connectedSub")} chevron />
+            <Row onPress={() => router.push("/change-passcode")} left={<MiniIcon name="lock" />} title={t("security.advanced.changePin")} chevron last />
           </Card>
         </View>
       </ScrollView>

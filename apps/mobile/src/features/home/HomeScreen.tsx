@@ -17,9 +17,12 @@ import {
   Segmented,
   Sparkline,
   PriceFreshness,
+  BackendNotice,
 } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
+import { useSheets } from "@/providers/SheetProvider";
+import { useDemoState } from "@/providers/DemoStateProvider";
 import { fmtUSD, fmtToken } from "@/utils/format";
 import {
   ACCOUNT,
@@ -82,9 +85,13 @@ export function HomeScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { t } = useTranslation();
+  const sheets = useSheets();
+  const { backend, price, retry } = useDemoState();
   const [range, setRange] = useState<Range>("1W");
   const [hidden, setHidden] = useState(false);
 
+  const priceUnavail = price === "unavailable";
+  const dimChart = backend === "rpc_unavailable" || priceUnavail;
   const recent = TRANSACTIONS.slice(0, 3);
   const verb: Record<DemoTransaction["type"], string> = {
     receive: t("activity.verb.receive"),
@@ -107,6 +114,7 @@ export function HomeScreen() {
           }}
         >
           <Pressable
+            onPress={() => sheets.open("accounts")}
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -134,8 +142,14 @@ export function HomeScreen() {
             onPress={() => setHidden((h) => !h)}
             accessibilityLabel={hidden ? "Show balances" : "Hide balances"}
           />
-          <IconButton name="scan" accessibilityLabel="Scan QR code" />
+          <IconButton name="scan" accessibilityLabel="Scan QR code" onPress={() => sheets.open("scan")} />
         </View>
+
+        {backend !== "online" && (
+          <View style={{ paddingHorizontal: theme.spacing.pad, paddingTop: 10 }}>
+            <BackendNotice status={backend} onRetry={retry} />
+          </View>
+        )}
 
         {/* balance hero */}
         <View style={{ paddingHorizontal: theme.spacing.pad, paddingTop: 10 }}>
@@ -152,18 +166,26 @@ export function HomeScreen() {
             </AppText>
             <TestnetBadge label={t("common.testnet.badge")} />
           </View>
-          <AppText weight="bold" size={44} tnum style={{ letterSpacing: -1.4 }}>
-            {hidden ? "••••••" : fmtUSD(PORTFOLIO_TOTAL)}
-          </AppText>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 9, marginTop: 11 }}>
-            <ChangeBadge pct={PORTFOLIO_CHANGE_PCT} />
-            <AppText size={14} muted tnum>
-              {hidden ? "••••" : fmtUSD(PORTFOLIO_CHANGE_ABS, { sign: true })} · {t("home.today")}
+          {priceUnavail ? (
+            <AppText weight="bold" size={26} muted style={{ letterSpacing: -0.6 }}>
+              {t("home.valueUnavailable")}
             </AppText>
-          </View>
-          <PriceFreshness status="fresh" />
+          ) : (
+            <AppText weight="bold" size={44} tnum style={{ letterSpacing: -1.4 }}>
+              {hidden ? "••••••" : fmtUSD(PORTFOLIO_TOTAL)}
+            </AppText>
+          )}
+          {!priceUnavail && (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 9, marginTop: 11 }}>
+              <ChangeBadge pct={PORTFOLIO_CHANGE_PCT} />
+              <AppText size={14} muted tnum>
+                {hidden ? "••••" : fmtUSD(PORTFOLIO_CHANGE_ABS, { sign: true })} · {t("home.today")}
+              </AppText>
+            </View>
+          )}
+          <PriceFreshness status={price} onRetry={retry} />
 
-          <View style={{ marginTop: 18, marginBottom: 12 }}>
+          <View style={{ marginTop: 18, marginBottom: 12, opacity: dimChart ? 0.4 : 1 }}>
             <Sparkline data={SPARKLINE} up={PORTFOLIO_CHANGE_PCT >= 0} height={92} />
           </View>
           <Segmented options={RANGES} value={range} onChange={setRange} small />
@@ -179,15 +201,15 @@ export function HomeScreen() {
             paddingBottom: 4,
           }}
         >
-          <QuickAction icon="receive" label={t("common.actions.receive")} />
-          <QuickAction icon="send" label={t("common.actions.send")} primary />
-          <QuickAction icon="swap" label={t("common.actions.swap")} />
-          <QuickAction icon="trend" label={t("common.actions.buy")} />
+          <QuickAction icon="receive" label={t("common.actions.receive")} onPress={() => sheets.open("receive")} />
+          <QuickAction icon="send" label={t("common.actions.send")} primary onPress={() => router.push("/send")} />
+          <QuickAction icon="swap" label={t("common.actions.swap")} onPress={() => sheets.open("soon", { title: "Swap" })} />
+          <QuickAction icon="trend" label={t("common.actions.buy")} onPress={() => sheets.open("soon", { title: "Buy crypto" })} />
         </View>
 
         {/* backup reminder */}
         <View style={{ paddingHorizontal: theme.spacing.pad, paddingTop: 16 }}>
-          <Card padding={15} style={{ backgroundColor: theme.colors.surface }}>
+          <Card padding={15} style={{ backgroundColor: theme.colors.surface }} onPress={() => router.push("/backup")}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 13 }}>
               <View
                 style={{
@@ -230,6 +252,7 @@ export function HomeScreen() {
               <Row
                 key={token.id}
                 last={i === TOKENS.length - 1}
+                onPress={() => router.push(`/token/${token.id}`)}
                 left={
                   <TokenGlyph
                     symbol={token.symbol}
@@ -239,8 +262,8 @@ export function HomeScreen() {
                 }
                 title={token.name}
                 sub={<AppText size={13} muted tnum>{fmtToken(token.amount, token.symbol)}</AppText>}
-                right={hidden ? "••••" : fmtUSD(token.value)}
-                rightSub={<ChangeBadge pct={token.change} size={12} plain />}
+                right={hidden ? "••••" : priceUnavail ? "—" : fmtUSD(token.value)}
+                rightSub={priceUnavail ? undefined : <ChangeBadge pct={token.change} size={12} plain />}
               />
             ))}
           </Card>
@@ -273,6 +296,7 @@ export function HomeScreen() {
                 <Row
                   key={tx.id}
                   last={i === recent.length - 1}
+                  onPress={() => sheets.open("txDetail", { id: tx.id })}
                   left={<TxIcon type={tx.type} size={40} />}
                   title={`${verb[tx.type]} ${tx.token}`}
                   sub={tx.when.split(" · ")[1] ?? tx.when}

@@ -1,0 +1,7 @@
+{
+  "title": "Receive",
+  "sub": "Scan or share your address",
+  "testnetBadge": "{{chain}} · testnet",
+  "addressLabel": "{{chain}} address",
+  "warning": "Testnet address — for test funds only. Only send {{chain}} assets here; other networks may be lost."
+}

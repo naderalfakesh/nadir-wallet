@@ -15,13 +15,16 @@ import {
 } from "@/components";
 import { useTheme, useThemeControls } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
+import { useSheets } from "@/providers/SheetProvider";
 import { displayAddress } from "@/services/wallet/account";
 import { ACCOUNT } from "@/features/wallet/data";
+import { DemoControls } from "./DemoControls";
 
 export function SettingsScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { scheme, toggleScheme } = useThemeControls();
+  const sheets = useSheets();
+  const { scheme } = useThemeControls();
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
@@ -68,9 +71,9 @@ export function SettingsScreen() {
           <View style={gap} />
           <SectionLabel>{t("settings.wallet.section")}</SectionLabel>
           <Card padding={0} style={{ paddingHorizontal: 16 }}>
-            <Row left={<MiniIcon name="user" />} title={t("settings.wallet.accounts")} sub={t("settings.wallet.accountsSub")} chevron />
-            <Row left={<MiniIcon name="globe" />} title={t("settings.wallet.networks")} sub={t("settings.wallet.networksSub")} chevron />
-            <Row left={<MiniIcon name="trend" />} title={t("settings.wallet.currency")} right={t("settings.wallet.currencyValue")} chevron last />
+            <Row onPress={() => sheets.open("accounts")} left={<MiniIcon name="user" />} title={t("settings.wallet.accounts")} sub={t("settings.wallet.accountsSub")} chevron />
+            <Row onPress={() => sheets.open("soon", { title: t("settings.wallet.networks") })} left={<MiniIcon name="globe" />} title={t("settings.wallet.networks")} sub={t("settings.wallet.networksSub")} chevron />
+            <Row onPress={() => sheets.open("soon", { title: t("settings.wallet.currency") })} left={<MiniIcon name="trend" />} title={t("settings.wallet.currency")} right={t("settings.wallet.currencyValue")} chevron last />
           </Card>
 
           <View style={gap} />
@@ -81,9 +84,9 @@ export function SettingsScreen() {
               title={t("settings.preferences.theme")}
               right={scheme === "light" ? t("settings.preferences.light") : t("settings.preferences.dark")}
               chevron
-              onPress={toggleScheme}
+              onPress={() => sheets.open("theme")}
             />
-            <Row left={<MiniIcon name="eyeOff" />} title={t("settings.preferences.privacy")} sub={t("settings.preferences.privacySub")} chevron last />
+            <Row onPress={() => sheets.open("soon", { title: t("settings.preferences.privacy") })} left={<MiniIcon name="eyeOff" />} title={t("settings.preferences.privacy")} sub={t("settings.preferences.privacySub")} chevron last />
           </Card>
 
           <View style={gap} />
@@ -96,17 +99,21 @@ export function SettingsScreen() {
               chevron
               onPress={() => router.navigate("/security")}
             />
-            <Row left={<MiniIcon name="key" />} title={t("settings.security.recovery")} chevron />
-            <Row left={<MiniIcon name="bell" />} title={t("settings.security.notifications")} chevron last />
+            <Row onPress={() => router.push("/reveal")} left={<MiniIcon name="key" />} title={t("settings.security.recovery")} chevron />
+            <Row onPress={() => sheets.open("soon", { title: t("settings.security.notifications") })} left={<MiniIcon name="bell" />} title={t("settings.security.notifications")} chevron last />
           </Card>
 
           <View style={gap} />
           <SectionLabel>{t("settings.about.section")}</SectionLabel>
           <Card padding={0} style={{ paddingHorizontal: 16 }}>
-            <Row left={<MiniIcon name="shield" />} title={t("settings.about.howItWorks")} sub={t("settings.about.howItWorksSub")} chevron />
-            <Row left={<MiniIcon name="info" />} title={t("settings.about.help")} chevron />
-            <Row left={<MiniIcon name="globe" />} title={t("settings.about.version")} right="v1.0.0" chevron last />
+            <Row onPress={() => sheets.open("howItWorks")} left={<MiniIcon name="shield" />} title={t("settings.about.howItWorks")} sub={t("settings.about.howItWorksSub")} chevron />
+            <Row onPress={() => sheets.open("soon", { title: t("settings.about.help") })} left={<MiniIcon name="info" />} title={t("settings.about.help")} chevron />
+            <Row onPress={() => sheets.open("soon", { title: t("settings.about.version") })} left={<MiniIcon name="globe" />} title={t("settings.about.version")} right="v1.0.0" chevron last />
           </Card>
+
+          <View style={gap} />
+          <SectionLabel>{t("settings.demo.section")}</SectionLabel>
+          <DemoControls />
 
           <View style={gap} />
           <Button label={t("settings.lockWallet")} variant="ghost" icon="lock" onPress={() => router.push("/lock")} />

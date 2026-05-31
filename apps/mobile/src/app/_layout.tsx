@@ -17,6 +17,9 @@ import {
   IBMPlexMono_600SemiBold,
 } from "@expo-google-fonts/ibm-plex-mono";
 import { ThemeProvider, useThemeControls } from "@/theme";
+import { DemoStateProvider } from "@/providers/DemoStateProvider";
+import { SheetProvider } from "@/providers/SheetProvider";
+import { SheetHost } from "@/features/sheets/SheetHost";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -46,13 +49,23 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider initialScheme="dark">
-          <ThemedStatusBar />
-          <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="onboarding" />
-            <Stack.Screen name="lock" options={{ animation: "slide_from_bottom" }} />
-            <Stack.Screen name="(tabs)" />
-          </Stack>
+          <DemoStateProvider>
+            <SheetProvider>
+              <ThemedStatusBar />
+              <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
+                <Stack.Screen name="index" />
+                <Stack.Screen name="onboarding" />
+                <Stack.Screen name="lock" options={{ animation: "slide_from_bottom" }} />
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="send" options={{ animation: "slide_from_right" }} />
+                <Stack.Screen name="token/[id]" options={{ animation: "slide_from_right" }} />
+                <Stack.Screen name="backup" options={{ animation: "slide_from_right" }} />
+                <Stack.Screen name="reveal" options={{ animation: "slide_from_right" }} />
+                <Stack.Screen name="change-passcode" options={{ animation: "slide_from_right" }} />
+              </Stack>
+              <SheetHost />
+            </SheetProvider>
+          </DemoStateProvider>
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

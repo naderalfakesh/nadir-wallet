@@ -1,0 +1,42 @@
+{
+  "accounts": {
+    "title": "Wallets",
+    "add": "Add or import wallet"
+  },
+  "pickToken": {
+    "title": "Select asset",
+    "selected": "Selected"
+  },
+  "scan": {
+    "title": "Scan QR code",
+    "hint": "Point your camera at a wallet QR code"
+  },
+  "soon": {
+    "fallback": "Coming soon",
+    "heading": "Placeholder screen",
+    "body": "\"{{title}}\" is part of the flow map — wire up the full screen in the next round.",
+    "close": "Close"
+  },
+  "howItWorks": {
+    "title": "How this demo works",
+    "sub": "Security model & testnet",
+    "badge": "Testnet-only · no real funds",
+    "localTitle": "Local-first & non-custodial",
+    "localBody": "Your recovery phrase and private keys are created and stored on this device only. They are never uploaded or backed up to a server.",
+    "signTitle": "Signing happens on-device",
+    "signBody": "Every transaction is signed locally after biometric approval. Signing material never leaves your phone.",
+    "backendTitle": "Public-address-only backend",
+    "backendBody": "The backend receives just your public address — to fetch cached prices, run address risk checks and simulate transactions. It cannot move your funds.",
+    "testnetTitle": "Testnet-only",
+    "testnetBody": "Nadir runs on test networks (Ethereum Sepolia, Polygon Amoy). Balances and prices are estimated demo values and hold no real-world worth.",
+    "gotIt": "Got it"
+  },
+  "theme": {
+    "title": "Theme",
+    "sub": "Choose how Nadir looks",
+    "dark": "Dark",
+    "darkSub": "Default · easy on the eyes",
+    "light": "Light",
+    "lightSub": "Bright · high contrast"
+  }
+}

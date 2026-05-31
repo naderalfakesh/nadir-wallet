@@ -6,5 +6,76 @@
     "import": "I already have a wallet",
     "trustKeys": "Your recovery phrase stays on this device. The backend only ever sees public wallet addresses.",
     "trustTestnet": "Testnet-only demo — balances and prices are estimated and hold no real value."
+  },
+  "explain": {
+    "title": "Self-custody",
+    "sub": "What that means",
+    "keysTitle": "You hold the keys",
+    "keysBody": "Your funds live on-chain and only your device can move them. No accounts, no bank, no middleman.",
+    "phraseTitle": "A recovery phrase is your backup",
+    "phraseBody": "Twelve words are the master key to your wallet. Write them down and keep them offline.",
+    "recoverTitle": "Only you can recover it",
+    "recoverBody": "Nadir never sees your phrase. If you lose it, no one — including us — can restore your wallet.",
+    "continue": "I understand, continue"
+  },
+  "reveal": {
+    "title": "Recovery phrase",
+    "step": "Step 1 of 3",
+    "warning": "Write these 12 words down in order and store them offline. Never share them. Don't screenshot.",
+    "demoNote": "Demo phrase — this wallet is testnet-only and creates no real keys.",
+    "tapToReveal": "Tap to reveal",
+    "copy": "Copy to clipboard",
+    "copied": "Copied to clipboard",
+    "cta": "I've written it down"
+  },
+  "verify": {
+    "title": "Verify backup",
+    "step": "Step 2 of 3",
+    "confirmWord": "Confirm word",
+    "prompt": "What's word #{{n}}?"
+  },
+  "passcode": {
+    "title": "App passcode",
+    "step1": "Step 1 of 2",
+    "step2": "Step 2 of 2",
+    "create": "Create a passcode",
+    "confirm": "Confirm passcode",
+    "createHint": "6 digits to unlock your wallet",
+    "confirmHint": "Enter it once more to confirm",
+    "mismatch": "Passcodes didn't match — try again"
+  },
+  "biometric": {
+    "title": "Enable Face ID",
+    "body": "Use Face ID to unlock your wallet and approve transactions instantly.",
+    "enable": "Enable Face ID",
+    "later": "Set up later"
+  },
+  "ready": {
+    "title": "You're all set",
+    "body": "Your wallet is ready and secured. Welcome to self-custody.",
+    "open": "Open wallet"
+  },
+  "import": {
+    "title": "Import wallet",
+    "sub": "Enter your recovery phrase",
+    "placeholder": "Enter your 12 or 24-word recovery phrase, separated by spaces",
+    "paste": "Paste",
+    "words": "{{count}} words",
+    "invalidWord": "\"{{word}}\" isn't a valid recovery word.",
+    "invalidChecksum": "This phrase is invalid — its checksum doesn't match.",
+    "securityNote": "Your phrase is stored only on this device and never leaves it.",
+    "cta": "Import wallet"
+  },
+  "backup": {
+    "title": "Back up wallet",
+    "introTitle": "Secure your wallet",
+    "introBody": "Your recovery phrase is the only way to restore your wallet. We'll show 12 words — write them down and keep them offline.",
+    "introNote": "Nadir is non-custodial — no one, including us, can recover this phrase for you.",
+    "show": "Show recovery phrase",
+    "doneTitle": "Wallet backed up",
+    "doneBody": "Your recovery phrase is verified. Your security score just went up.",
+    "revealTitle": "Recovery phrase",
+    "revealGate": "Reveal requires Face ID",
+    "verifyIt": "Verify it's you"
   }
 }

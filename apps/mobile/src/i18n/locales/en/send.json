@@ -1,0 +1,81 @@
+{
+  "steps": {
+    "to": "Send to",
+    "amount": "Amount",
+    "review": "Review",
+    "step": "Step {{n}} of 3"
+  },
+  "to": {
+    "placeholder": "Address or ENS name",
+    "invalid": "Not a valid wallet address or ENS name.",
+    "recent": "Recent",
+    "riskUnavailable": "Risk check unavailable — services offline. Verify the recipient manually.",
+    "continue": "Continue",
+    "blocked": "Sending blocked — high risk"
+  },
+  "risk": {
+    "levelLow": "low",
+    "levelMedium": "medium",
+    "levelHigh": "high",
+    "reportedTitle": "Reported address",
+    "reportedDetail": "Flagged by the risk service for reported scam activity. Sending is blocked.",
+    "knownTitle": "Risk check passed",
+    "knownDetail": "Known recipient in your address book · address format valid.",
+    "firstTimeTitle": "First-time recipient",
+    "firstTimeDetail": "Not in your address book — verify the address carefully before sending."
+  },
+  "amount": {
+    "max": "Max",
+    "demoApprox": "≈ {{value}} demo",
+    "insufficient": "Insufficient balance",
+    "review": "Review"
+  },
+  "review": {
+    "to": "To",
+    "network": "Network",
+    "fee": "Network fee",
+    "total": "Total",
+    "totalValue": "{{amount}} + fee",
+    "riskUnavailable": "Risk check unavailable — verify the recipient manually before sending.",
+    "trustNote": "Only the public recipient address is checked by the backend. Your private keys are used to sign locally and never leave this device."
+  },
+  "mismatch": {
+    "title": "Network mismatch",
+    "body": "You're sending on {{from}}, but this recipient is known on {{to}}. Funds sent to the wrong network may be lost."
+  },
+  "sim": {
+    "title": "Transaction simulation",
+    "passed": "Passed",
+    "failed": "Failed",
+    "unavailable": "Unavailable",
+    "failedBody": "Simulation reverted — the transaction is likely to fail (insufficient gas). Adjust the amount or try again when the testnet RPC is responsive.",
+    "unavailableBody": "Couldn't simulate — wallet services are offline. You can still sign locally, but the outcome can't be previewed.",
+    "estFee": "Estimated fee",
+    "balanceAfter": "Balance after",
+    "network": "Network",
+    "contract": "Contract interaction",
+    "contractNone": "None detected",
+    "note": "Simulation runs against testnet and does not move funds."
+  },
+  "confirm": {
+    "cta": "Confirm with Face ID",
+    "blocked": "Blocked — high risk",
+    "simFailed": "Simulation failed"
+  },
+  "overlay": {
+    "signing": "Confirm with Face ID",
+    "signingSub": "Signing locally on your device…",
+    "submitted": "Transaction submitted",
+    "submittedBody": "Broadcast to {{network}}. Waiting for confirmation…",
+    "hash": "Hash",
+    "viewOn": "View on {{explorer}}",
+    "backToWallet": "Back to wallet",
+    "failedTitle": "Transaction failed",
+    "failedBody": "The transaction reverted on-chain — it ran out of gas before completing. No funds were moved.",
+    "retry": "Retry",
+    "details": "Details",
+    "sentTitle": "Sent",
+    "sentTo": "to {{addr}}",
+    "done": "Done"
+  }
+}

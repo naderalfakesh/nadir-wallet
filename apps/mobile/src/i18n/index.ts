@@ -6,10 +6,29 @@ import activity from "./locales/en/activity.json";
 import security from "./locales/en/security.json";
 import settings from "./locales/en/settings.json";
 import status from "./locales/en/status.json";
+import send from "./locales/en/send.json";
+import token from "./locales/en/token.json";
+import tx from "./locales/en/tx.json";
+import receive from "./locales/en/receive.json";
+import sheets from "./locales/en/sheets.json";
 
 // English is the source and fallback language. Strings live in per-domain files
 // so the app can become multilingual without a rewrite.
-const resources = { common, onboarding, lock, home, activity, security, settings, status } as const;
+const resources = {
+  common,
+  onboarding,
+  lock,
+  home,
+  activity,
+  security,
+  settings,
+  status,
+  send,
+  token,
+  tx,
+  receive,
+  sheets,
+} as const;
 
 type Vars = Record<string, string | number>;
 

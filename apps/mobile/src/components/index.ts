@@ -18,3 +18,8 @@ export { Sparkline } from "./Sparkline";
 export { Screen } from "./Screen";
 export { ScreenHeader } from "./ScreenHeader";
 export { StatusNotice, BackendNotice, PriceFreshness, TrustNote, SecurityEventRow } from "./notices";
+export { BottomSheet } from "./BottomSheet";
+export { SheetHeader } from "./SheetHeader";
+export { RiskResult } from "./RiskResult";
+export { QRCode } from "./QRCode";
+export { NumberPad } from "./NumberPad";

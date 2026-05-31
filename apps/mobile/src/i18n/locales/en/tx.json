@@ -1,0 +1,12 @@
+{
+  "title": "Transaction",
+  "from": "From",
+  "to": "To",
+  "pair": "Pair",
+  "network": "Network",
+  "date": "Date",
+  "fee": "Network fee",
+  "confirmations": "Confirmations",
+  "hash": "Transaction hash",
+  "viewOn": "View on {{explorer}}"
+}
