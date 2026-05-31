@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import type { PriceQuote } from "@secure-wallet/types";
 import { db } from "../db/client";
 import { priceCache } from "../db/schema";
 
@@ -30,17 +31,10 @@ function basePrice(symbol: string): number {
   return Number(((hash % 5000) / 100 + 0.5).toFixed(2));
 }
 
-export interface PriceResult {
-  symbol: string;
-  priceUsd: number;
-  source: string;
-  updatedAt: number;
-}
-
-export async function getPrices(symbols: string[]): Promise<PriceResult[]> {
+export async function getPrices(symbols: string[]): Promise<PriceQuote[]> {
   const now = Date.now();
   const unique = [...new Set(symbols.map((symbol) => symbol.trim().toUpperCase()).filter(Boolean))];
-  const results: PriceResult[] = [];
+  const results: PriceQuote[] = [];
 
   for (const symbol of unique) {
     const cached = await db.select().from(priceCache).where(eq(priceCache.symbol, symbol)).get();

@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { isEvmAddress, isSupportedNetworkId } from "@repo/crypto-core";
+import type { ReportAddressResponse } from "@secure-wallet/types";
+import { isEvmAddress, isSupportedNetworkId } from "@secure-wallet/crypto-core";
 import { badRequest } from "../lib/errors";
 import { parseOrThrow } from "../lib/validation";
 import { checkAddress, reportAddress } from "../services/security";
@@ -55,5 +56,5 @@ securityRoutes.post("/security/report-address", async (c) => {
     networkId: isSupportedNetworkId(input.networkId) ? input.networkId : undefined,
   });
 
-  return c.json({ ok: true, id }, 201);
+  return c.json({ ok: true, id } satisfies ReportAddressResponse, 201);
 });

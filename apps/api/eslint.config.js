@@ -1,1 +1,1 @@
-export { default } from "@repo/config/eslint";
+export { default } from "@secure-wallet/config/eslint";

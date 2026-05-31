@@ -3,9 +3,9 @@ import type {
   AddressRiskCheckRequest,
   AddressRiskCheckResponse,
   NetworkId,
-} from "@repo/types";
-import { normalizeAddress } from "@repo/crypto-core";
-import { assessAddressRisk } from "@repo/wallet-core";
+} from "@secure-wallet/types";
+import { normalizeAddress } from "@secure-wallet/crypto-core";
+import { assessAddressRisk } from "@secure-wallet/wallet-core";
 import { db } from "../db/client";
 import { reportedAddresses, securityChecks } from "../db/schema";
 

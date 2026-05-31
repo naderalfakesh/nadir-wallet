@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { getTokens, isSupportedNetworkId } from "@repo/crypto-core";
+import type { TokensResponse } from "@secure-wallet/types";
+import { getTokens, isSupportedNetworkId } from "@secure-wallet/crypto-core";
 import { badRequest } from "../lib/errors";
 import { parseOrThrow } from "../lib/validation";
 
@@ -13,5 +14,5 @@ tokensRoutes.get("/tokens", (c) => {
   if (!isSupportedNetworkId(networkId)) {
     throw badRequest(`Unsupported networkId: ${networkId}`);
   }
-  return c.json({ networkId, tokens: getTokens(networkId) });
+  return c.json({ networkId, tokens: getTokens(networkId) } satisfies TokensResponse);
 });

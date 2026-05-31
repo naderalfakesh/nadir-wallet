@@ -3,8 +3,8 @@ import type {
   TransactionSimulationRequest,
   TransactionSimulationResponse,
   TransactionType,
-} from "@repo/types";
-import { getNetwork, isEvmAddress, normalizeAddress } from "@repo/crypto-core";
+} from "@secure-wallet/types";
+import { getNetwork, isEvmAddress, normalizeAddress } from "@secure-wallet/crypto-core";
 import { assessAddressRisk } from "./risk";
 import {
   CONTRACT_INTERACTION_GAS_LIMIT,

@@ -1,5 +1,6 @@
 import { Hono } from "hono";
-import { SUPPORTED_NETWORKS } from "@repo/crypto-core";
+import type { HealthResponse, NetworksResponse } from "@secure-wallet/types";
+import { SUPPORTED_NETWORKS } from "@secure-wallet/crypto-core";
 
 const startedAt = Date.now();
 
@@ -11,7 +12,9 @@ systemRoutes.get("/health", (c) =>
     uptimeSeconds: Math.floor((Date.now() - startedAt) / 1000),
     timestamp: new Date().toISOString(),
     version: "0.1.0",
-  }),
+  } satisfies HealthResponse),
 );
 
-systemRoutes.get("/networks", (c) => c.json({ networks: SUPPORTED_NETWORKS }));
+systemRoutes.get("/networks", (c) =>
+  c.json({ networks: SUPPORTED_NETWORKS } satisfies NetworksResponse),
+);

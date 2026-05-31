@@ -1,4 +1,4 @@
-import type { Network, NetworkId } from "@repo/types";
+import type { Network, NetworkId } from "@secure-wallet/types";
 
 export const SUPPORTED_NETWORKS: readonly Network[] = [
   {

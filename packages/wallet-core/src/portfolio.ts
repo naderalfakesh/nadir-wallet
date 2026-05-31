@@ -1,4 +1,4 @@
-import type { TokenBalance } from "@repo/types";
+import type { TokenBalance } from "@secure-wallet/types";
 
 export interface PortfolioPosition {
   symbol: string;

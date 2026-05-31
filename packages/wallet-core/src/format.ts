@@ -1,5 +1,5 @@
-import type { TransactionType, WalletTransaction } from "@repo/types";
-import { shortenAddress } from "@repo/crypto-core";
+import type { TransactionType, WalletTransaction } from "@secure-wallet/types";
+import { shortenAddress } from "@secure-wallet/crypto-core";
 
 const TYPE_LABELS: Record<TransactionType, string> = {
   send: "Sent",

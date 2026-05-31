@@ -1,4 +1,4 @@
 {
-  "extends": "@repo/config/base.json",
+  "extends": "@secure-wallet/config/base.json",
   "include": ["src"]
 }

@@ -8,7 +8,7 @@ importers:
 
   .:
     devDependencies:
-      '@repo/config':
+      '@secure-wallet/config':
         specifier: workspace:*
         version: link:packages/config
       prettier:
@@ -29,13 +29,13 @@ importers:
       '@libsql/client':
         specifier: ^0.14.0
         version: 0.14.0
-      '@repo/crypto-core':
+      '@secure-wallet/crypto-core':
         specifier: workspace:*
         version: link:../../packages/crypto-core
-      '@repo/types':
+      '@secure-wallet/types':
         specifier: workspace:*
         version: link:../../packages/types
-      '@repo/wallet-core':
+      '@secure-wallet/wallet-core':
         specifier: workspace:*
         version: link:../../packages/wallet-core
       drizzle-orm:
@@ -51,7 +51,7 @@ importers:
         specifier: ^3.24.1
         version: 3.25.76
     devDependencies:
-      '@repo/config':
+      '@secure-wallet/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@types/node':
@@ -175,14 +175,14 @@ importers:
 
   packages/crypto-core:
     dependencies:
-      '@repo/types':
+      '@secure-wallet/types':
         specifier: workspace:*
         version: link:../types
       viem:
         specifier: ^2.21.54
         version: 2.51.3(typescript@5.9.2)(zod@3.25.76)
     devDependencies:
-      '@repo/config':
+      '@secure-wallet/config':
         specifier: workspace:*
         version: link:../config
       typescript:
@@ -191,7 +191,7 @@ importers:
 
   packages/types:
     devDependencies:
-      '@repo/config':
+      '@secure-wallet/config':
         specifier: workspace:*
         version: link:../config
       typescript:
@@ -200,14 +200,14 @@ importers:
 
   packages/wallet-core:
     dependencies:
-      '@repo/crypto-core':
+      '@secure-wallet/crypto-core':
         specifier: workspace:*
         version: link:../crypto-core
-      '@repo/types':
+      '@secure-wallet/types':
         specifier: workspace:*
         version: link:../types
     devDependencies:
-      '@repo/config':
+      '@secure-wallet/config':
         specifier: workspace:*
         version: link:../config
       typescript:

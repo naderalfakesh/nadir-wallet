@@ -1,5 +1,5 @@
 {
-  "extends": "@repo/config/base.json",
+  "extends": "@secure-wallet/config/base.json",
   "compilerOptions": {
     "types": ["node"],
     "outDir": "dist"

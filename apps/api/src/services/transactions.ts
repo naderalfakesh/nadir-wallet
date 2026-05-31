@@ -3,8 +3,8 @@ import type {
   TransactionStatus,
   TransactionType,
   WalletTransaction,
-} from "@repo/types";
-import { getNetwork, normalizeAddress, parseTokenAmount } from "@repo/crypto-core";
+} from "@secure-wallet/types";
+import { getNetwork, normalizeAddress, parseTokenAmount } from "@secure-wallet/crypto-core";
 import { hashString, pseudoHex } from "../lib/mock";
 
 const HISTORY_LENGTH = 8;

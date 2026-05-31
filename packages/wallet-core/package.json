@@ -1,5 +1,5 @@
 {
-  "name": "@repo/wallet-core",
+  "name": "@secure-wallet/wallet-core",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,11 +15,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@repo/crypto-core": "workspace:*",
-    "@repo/types": "workspace:*"
+    "@secure-wallet/crypto-core": "workspace:*",
+    "@secure-wallet/types": "workspace:*"
   },
   "devDependencies": {
-    "@repo/config": "workspace:*",
+    "@secure-wallet/config": "workspace:*",
     "typescript": "^5.9.2"
   }
 }

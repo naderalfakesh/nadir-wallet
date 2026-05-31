@@ -1,5 +1,5 @@
-import type { NetworkId, TokenBalance } from "@repo/types";
-import { formatTokenAmount, getTokens, parseTokenAmount } from "@repo/crypto-core";
+import type { NetworkId, TokenBalance } from "@secure-wallet/types";
+import { formatTokenAmount, getTokens, parseTokenAmount } from "@secure-wallet/crypto-core";
 import { hashString } from "../lib/mock";
 
 // Mock balances derived deterministically from the address so the same wallet

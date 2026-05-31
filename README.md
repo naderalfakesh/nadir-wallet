@@ -6,11 +6,21 @@ A Turborepo monorepo housing the NadirWallet frontend and backend.
 
 ```
 apps/
-  mobile/        # React Native app (Expo SDK 56, expo-router)
-packages/        # Shared packages (empty for now — add shared code here)
+  mobile/                # React Native app (Expo SDK 56, expo-router)
+  api/                   # Hono backend API (libsql + Drizzle)
+packages/
+  types/                 # @secure-wallet/types — shared TypeScript types
+  crypto-core/           # @secure-wallet/crypto-core — address/amount/network helpers
+  wallet-core/           # @secure-wallet/wallet-core — risk, simulation, portfolio logic
+  config/                # @secure-wallet/config — shared tsconfig / eslint / prettier
+docs/
+  security-model.md      # non-custodial, testnet-only trust boundary
+  api.md                 # endpoint request/response reference
 ```
 
-The backend app will live under `apps/` alongside `mobile`.
+`crypto-core` and `wallet-core` are dependency-light and free of Node-only APIs,
+so they are safe to import from `apps/mobile` later. Backend-only concerns
+(database, Hono server, RPC) stay inside `apps/api`.
 
 ## Requirements
 
@@ -34,12 +44,23 @@ pnpm --filter mobile web        # run in the browser
 
 App code lives in `apps/mobile/src`; only screens and layout files belong in `src/app`.
 
+### API
+
+```sh
+pnpm dev:api        # start the backend on http://localhost:8787
+```
+
+See [`apps/api/README.md`](apps/api/README.md) for endpoints, env vars, and demo
+risk examples.
+
 ## Workspace scripts
 
 ```sh
 pnpm dev            # turbo run dev across all apps
+pnpm dev:api        # backend only
+pnpm dev:mobile     # mobile only
 pnpm lint           # turbo run lint
-pnpm check-types    # turbo run check-types
+pnpm typecheck      # turbo run typecheck
 pnpm format         # prettier across the repo
 ```
 

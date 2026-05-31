@@ -5,6 +5,17 @@ touches signing material — it only works with public data such as addresses,
 token metadata, prices, network metadata, transaction simulation, and risk
 checks.
 
+See also: [`docs/security-model.md`](../../docs/security-model.md) and
+[`docs/api.md`](../../docs/api.md).
+
+## What it does
+
+- Lists supported testnet networks and their known tokens.
+- Serves cached token prices (deterministic mock values for now).
+- Returns mock balances and transaction history for any public address.
+- Simulates a transaction draft: fee estimate, warnings, risk level, preview.
+- Runs address risk checks and stores locally reported risky addresses.
+
 ## Security model
 
 This is a local-first, non-custodial, testnet-only wallet showcase.
@@ -15,16 +26,18 @@ This is a local-first, non-custodial, testnet-only wallet showcase.
 - The database only holds public/derived data: cached prices, locally reported
   risky addresses, and a log of risk checks.
 
+Full explanation: [`docs/security-model.md`](../../docs/security-model.md).
+
 ## Running
 
 ```sh
 cp .env.example .env        # optional; sensible defaults are built in
 pnpm install                # from the repo root
-pnpm --filter api dev       # or: pnpm dev:api
+pnpm dev:api                # or: pnpm --filter api dev
 ```
 
-The server starts on `http://localhost:8787` and applies database migrations on
-boot, so no manual migration step is required for local development.
+The server starts on `http://localhost:8787` and applies database migrations and
+seeds demo data on boot, so no manual setup is required for local development.
 
 ### Scripts
 
@@ -37,6 +50,18 @@ pnpm --filter api lint         # eslint
 pnpm --filter api db:generate  # generate Drizzle migrations from the schema
 pnpm --filter api db:migrate   # apply migrations manually
 ```
+
+## Environment variables
+
+| Variable | Default | Purpose |
+| -------- | ------- | ------- |
+| `PORT` | `8787` | Port the API listens on |
+| `DATABASE_URL` | `file:./local.db` | libsql/SQLite database location |
+| `RPC_URL_ETHEREUM_SEPOLIA` | _(empty)_ | Sepolia RPC URL (not required on mock data) |
+| `RPC_URL_POLYGON_AMOY` | _(empty)_ | Polygon Amoy RPC URL (not required on mock data) |
+
+No RPC keys are required for the first implementation — the API runs on mock data
+by default.
 
 ## Endpoints
 
@@ -53,6 +78,88 @@ pnpm --filter api db:migrate   # apply migrations manually
 | POST | `/security/report-address` | Store a locally reported risky address |
 
 Supported network ids: `ethereum-sepolia`, `polygon-amoy`.
+
+Every success response has a predictable, typed shape (see the response types in
+`@secure-wallet/types`). Every error response uses the shared `ApiErrorResponse`
+shape:
+
+```json
+{ "error": { "code": "bad_request", "message": "Unsupported networkId: bitcoin" } }
+```
+
+## curl examples
+
+```sh
+curl localhost:8787/health
+curl localhost:8787/networks
+curl "localhost:8787/tokens?networkId=ethereum-sepolia"
+curl "localhost:8787/prices?symbols=ETH,USDC,POL"
+
+ADDR=0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+curl "localhost:8787/wallet/$ADDR/balances?networkId=ethereum-sepolia"
+curl "localhost:8787/wallet/$ADDR/transactions?networkId=ethereum-sepolia"
+
+curl -X POST localhost:8787/transaction/simulate -H 'content-type: application/json' \
+  -d "{\"networkId\":\"ethereum-sepolia\",\"from\":\"$ADDR\",\"to\":\"0x1111111111111111111111111111111111111111\",\"value\":\"0.1\"}"
+
+curl -X POST localhost:8787/security/check-address -H 'content-type: application/json' \
+  -d '{"address":"0x1111111111111111111111111111111111111111","networkId":"ethereum-sepolia"}'
+
+curl -X POST localhost:8787/security/report-address -H 'content-type: application/json' \
+  -d '{"address":"0xcafecafecafecafecafecafecafecafecafecafe","reason":"demo report"}'
+```
+
+## Demo risk examples
+
+These are deterministic and clearly mocked/testnet — safe for the mobile app to
+use when demonstrating every risk state. They make no claim about any real
+address.
+
+| State | How to trigger |
+| ----- | -------------- |
+| **Low risk** | A valid address with no risk flags |
+| **Medium — unknown contact** | A valid address with `knownContact: false` |
+| **Medium — large amount** | A valid address with `amount` above `5` |
+| **Medium — contract/burn** | The zero/burn address `0x0000…0000` |
+| **High — reported** | The seeded demo address `0xbeef…beef` |
+| **High — invalid** | A malformed address (`isValidAddress: false`) |
+| **Error — unsupported network** | Any unknown `networkId` |
+
+The high-risk reported address `0xbeefbeefbeefbeefbeefbeefbeefbeefbeefbeef` is
+seeded into `reported_addresses` on boot, so it returns `high` without first
+calling `/security/report-address`.
+
+```sh
+# Low risk
+curl -X POST localhost:8787/security/check-address -H 'content-type: application/json' \
+  -d '{"address":"0x1111111111111111111111111111111111111111","networkId":"ethereum-sepolia"}'
+# -> { "riskLevel": "low", ... }
+
+# Medium risk (unknown contact + large amount)
+curl -X POST localhost:8787/security/check-address -H 'content-type: application/json' \
+  -d '{"address":"0x1111111111111111111111111111111111111111","networkId":"ethereum-sepolia","amount":"12","knownContact":false}'
+# -> { "riskLevel": "medium", ... }
+
+# Medium risk (contract / burn address)
+curl -X POST localhost:8787/security/check-address -H 'content-type: application/json' \
+  -d '{"address":"0x0000000000000000000000000000000000000000","networkId":"ethereum-sepolia"}'
+# -> { "riskLevel": "medium", ... }
+
+# High risk (seeded reported address)
+curl -X POST localhost:8787/security/check-address -H 'content-type: application/json' \
+  -d '{"address":"0xbeefbeefbeefbeefbeefbeefbeefbeefbeefbeef","networkId":"ethereum-sepolia"}'
+# -> { "riskLevel": "high", ... }
+
+# High risk (invalid address)
+curl -X POST localhost:8787/security/check-address -H 'content-type: application/json' \
+  -d '{"address":"0x123","networkId":"ethereum-sepolia"}'
+# -> { "riskLevel": "high", "isValidAddress": false, ... }
+
+# Error (unsupported network)
+curl -X POST localhost:8787/security/check-address -H 'content-type: application/json' \
+  -d '{"address":"0x1111111111111111111111111111111111111111","networkId":"ethereum-mainnet"}'
+# -> 400 { "error": { "code": "bad_request", ... } }
+```
 
 ## Database
 
@@ -84,8 +191,8 @@ The service layer is the single integration point:
   ERC-20 `balanceOf` calls using `RPC_URL_*`.
 - `services/transactions.ts` — replace mock history with an indexer or RPC log
   query.
-- `@repo/wallet-core` `simulateTransaction` — replace the deterministic fee
-  model with a real `eth_estimateGas` / fee-history call.
+- `@secure-wallet/wallet-core` `simulateTransaction` — replace the deterministic
+  fee model with a real `eth_estimateGas` / fee-history call.
 
 RPC URLs are read from `RPC_URL_ETHEREUM_SEPOLIA` and `RPC_URL_POLYGON_AMOY`
 but are not required while running on mock data.

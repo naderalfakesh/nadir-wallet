@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { isEvmAddress, isSupportedNetworkId, normalizeAddress } from "@repo/crypto-core";
+import type { WalletBalancesResponse, WalletTransactionsResponse } from "@secure-wallet/types";
+import { isEvmAddress, isSupportedNetworkId, normalizeAddress } from "@secure-wallet/crypto-core";
 import { badRequest } from "../lib/errors";
 import { parseOrThrow } from "../lib/validation";
 import { getBalances } from "../services/balances";
@@ -25,7 +26,7 @@ walletRoutes.get("/wallet/:address/balances", (c) => {
     address: normalizeAddress(address),
     networkId,
     balances: getBalances(address, networkId),
-  });
+  } satisfies WalletBalancesResponse);
 });
 
 walletRoutes.get("/wallet/:address/transactions", (c) => {
@@ -43,5 +44,5 @@ walletRoutes.get("/wallet/:address/transactions", (c) => {
     address: normalizeAddress(address),
     networkId,
     transactions: getTransactions(address, networkId),
-  });
+  } satisfies WalletTransactionsResponse);
 });
