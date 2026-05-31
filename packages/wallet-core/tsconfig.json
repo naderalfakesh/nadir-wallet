@@ -1,4 +1,4 @@
 {
-  "extends": "@secure-wallet/config/base.json",
+  "extends": "@nadir-wallet/config/base.json",
   "include": ["src"]
 }

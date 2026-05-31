@@ -1,5 +1,5 @@
 {
-  "name": "@secure-wallet/types",
+  "name": "@nadir-wallet/types",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@secure-wallet/config": "workspace:*",
+    "@nadir-wallet/config": "workspace:*",
     "typescript": "^5.9.2"
   }
 }

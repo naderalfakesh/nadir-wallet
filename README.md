@@ -9,10 +9,10 @@ apps/
   mobile/                # React Native app (Expo SDK 56, expo-router)
   api/                   # Hono backend API (libsql + Drizzle)
 packages/
-  types/                 # @secure-wallet/types — shared TypeScript types
-  crypto-core/           # @secure-wallet/crypto-core — address/amount/network helpers
-  wallet-core/           # @secure-wallet/wallet-core — risk, simulation, portfolio logic
-  config/                # @secure-wallet/config — shared tsconfig / eslint / prettier
+  types/                 # @nadir-wallet/types — shared TypeScript types
+  crypto-core/           # @nadir-wallet/crypto-core — address/amount/network helpers
+  wallet-core/           # @nadir-wallet/wallet-core — risk, simulation, portfolio logic
+  config/                # @nadir-wallet/config — shared tsconfig / eslint / prettier
 docs/
   security-model.md      # non-custodial, testnet-only trust boundary
   api.md                 # endpoint request/response reference

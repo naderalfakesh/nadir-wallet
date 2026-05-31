@@ -1,5 +1,5 @@
-import type { AddressRiskCheckResponse, AddressRiskLevel, NetworkId } from "@secure-wallet/types";
-import { isEvmAddress } from "@secure-wallet/crypto-core";
+import type { AddressRiskCheckResponse, AddressRiskLevel, NetworkId } from "@nadir-wallet/types";
+import { isEvmAddress } from "@nadir-wallet/crypto-core";
 import { LARGE_AMOUNT_THRESHOLD } from "./constants";
 
 export interface RiskAssessmentInput {

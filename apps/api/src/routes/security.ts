@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import type { ReportAddressResponse } from "@secure-wallet/types";
-import { isEvmAddress, isSupportedNetworkId } from "@secure-wallet/crypto-core";
+import type { ReportAddressResponse } from "@nadir-wallet/types";
+import { isEvmAddress, isSupportedNetworkId } from "@nadir-wallet/crypto-core";
 import { badRequest } from "../lib/errors";
 import { parseOrThrow } from "../lib/validation";
 import { checkAddress, reportAddress } from "../services/security";

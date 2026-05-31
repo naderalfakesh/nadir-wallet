@@ -8,7 +8,7 @@ importers:
 
   .:
     devDependencies:
-      '@secure-wallet/config':
+      '@nadir-wallet/config':
         specifier: workspace:*
         version: link:packages/config
       prettier:
@@ -29,13 +29,13 @@ importers:
       '@libsql/client':
         specifier: ^0.14.0
         version: 0.14.0
-      '@secure-wallet/crypto-core':
+      '@nadir-wallet/crypto-core':
         specifier: workspace:*
         version: link:../../packages/crypto-core
-      '@secure-wallet/types':
+      '@nadir-wallet/types':
         specifier: workspace:*
         version: link:../../packages/types
-      '@secure-wallet/wallet-core':
+      '@nadir-wallet/wallet-core':
         specifier: workspace:*
         version: link:../../packages/wallet-core
       drizzle-orm:
@@ -51,7 +51,7 @@ importers:
         specifier: ^3.24.1
         version: 3.25.76
     devDependencies:
-      '@secure-wallet/config':
+      '@nadir-wallet/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@types/node':
@@ -175,14 +175,14 @@ importers:
 
   packages/crypto-core:
     dependencies:
-      '@secure-wallet/types':
+      '@nadir-wallet/types':
         specifier: workspace:*
         version: link:../types
       viem:
         specifier: ^2.21.54
         version: 2.51.3(typescript@5.9.2)(zod@3.25.76)
     devDependencies:
-      '@secure-wallet/config':
+      '@nadir-wallet/config':
         specifier: workspace:*
         version: link:../config
       typescript:
@@ -191,7 +191,7 @@ importers:
 
   packages/types:
     devDependencies:
-      '@secure-wallet/config':
+      '@nadir-wallet/config':
         specifier: workspace:*
         version: link:../config
       typescript:
@@ -200,14 +200,14 @@ importers:
 
   packages/wallet-core:
     dependencies:
-      '@secure-wallet/crypto-core':
+      '@nadir-wallet/crypto-core':
         specifier: workspace:*
         version: link:../crypto-core
-      '@secure-wallet/types':
+      '@nadir-wallet/types':
         specifier: workspace:*
         version: link:../types
     devDependencies:
-      '@secure-wallet/config':
+      '@nadir-wallet/config':
         specifier: workspace:*
         version: link:../config
       typescript:

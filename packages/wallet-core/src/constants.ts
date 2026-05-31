@@ -1,4 +1,4 @@
-import type { NetworkId } from "@secure-wallet/types";
+import type { NetworkId } from "@nadir-wallet/types";
 
 /** Native-token amount considered unusually large for a testnet transfer. */
 export const LARGE_AMOUNT_THRESHOLD = 5;

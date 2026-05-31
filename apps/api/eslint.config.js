@@ -1,1 +1,1 @@
-export { default } from "@secure-wallet/config/eslint";
+export { default } from "@nadir-wallet/config/eslint";

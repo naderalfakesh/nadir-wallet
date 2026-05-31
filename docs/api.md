@@ -3,7 +3,7 @@
 Base URL (local): `http://localhost:8787`
 
 All success responses have predictable, typed shapes — the response types live in
-`@secure-wallet/types` and are shared with the mobile app. All error responses
+`@nadir-wallet/types` and are shared with the mobile app. All error responses
 use the shared `ApiErrorResponse` shape:
 
 ```json

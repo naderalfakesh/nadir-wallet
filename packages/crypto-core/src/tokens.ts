@@ -1,4 +1,4 @@
-import type { NetworkId, Token } from "@secure-wallet/types";
+import type { NetworkId, Token } from "@nadir-wallet/types";
 import { getNetwork } from "./networks";
 
 export const NATIVE_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000";

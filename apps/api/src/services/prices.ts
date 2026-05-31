@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { PriceQuote } from "@secure-wallet/types";
+import type { PriceQuote } from "@nadir-wallet/types";
 import { db } from "../db/client";
 import { priceCache } from "../db/schema";
 

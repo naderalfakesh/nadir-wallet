@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import type { HealthResponse, NetworksResponse } from "@secure-wallet/types";
-import { SUPPORTED_NETWORKS } from "@secure-wallet/crypto-core";
+import type { HealthResponse, NetworksResponse } from "@nadir-wallet/types";
+import { SUPPORTED_NETWORKS } from "@nadir-wallet/crypto-core";
 
 const startedAt = Date.now();
 

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import type { TokensResponse } from "@secure-wallet/types";
-import { getTokens, isSupportedNetworkId } from "@secure-wallet/crypto-core";
+import type { TokensResponse } from "@nadir-wallet/types";
+import { getTokens, isSupportedNetworkId } from "@nadir-wallet/crypto-core";
 import { badRequest } from "../lib/errors";
 import { parseOrThrow } from "../lib/validation";
 

@@ -80,7 +80,7 @@ by default.
 Supported network ids: `ethereum-sepolia`, `polygon-amoy`.
 
 Every success response has a predictable, typed shape (see the response types in
-`@secure-wallet/types`). Every error response uses the shared `ApiErrorResponse`
+`@nadir-wallet/types`). Every error response uses the shared `ApiErrorResponse`
 shape:
 
 ```json
@@ -191,7 +191,7 @@ The service layer is the single integration point:
   ERC-20 `balanceOf` calls using `RPC_URL_*`.
 - `services/transactions.ts` — replace mock history with an indexer or RPC log
   query.
-- `@secure-wallet/wallet-core` `simulateTransaction` — replace the deterministic
+- `@nadir-wallet/wallet-core` `simulateTransaction` — replace the deterministic
   fee model with a real `eth_estimateGas` / fee-history call.
 
 RPC URLs are read from `RPC_URL_ETHEREUM_SEPOLIA` and `RPC_URL_POLYGON_AMOY`

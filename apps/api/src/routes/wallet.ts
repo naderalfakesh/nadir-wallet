@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import type { WalletBalancesResponse, WalletTransactionsResponse } from "@secure-wallet/types";
-import { isEvmAddress, isSupportedNetworkId, normalizeAddress } from "@secure-wallet/crypto-core";
+import type { WalletBalancesResponse, WalletTransactionsResponse } from "@nadir-wallet/types";
+import { isEvmAddress, isSupportedNetworkId, normalizeAddress } from "@nadir-wallet/crypto-core";
 import { badRequest } from "../lib/errors";
 import { parseOrThrow } from "../lib/validation";
 import { getBalances } from "../services/balances";

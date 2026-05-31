@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import type { ApiErrorResponse } from "@secure-wallet/types";
+import type { ApiErrorResponse } from "@nadir-wallet/types";
 import { handleError } from "./lib/errors";
 import { systemRoutes } from "./routes/system";
 import { tokensRoutes } from "./routes/tokens";

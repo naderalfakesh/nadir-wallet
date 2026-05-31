@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
-import type { ApiErrorResponse } from "@secure-wallet/types";
+import type { ApiErrorResponse } from "@nadir-wallet/types";
 
 export class ApiError extends Error {
   readonly status: ContentfulStatusCode;

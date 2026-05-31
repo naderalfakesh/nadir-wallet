@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { isSupportedNetworkId } from "@secure-wallet/crypto-core";
-import { simulateTransaction } from "@secure-wallet/wallet-core";
+import { isSupportedNetworkId } from "@nadir-wallet/crypto-core";
+import { simulateTransaction } from "@nadir-wallet/wallet-core";
 import { badRequest } from "../lib/errors";
 import { parseOrThrow } from "../lib/validation";
 

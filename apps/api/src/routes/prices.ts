@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import type { PricesResponse } from "@secure-wallet/types";
+import type { PricesResponse } from "@nadir-wallet/types";
 import { badRequest } from "../lib/errors";
 import { parseOrThrow } from "../lib/validation";
 import { getPrices } from "../services/prices";

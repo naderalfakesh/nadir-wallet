@@ -1,1 +1,1 @@
-export { default } from "@secure-wallet/config/prettier";
+export { default } from "@nadir-wallet/config/prettier";

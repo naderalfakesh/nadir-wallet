@@ -1,4 +1,4 @@
-import type { TokenBalance } from "@secure-wallet/types";
+import type { TokenBalance } from "@nadir-wallet/types";
 
 export interface PortfolioPosition {
   symbol: string;

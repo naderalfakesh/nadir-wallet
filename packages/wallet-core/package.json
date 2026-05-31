@@ -1,5 +1,5 @@
 {
-  "name": "@secure-wallet/wallet-core",
+  "name": "@nadir-wallet/wallet-core",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,11 +15,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@secure-wallet/crypto-core": "workspace:*",
-    "@secure-wallet/types": "workspace:*"
+    "@nadir-wallet/crypto-core": "workspace:*",
+    "@nadir-wallet/types": "workspace:*"
   },
   "devDependencies": {
-    "@secure-wallet/config": "workspace:*",
+    "@nadir-wallet/config": "workspace:*",
     "typescript": "^5.9.2"
   }
 }
