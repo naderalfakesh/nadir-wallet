@@ -1,0 +1,18 @@
+{
+  "totalBalance": "Total balance",
+  "today": "today",
+  "tokens": "Tokens",
+  "recentActivity": "Recent activity",
+  "estimatedDemoValue": "Estimated demo value · prices cached",
+  "valueUnavailable": "Value unavailable",
+  "priceUnavailable": "Price data unavailable",
+  "backup": {
+    "title": "Back up your wallet",
+    "body": "Secure your recovery phrase to avoid losing funds."
+  },
+  "empty": {
+    "title": "No assets yet",
+    "body": "Fund your wallet to get started — receive crypto from an exchange or another wallet.",
+    "action": "Receive your first asset"
+  }
+}

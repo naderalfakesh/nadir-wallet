@@ -1,0 +1,25 @@
+{
+  "appName": "Nadir Wallet",
+  "nav": {
+    "home": "Home",
+    "activity": "Activity",
+    "security": "Security",
+    "settings": "Settings"
+  },
+  "actions": {
+    "receive": "Receive",
+    "send": "Send",
+    "swap": "Swap",
+    "buy": "Buy",
+    "retry": "Retry",
+    "copy": "Copy",
+    "copied": "Copied",
+    "share": "Share",
+    "done": "Done",
+    "manage": "Manage",
+    "seeAll": "See all"
+  },
+  "testnet": {
+    "badge": "Testnet"
+  }
+}

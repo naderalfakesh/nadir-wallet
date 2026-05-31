@@ -1,0 +1,8 @@
+{
+  "welcomeBack": "Welcome back",
+  "locked": "Wallet locked",
+  "unlockFaceId": "Unlock with Face ID",
+  "scanning": "Scanning…",
+  "useFaceId": "Use Face ID",
+  "usePasscode": "Use passcode instead"
+}

@@ -1,0 +1,38 @@
+{
+  "title": "Settings",
+  "wallet": {
+    "section": "Wallet",
+    "accounts": "Wallets & accounts",
+    "accountsSub": "1 wallet",
+    "networks": "Networks",
+    "networksSub": "5 testnets enabled",
+    "currency": "Display currency",
+    "currencyValue": "USD · demo"
+  },
+  "preferences": {
+    "section": "Preferences",
+    "theme": "Theme",
+    "dark": "Dark",
+    "light": "Light",
+    "privacy": "Privacy",
+    "privacySub": "Hide balances, analytics"
+  },
+  "security": {
+    "section": "Security",
+    "center": "Security Center",
+    "protected": "Protected",
+    "actionNeeded": "Action needed",
+    "recovery": "Recovery phrase",
+    "notifications": "Notifications"
+  },
+  "about": {
+    "section": "About",
+    "howItWorks": "How this demo works",
+    "howItWorksSub": "Security model & testnet",
+    "help": "Help & support",
+    "version": "About Nadir Wallet"
+  },
+  "lockWallet": "Lock wallet",
+  "footerName": "Nadir Wallet · Non-custodial · v1.0.0",
+  "footerNote": "Testnet-only demo — no real funds. Keys never leave this device."
+}

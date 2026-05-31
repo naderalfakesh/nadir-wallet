@@ -1,0 +1,70 @@
+{
+  "title": "Security",
+  "score": {
+    "label": "Security score",
+    "excellent": "Excellent",
+    "actionNeeded": "Action needed",
+    "atRisk": "At risk",
+    "protected": "Your wallet is well protected.",
+    "finishBackup": "Finish your backup to fully protect your funds."
+  },
+  "model": {
+    "title": "Security model",
+    "keysTitle": "Keys stay on this device",
+    "keysBody": "Your recovery phrase and private keys are generated and stored only on this device — never uploaded.",
+    "signTitle": "Signing happens locally",
+    "signBody": "Transactions are signed on-device after biometric approval. Nothing to sign ever leaves the phone.",
+    "backendTitle": "Backend sees public data only",
+    "backendBody": "Only your public address is shared — for cached prices, address risk checks and transaction simulation."
+  },
+  "protection": {
+    "title": "Protection",
+    "backup": "Recovery phrase backup",
+    "backupDone": "Backed up & verified",
+    "backupTodo": "Not backed up yet",
+    "biometric": "Biometric unlock",
+    "biometricSub": "Face ID",
+    "pin": "App lock PIN",
+    "pinSub": "6-digit code",
+    "autolock": "Auto-lock",
+    "autolockSub": "After {{min}} min",
+    "signing": "Transaction signing",
+    "signingSub": "Biometric required",
+    "on": "On",
+    "off": "Off"
+  },
+  "device": {
+    "title": "Device security",
+    "secure": "This device is secure",
+    "lastChecked": "Last checked just now",
+    "checks": {
+      "screenLock": "Screen lock enabled",
+      "notRooted": "Not rooted / jailbroken",
+      "latestVersion": "Latest app version",
+      "secureEnclave": "Secure enclave available"
+    }
+  },
+  "txProtection": {
+    "title": "Transaction protection",
+    "heading": "Suspicious activity protection",
+    "sub": "Screens recipients & contracts before you sign",
+    "riskLevels": "RISK LEVELS",
+    "low": "Low",
+    "lowBody": "Known address, verified contract — safe to proceed.",
+    "caution": "Caution",
+    "cautionBody": "New address or unverified contract — review carefully.",
+    "high": "High",
+    "highBody": "Flagged for scams or drains — signing is blocked."
+  },
+  "events": {
+    "title": "Recent security activity"
+  },
+  "advanced": {
+    "title": "Advanced",
+    "reveal": "Reveal recovery phrase",
+    "revealSub": "Requires Face ID",
+    "connected": "Connected apps",
+    "connectedSub": "2 dApps connected",
+    "changePin": "Change passcode"
+  }
+}

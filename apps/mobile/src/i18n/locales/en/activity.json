@@ -1,0 +1,23 @@
+{
+  "title": "Activity",
+  "filters": {
+    "all": "All",
+    "receive": "Received",
+    "send": "Sent",
+    "swap": "Swaps"
+  },
+  "verb": {
+    "receive": "Received",
+    "send": "Sent",
+    "swap": "Swapped"
+  },
+  "from": "From ",
+  "to": "To ",
+  "footer": "Showing recent activity",
+  "empty": {
+    "title": "No activity yet",
+    "body": "Your transactions will appear here once you send or receive crypto.",
+    "filteredTitle": "No transactions",
+    "filteredBody": "Try a different filter to see more of your history."
+  }
+}

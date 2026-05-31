@@ -1,0 +1,10 @@
+{
+  "welcome": {
+    "tagline": "Self-custody for multi-chain assets. Your keys, your crypto — secured by design.",
+    "badge": "Testnet demo · no real funds",
+    "create": "Create a new wallet",
+    "import": "I already have a wallet",
+    "trustKeys": "Your recovery phrase stays on this device. The backend only ever sees public wallet addresses.",
+    "trustTestnet": "Testnet-only demo — balances and prices are estimated and hold no real value."
+  }
+}

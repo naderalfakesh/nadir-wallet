@@ -1,0 +1,16 @@
+{
+  "backend": {
+    "apiTitle": "Wallet services unavailable",
+    "apiBody": "Risk checks and cached prices are temporarily unavailable. Your keys remain safe on this device.",
+    "rpcTitle": "Testnet connection unavailable",
+    "rpcBody": "Balances and transaction status may be delayed. This does not affect your local wallet keys.",
+    "retry": "Retry",
+    "demoMode": "Demo mode",
+    "viewCached": "View cached data"
+  },
+  "price": {
+    "fresh": "Estimated demo value · updated 2 min ago",
+    "stale": "Using cached prices · updated 1 h ago",
+    "unavailable": "Price data unavailable"
+  }
+}
