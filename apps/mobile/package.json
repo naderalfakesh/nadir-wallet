@@ -29,9 +29,11 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "eslint-config-expo": "~56.0.4",
     "typescript": "~6.0.3"
   },
   "scripts": {
+    "dev": "expo start",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",

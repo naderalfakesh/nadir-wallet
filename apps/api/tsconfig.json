@@ -1,0 +1,8 @@
+{
+  "extends": "@repo/config/base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "outDir": "dist"
+  },
+  "include": ["src", "drizzle.config.ts", "tsup.config.ts"]
+}
