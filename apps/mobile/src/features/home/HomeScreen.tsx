@@ -198,34 +198,36 @@ export function HomeScreen() {
           <QuickAction icon="trend" label={t("common.actions.buy")} onPress={() => sheets.open("soon", { title: "Buy crypto" })} />
         </View>
 
-        {/* backup reminder */}
-        <View style={{ paddingHorizontal: theme.spacing.pad, paddingTop: 16 }}>
-          <Card padding={15} style={{ backgroundColor: theme.colors.surface }} onPress={() => router.push("/backup")}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 13 }}>
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 12,
-                  backgroundColor: theme.colors.surface2,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Icon name="backup" size={22} color={theme.colors.warn} />
+        {/* backup reminder — only until the recovery phrase is backed up */}
+        {!prefs.backupConfirmed && (
+          <View style={{ paddingHorizontal: theme.spacing.pad, paddingTop: 16 }}>
+            <Card padding={15} style={{ backgroundColor: theme.colors.surface }} onPress={() => router.push("/backup")}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 13 }}>
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 12,
+                    backgroundColor: theme.colors.surface2,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="backup" size={22} color={theme.colors.warn} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <AppText weight="bold" size={14.5}>
+                    {t("home.backup.title")}
+                  </AppText>
+                  <AppText size={12.5} muted style={{ marginTop: 1 }}>
+                    {t("home.backup.body")}
+                  </AppText>
+                </View>
+                <Icon name="chevronR" size={18} color={theme.colors.warn} />
               </View>
-              <View style={{ flex: 1 }}>
-                <AppText weight="bold" size={14.5}>
-                  {t("home.backup.title")}
-                </AppText>
-                <AppText size={12.5} muted style={{ marginTop: 1 }}>
-                  {t("home.backup.body")}
-                </AppText>
-              </View>
-              <Icon name="chevronR" size={18} color={theme.colors.warn} />
-            </View>
-          </Card>
-        </View>
+            </Card>
+          </View>
+        )}
 
         {/* tokens */}
         <View style={{ paddingHorizontal: theme.spacing.pad, paddingTop: 22, paddingBottom: 14 }}>

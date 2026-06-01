@@ -1,6 +1,5 @@
-// Polyfills crypto.getRandomValues for on-device BIP39 generation. Must load
-// before any wallet crypto runs.
-import "react-native-get-random-values";
+// Note: the crypto.getRandomValues polyfill is loaded in the app entry
+// (index.js), which must run before any module that reads crypto at import time.
 import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";

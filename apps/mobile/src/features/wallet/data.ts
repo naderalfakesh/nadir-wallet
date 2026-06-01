@@ -60,9 +60,11 @@ export const TRANSACTIONS: DemoTransaction[] = [
   { id: "t7", type: "send", token: "ETH", amount: 0.04, fiat: 121.74, party: "0x9fE2…0aB3", chain: "ethereum", status: "failed", when: "May 27 · 1:12 PM", day: "May 27", fee: 0.39, confirmations: 0, hash: "0xf0e1d2c3b4a5968778695a4b3c2d1e0f9a8b7c6d5e4f3021123344556677889900", failReason: "Out of gas — the transaction ran out of gas before completing." },
 ];
 
+// Full 40-char addresses so the live risk API (which validates address format)
+// returns the intended low/medium/high for each recent.
 export const RECIPIENTS: SavedRecipient[] = [
-  { addr: "0x6b2fA0e1c4D9b8721a3F5e0c91A4", label: "demo.eth", network: "ethereum", known: true },
-  { addr: "0x44Ae7C13b9F02d6E8a51c0937dD7c1", label: null, network: "polygon", known: false },
+  { addr: "0x6b2fA0e1c4D9b8721a3F5e0c91A4D3b21f9C0e57", label: "demo.eth", network: "ethereum", known: true },
+  { addr: "0x44Ae7C13b9F02d6E8a51c0937dD7c1A2b3C4D5e6", label: null, network: "polygon", known: false },
   { addr: "0xbeefbeefbeefbeefbeefbeefbeefbeefbeefbeef", label: "Reported address", network: "ethereum", known: false, flagged: true },
 ];
 
