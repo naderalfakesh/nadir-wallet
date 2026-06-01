@@ -3,31 +3,24 @@ import { Pressable, TextInput, View } from "react-native";
 import { ScreenHeader, AppText, Button, Icon } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
-import { DEMO_RECOVERY_PHRASE } from "./data";
+import { generateMnemonic, validateMnemonicPhrase } from "@nadir-wallet/crypto-core";
 
-// Mock validation only — no real import or persistence happens. A reviewer can
-// reach the success path with "Paste", or trigger the invalid-word / checksum
-// states by typing.
-// TODO(pass 3): validate against a real BIP39 wordlist + checksum on-device.
-export function ImportScreen({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+// Real BIP39 validation. On success the phrase is handed up and the wallet is
+// derived; the phrase never leaves the device.
+export function ImportScreen({ onBack, onDone }: { onBack: () => void; onDone: (phrase: string) => void }) {
   const theme = useTheme();
   const { t } = useTranslation();
   const [value, setValue] = useState("");
 
-  const tokens = value.trim().split(/\s+/).filter(Boolean);
-  const countOk = tokens.length === 12 || tokens.length === 24;
-  const invalidWord = tokens.find((w) => !/^[a-z]+$/i.test(w)) ?? null;
-  const demoPhrase = DEMO_RECOVERY_PHRASE.join(" ");
-  const checksumOk = value.trim().toLowerCase() === demoPhrase;
-
+  const result = validateMnemonicPhrase(value);
   const error =
-    invalidWord != null
-      ? t("onboarding.import.invalidWord", { word: invalidWord })
-      : countOk && !checksumOk
+    result.invalidWord != null
+      ? t("onboarding.import.invalidWord", { word: result.invalidWord })
+      : result.wordCountValid && !result.checksumValid
         ? t("onboarding.import.invalidChecksum")
         : null;
 
-  const canContinue = countOk && invalidWord == null && checksumOk;
+  const normalized = value.trim().toLowerCase().split(/\s+/).filter(Boolean).join(" ");
 
   return (
     <View style={{ flex: 1 }}>
@@ -59,7 +52,7 @@ export function ImportScreen({ onBack, onDone }: { onBack: () => void; onDone: (
 
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
           <Pressable
-            onPress={() => setValue(demoPhrase)}
+            onPress={() => setValue(generateMnemonic())}
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -77,8 +70,8 @@ export function ImportScreen({ onBack, onDone }: { onBack: () => void; onDone: (
               {t("onboarding.import.paste")}
             </AppText>
           </Pressable>
-          <AppText weight="semibold" size={13} tnum color={countOk ? theme.colors.pos : theme.colors.textFaint}>
-            {t("onboarding.import.words", { count: tokens.length })}
+          <AppText weight="semibold" size={13} tnum color={result.wordCountValid ? theme.colors.pos : theme.colors.textFaint}>
+            {t("onboarding.import.words", { count: result.wordCount })}
           </AppText>
         </View>
 
@@ -99,7 +92,7 @@ export function ImportScreen({ onBack, onDone }: { onBack: () => void; onDone: (
         </View>
 
         <View style={{ flex: 1 }} />
-        <Button label={t("onboarding.import.cta")} disabled={!canContinue} onPress={onDone} />
+        <Button label={t("onboarding.import.cta")} disabled={!result.valid} onPress={() => onDone(normalized)} />
       </View>
     </View>
   );

@@ -6,19 +6,27 @@ import { Screen, ScreenHeader, AppText, Button, Card, Icon } from "@/components"
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useApp } from "@/providers/AppProvider";
+import { FaceIDGate } from "@/features/auth/FaceIDGate";
 import { SeedReveal, SeedVerify } from "@/features/onboarding/SeedComponents";
-import { DEMO_RECOVERY_PHRASE } from "@/features/onboarding/data";
 
-type Step = "intro" | "reveal" | "verify" | "done";
+type Step = "intro" | "auth" | "reveal" | "verify" | "done";
 
 export function BackupScreen() {
   const theme = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { setPref, logEvent } = useApp();
+  const { setPref, logEvent, getMnemonic } = useApp();
   const [step, setStep] = useState<Step>("intro");
+  const [words, setWords] = useState<string[]>([]);
   const pad = theme.spacing.pad;
+
+  // Read the stored phrase only after passing the auth gate.
+  const unlock = async () => {
+    const mnemonic = await getMnemonic();
+    setWords(mnemonic ? mnemonic.split(" ") : []);
+    setStep("reveal");
+  };
 
   const confirmBackup = () => {
     setPref("backupConfirmed", true);
@@ -59,8 +67,21 @@ export function BackupScreen() {
               </AppText>
             </View>
           </Card>
-          <Button label={t("onboarding.backup.show")} onPress={() => setStep("reveal")} />
+          <Button label={t("onboarding.backup.show")} onPress={() => setStep("auth")} />
         </View>
+      </Screen>
+    );
+  }
+
+  if (step === "auth") {
+    return (
+      <Screen>
+        <ScreenHeader title={t("onboarding.backup.revealTitle")} onBack={() => setStep("intro")} />
+        <FaceIDGate
+          title={t("onboarding.backup.verifyIt")}
+          subtitle={t("onboarding.backup.revealGate")}
+          onDone={() => void unlock()}
+        />
       </Screen>
     );
   }
@@ -70,7 +91,7 @@ export function BackupScreen() {
       <Screen>
         <ScreenHeader title={t("onboarding.reveal.title")} subtitle={t("onboarding.reveal.step")} onBack={() => setStep("intro")} />
         <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: insets.bottom + pad }}>
-          <SeedReveal words={DEMO_RECOVERY_PHRASE} onContinue={() => setStep("verify")} ctaLabel={t("onboarding.reveal.cta")} />
+          <SeedReveal words={words} onContinue={() => setStep("verify")} ctaLabel={t("onboarding.reveal.cta")} />
         </ScrollView>
       </Screen>
     );
@@ -81,7 +102,7 @@ export function BackupScreen() {
       <Screen>
         <ScreenHeader title={t("onboarding.verify.title")} subtitle={t("onboarding.verify.step")} onBack={() => setStep("reveal")} />
         <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: insets.bottom + pad }}>
-          <SeedVerify words={DEMO_RECOVERY_PHRASE} onContinue={confirmBackup} />
+          <SeedVerify words={words} onContinue={confirmBackup} />
         </ScrollView>
       </Screen>
     );

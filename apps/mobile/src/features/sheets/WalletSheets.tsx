@@ -6,12 +6,14 @@ import { useTranslation } from "@/i18n/useTranslation";
 import { fmtUSD, fmtToken } from "@/utils/format";
 import { displayAddress } from "@/services/wallet/account";
 import { useWallet } from "@/providers/WalletDataProvider";
+import { useApp } from "@/providers/AppProvider";
 import { ACCOUNT, type DemoToken } from "@/features/wallet/data";
 import type { SheetBodyProps } from "./types";
 
 export function AccountsSheet({ close }: SheetBodyProps) {
   const theme = useTheme();
   const { t } = useTranslation();
+  const { prefs } = useApp();
   return (
     <View>
       <SheetHeader title={t("sheets.accounts.title")} onClose={close} />
@@ -20,7 +22,7 @@ export function AccountsSheet({ close }: SheetBodyProps) {
           last
           left={<View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: theme.colors.accent }} />}
           title={ACCOUNT.label}
-          sub={<AppText mono size={13} muted>{displayAddress(ACCOUNT.address)}</AppText>}
+          sub={<AppText mono size={13} muted>{displayAddress(prefs.walletAddress)}</AppText>}
           right={<Icon name="checkCircle" size={22} color={theme.colors.accent} />}
         />
       </Card>

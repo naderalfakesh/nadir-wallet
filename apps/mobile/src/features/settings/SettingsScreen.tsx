@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ScrollView, View } from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
   Screen,
@@ -16,6 +16,7 @@ import {
 import { useTheme, useThemeControls } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useSheets } from "@/providers/SheetProvider";
+import { useApp } from "@/providers/AppProvider";
 import { displayAddress } from "@/services/wallet/account";
 import { copyText } from "@/services/device";
 import { ACCOUNT } from "@/features/wallet/data";
@@ -27,12 +28,26 @@ export function SettingsScreen() {
   const sheets = useSheets();
   const { scheme } = useThemeControls();
   const { t } = useTranslation();
+  const { prefs, resetWallet } = useApp();
   const [copied, setCopied] = useState(false);
 
   const copy = () => {
-    void copyText(ACCOUNT.address);
+    void copyText(prefs.walletAddress);
     setCopied(true);
     setTimeout(() => setCopied(false), 1400);
+  };
+
+  const confirmReset = () => {
+    Alert.alert(t("settings.reset.title"), t("settings.reset.body"), [
+      { text: t("settings.reset.cancel"), style: "cancel" },
+      {
+        text: t("settings.reset.confirm"),
+        style: "destructive",
+        onPress: () => {
+          void resetWallet().then(() => router.replace("/onboarding"));
+        },
+      },
+    ]);
   };
 
   const gap = { height: 18 } as const;
@@ -57,7 +72,7 @@ export function SettingsScreen() {
                   {ACCOUNT.ens}
                 </AppText>
                 <AppText mono size={12} muted style={{ marginTop: 3 }}>
-                  {displayAddress(ACCOUNT.address)}
+                  {displayAddress(prefs.walletAddress)}
                 </AppText>
               </View>
               <IconButton
@@ -116,6 +131,19 @@ export function SettingsScreen() {
           <View style={gap} />
           <SectionLabel>{t("settings.demo.section")}</SectionLabel>
           <DemoControls />
+
+          <View style={gap} />
+          <SectionLabel>{t("settings.reset.section")}</SectionLabel>
+          <Card padding={0} style={{ paddingHorizontal: 16 }}>
+            <Row
+              onPress={confirmReset}
+              left={<MiniIcon name="refresh" tone="neg" />}
+              title={<AppText weight="semibold" size={16} color={theme.colors.neg}>{t("settings.reset.action")}</AppText>}
+              sub={t("settings.reset.sub")}
+              chevron
+              last
+            />
+          </Card>
 
           <View style={gap} />
           <Button label={t("settings.lockWallet")} variant="ghost" icon="lock" onPress={() => router.push("/lock")} />

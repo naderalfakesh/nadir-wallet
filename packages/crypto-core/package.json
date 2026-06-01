@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@nadir-wallet/types": "workspace:*",
+    "@scure/bip39": "^1.6.0",
     "viem": "^2.21.54"
   },
   "devDependencies": {

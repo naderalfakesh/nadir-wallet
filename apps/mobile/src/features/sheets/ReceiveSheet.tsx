@@ -4,12 +4,15 @@ import { SheetHeader, AppText, Button, Icon, QRCode, TestnetBadge } from "@/comp
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { copyText, shareText } from "@/services/device";
-import { ACCOUNT, CHAINS, TOKENS, type ChainId } from "@/features/wallet/data";
+import { useApp } from "@/providers/AppProvider";
+import { CHAINS, TOKENS, type ChainId } from "@/features/wallet/data";
 import type { SheetBodyProps } from "./types";
 
 export function ReceiveSheet({ params, close }: SheetBodyProps) {
   const theme = useTheme();
   const { t } = useTranslation();
+  const { prefs } = useApp();
+  const address = prefs.walletAddress;
   const symbol = params?.token as string | undefined;
   const initialChain = symbol ? (TOKENS.find((x) => x.symbol === symbol)?.chain ?? "ethereum") : "ethereum";
   const [chain, setChain] = useState<ChainId>(initialChain);
@@ -54,7 +57,7 @@ export function ReceiveSheet({ params, close }: SheetBodyProps) {
 
       <View style={{ alignItems: "center" }}>
         <View style={{ padding: 16, backgroundColor: "#fff", borderRadius: 22 }}>
-          <QRCode value={ACCOUNT.address} size={188} />
+          <QRCode value={address} size={188} />
         </View>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 16 }}>
           <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: ch.color }} />
@@ -75,7 +78,7 @@ export function ReceiveSheet({ params, close }: SheetBodyProps) {
         }}
       >
         <AppText mono size={13} style={{ lineHeight: 20 }}>
-          {ACCOUNT.address}
+          {address}
         </AppText>
       </View>
 
@@ -87,12 +90,12 @@ export function ReceiveSheet({ params, close }: SheetBodyProps) {
           height={52}
           style={{ flex: 1 }}
           onPress={() => {
-            void copyText(ACCOUNT.address);
+            void copyText(address);
             setCopied(true);
             setTimeout(() => setCopied(false), 1500);
           }}
         />
-        <Button label={t("common.actions.share")} icon="external" height={52} style={{ flex: 1 }} onPress={() => void shareText(ACCOUNT.address)} />
+        <Button label={t("common.actions.share")} icon="external" height={52} style={{ flex: 1 }} onPress={() => void shareText(address)} />
       </View>
 
       <View style={{ flexDirection: "row", gap: 9, marginTop: 14, paddingHorizontal: 2 }}>

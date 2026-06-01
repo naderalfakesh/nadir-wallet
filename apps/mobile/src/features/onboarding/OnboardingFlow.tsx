@@ -6,11 +6,11 @@ import { Screen, ScreenHeader, AppText, Button, Card, Icon, type IconName } from
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useApp } from "@/providers/AppProvider";
+import { generateMnemonic } from "@nadir-wallet/crypto-core";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { ImportScreen } from "./ImportScreen";
 import { CreatePasscode } from "./CreatePasscode";
 import { SeedReveal, SeedVerify } from "./SeedComponents";
-import { DEMO_RECOVERY_PHRASE } from "./data";
 
 type Step = "welcome" | "explain" | "reveal" | "verify" | "import" | "passcode" | "biometric" | "ready";
 
@@ -19,15 +19,15 @@ export function OnboardingFlow() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { setPref, setPasscode, logEvent } = useApp();
+  const { setPref, setPasscode, logEvent, createWallet } = useApp();
   const [step, setStep] = useState<Step>("welcome");
   const [viaImport, setViaImport] = useState(false);
+  // The fresh/imported phrase lives only in memory until the user confirms.
+  const [mnemonic, setMnemonic] = useState("");
+  const words = mnemonic ? mnemonic.split(" ") : [];
 
-  const finish = () => {
-    setPref("onboardingCompleted", true);
-    // Create flow verifies the phrase; import assumes the user already has it.
-    setPref("backupConfirmed", !viaImport);
-    logEvent(viaImport ? "imported" : "created");
+  const finish = async () => {
+    await createWallet(mnemonic, { imported: viaImport });
     router.replace("/home");
   };
   const pad = theme.spacing.pad;
@@ -37,6 +37,7 @@ export function OnboardingFlow() {
       <WelcomeScreen
         onCreate={() => {
           setViaImport(false);
+          setMnemonic(generateMnemonic());
           setStep("explain");
         }}
         onImport={() => {
@@ -95,7 +96,7 @@ export function OnboardingFlow() {
       <Screen>
         <ScreenHeader title={t("onboarding.reveal.title")} subtitle={t("onboarding.reveal.step")} onBack={() => setStep("explain")} />
         <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: insets.bottom + pad }}>
-          <SeedReveal words={DEMO_RECOVERY_PHRASE} onContinue={() => setStep("verify")} ctaLabel={t("onboarding.reveal.cta")} />
+          <SeedReveal words={words} onContinue={() => setStep("verify")} ctaLabel={t("onboarding.reveal.cta")} />
         </ScrollView>
       </Screen>
     );
@@ -106,7 +107,7 @@ export function OnboardingFlow() {
       <Screen>
         <ScreenHeader title={t("onboarding.verify.title")} subtitle={t("onboarding.verify.step")} onBack={() => setStep("reveal")} />
         <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: insets.bottom + pad }}>
-          <SeedVerify words={DEMO_RECOVERY_PHRASE} onContinue={() => setStep("passcode")} />
+          <SeedVerify words={words} onContinue={() => setStep("passcode")} />
         </ScrollView>
       </Screen>
     );
@@ -115,7 +116,13 @@ export function OnboardingFlow() {
   if (step === "import") {
     return (
       <Screen>
-        <ImportScreen onBack={() => setStep("welcome")} onDone={() => setStep("passcode")} />
+        <ImportScreen
+          onBack={() => setStep("welcome")}
+          onDone={(phrase) => {
+            setMnemonic(phrase);
+            setStep("passcode");
+          }}
+        />
       </Screen>
     );
   }
@@ -205,7 +212,7 @@ export function OnboardingFlow() {
         </AppText>
       </View>
       <View style={{ paddingHorizontal: pad, paddingBottom: insets.bottom + pad }}>
-        <Button label={t("onboarding.ready.open")} onPress={finish} />
+        <Button label={t("onboarding.ready.open")} onPress={() => void finish()} />
       </View>
     </Screen>
   );

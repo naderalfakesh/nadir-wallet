@@ -2,7 +2,6 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { api } from "@/services/api";
 import type { BackendStatus, PriceStatus } from "@/types/status";
 import {
-  ACCOUNT,
   TOKENS,
   TRANSACTIONS,
   PORTFOLIO_TOTAL,
@@ -12,6 +11,7 @@ import {
 } from "@/features/wallet/data";
 import { fetchLivePortfolio, type LivePortfolio } from "@/features/wallet/portfolio";
 import { useDemoState } from "./DemoStateProvider";
+import { useApp } from "./AppProvider";
 
 interface WalletData {
   tokens: DemoToken[];
@@ -36,11 +36,14 @@ const WalletDataContext = createContext<WalletData | null>(null);
 
 export function WalletDataProvider({ children }: { children: React.ReactNode }) {
   const { liveApi, backend: demoBackend, price: demoPrice, retry } = useDemoState();
+  const { prefs } = useApp();
+  const address = prefs.walletAddress;
   const [live, setLive] = useState<LivePortfolio | null>(null);
   const [backendLive, setBackendLive] = useState<BackendStatus>("online");
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
+    if (!address) return; // No wallet yet — fall back to demo data.
     setLoading(true);
     const health = await api.health();
     if (!health.ok) {
@@ -50,7 +53,7 @@ export function WalletDataProvider({ children }: { children: React.ReactNode }) 
       return;
     }
     setBackendLive("online");
-    const portfolio = await fetchLivePortfolio(ACCOUNT.address);
+    const portfolio = await fetchLivePortfolio(address);
     if (portfolio) {
       setLive(portfolio);
     } else {
@@ -58,7 +61,7 @@ export function WalletDataProvider({ children }: { children: React.ReactNode }) 
       setLive(null);
     }
     setLoading(false);
-  }, []);
+  }, [address]);
 
   const refresh = useCallback(() => {
     if (liveApi) void load();

@@ -12,9 +12,10 @@ const KEYS = {
   events: "nadir.events",
 } as const;
 
-// The demo passcode is an app-lock PIN placeholder — not a wallet secret. It
-// lives in the device keychain via SecureStore to model real behaviour.
+// SecureStore (device keychain) holds the only real secret — the BIP39
+// mnemonic — plus the app-lock PIN placeholder. Never AsyncStorage.
 const SECURE_PASSCODE = "nadir.demoPasscode";
+const SECURE_MNEMONIC = "nadir.mnemonic";
 const DEFAULT_PASSCODE = "123456";
 
 export interface Prefs {
@@ -24,6 +25,9 @@ export interface Prefs {
   autoLockMinutes: number;
   hideBalances: boolean;
   lastAccountId: string;
+  /** Public derived EVM address — non-secret. */
+  walletAddress: string;
+  walletCreatedAt: number;
 }
 
 export interface DemoPrefs {
@@ -41,6 +45,8 @@ export const DEFAULT_PREFS: Prefs = {
   autoLockMinutes: 1,
   hideBalances: false,
   lastAccountId: "main",
+  walletAddress: "",
+  walletCreatedAt: 0,
 };
 
 export const DEFAULT_DEMO: DemoPrefs = {
@@ -106,5 +112,22 @@ export const storage = {
     } catch {
       // SecureStore is unavailable on some targets (e.g. web); ignore.
     }
+  },
+  // The mnemonic is the only real secret and lives only in the keychain.
+  saveMnemonic: (mnemonic: string) => SecureStore.setItemAsync(SECURE_MNEMONIC, mnemonic),
+  getMnemonic: async (): Promise<string | null> => {
+    try {
+      return await SecureStore.getItemAsync(SECURE_MNEMONIC);
+    } catch {
+      return null;
+    }
+  },
+  // Wipes all device-stored wallet state (secret + non-secret) for reset.
+  clearWallet: async () => {
+    await Promise.all([
+      SecureStore.deleteItemAsync(SECURE_MNEMONIC).catch(() => undefined),
+      SecureStore.deleteItemAsync(SECURE_PASSCODE).catch(() => undefined),
+      AsyncStorage.multiRemove([KEYS.prefs, KEYS.events]),
+    ]);
   },
 };

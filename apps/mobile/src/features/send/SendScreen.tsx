@@ -24,7 +24,7 @@ import { useSheets } from "@/providers/SheetProvider";
 import { useApp } from "@/providers/AppProvider";
 import { useWallet } from "@/providers/WalletDataProvider";
 import { fmtUSD, fmtToken, shortAddr } from "@/utils/format";
-import { ACCOUNT, CHAINS, tokenById, RECIPIENTS, chainBadgeColor, chainToNetworkId, type DemoToken, type ChainId } from "@/features/wallet/data";
+import { CHAINS, tokenById, RECIPIENTS, chainBadgeColor, chainToNetworkId, type DemoToken, type ChainId } from "@/features/wallet/data";
 import { assessRecipient, recipientNetwork, type AddressRisk } from "@/features/wallet/risk";
 import { useRiskCheck, useSimulation } from "./useSendChecks";
 import { SendConfirmOverlay, type SendPhase } from "./SendConfirmOverlay";
@@ -60,7 +60,7 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
   const { t } = useTranslation();
   const { liveApi, backend, sendSim, sendOutcome } = useDemoState();
   const sheets = useSheets();
-  const { logEvent } = useApp();
+  const { logEvent, prefs } = useApp();
   const { tokens } = useWallet();
   const logged = useRef<Set<string>>(new Set());
 
@@ -94,7 +94,7 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
   const liveSim = useSimulation({
     enabled: liveMode && step === "review" && amtNum > 0,
     networkId,
-    from: ACCOUNT.address,
+    from: prefs.walletAddress,
     to: trimmedTo,
     value: amt,
   });

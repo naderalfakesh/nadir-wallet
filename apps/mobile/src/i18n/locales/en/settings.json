@@ -70,6 +70,15 @@
     "outcomePending": "Pending",
     "outcomeFailed": "Failed"
   },
+  "reset": {
+    "section": "Developer",
+    "action": "Reset wallet",
+    "sub": "Erase this device's wallet and start over",
+    "title": "Reset wallet?",
+    "body": "This deletes the on-device recovery phrase and all local wallet data, then returns to onboarding. This is a testnet demo — no real funds are affected.",
+    "cancel": "Cancel",
+    "confirm": "Reset"
+  },
   "lockWallet": "Lock wallet",
   "footerName": "Nadir Wallet · Non-custodial · v1.0.0",
   "footerNote": "Testnet-only demo — no real funds. Keys never leave this device."
