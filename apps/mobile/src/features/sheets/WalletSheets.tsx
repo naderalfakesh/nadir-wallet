@@ -5,7 +5,8 @@ import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { fmtUSD, fmtToken } from "@/utils/format";
 import { displayAddress } from "@/services/wallet/account";
-import { ACCOUNT, TOKENS, type DemoToken } from "@/features/wallet/data";
+import { useWallet } from "@/providers/WalletDataProvider";
+import { ACCOUNT, type DemoToken } from "@/features/wallet/data";
 import type { SheetBodyProps } from "./types";
 
 export function AccountsSheet({ close }: SheetBodyProps) {
@@ -31,6 +32,7 @@ export function AccountsSheet({ close }: SheetBodyProps) {
 export function PickTokenSheet({ params, close }: SheetBodyProps) {
   const theme = useTheme();
   const { t } = useTranslation();
+  const { tokens } = useWallet();
   const current = params?.current as string | undefined;
   const onPick = params?.onPick as ((token: DemoToken) => void) | undefined;
 
@@ -38,10 +40,10 @@ export function PickTokenSheet({ params, close }: SheetBodyProps) {
     <View>
       <SheetHeader title={t("sheets.pickToken.title")} onClose={close} />
       <Card padding={0} style={{ paddingHorizontal: 16 }}>
-        {TOKENS.map((token, i) => (
+        {tokens.map((token, i) => (
           <Row
             key={token.id}
-            last={i === TOKENS.length - 1}
+            last={i === tokens.length - 1}
             onPress={() => {
               onPick?.(token);
               close();

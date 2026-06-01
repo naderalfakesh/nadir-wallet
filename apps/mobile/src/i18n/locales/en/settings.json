@@ -49,6 +49,11 @@
   "demo": {
     "section": "Demo controls",
     "note": "Showcase only — flip these to preview backend, price and send states. They don't affect your local wallet.",
+    "liveApi": "Live API data",
+    "liveOn": "Querying the local API for public data",
+    "liveOff": "Using bundled demo data",
+    "apiOnline": "API reachable",
+    "apiOffline": "API unreachable — showing demo data",
     "backend": "Backend",
     "backendOnline": "Online",
     "backendApi": "API down",

@@ -12,6 +12,7 @@ const META: Record<SecurityEventType, { sev: SecurityEventSeverity; titleKey: st
   risk_block: { sev: "critical", titleKey: "security.log.riskBlockTitle", detailKey: "security.log.riskBlockDetail" },
   sim_fail: { sev: "warning", titleKey: "security.log.simFailTitle", detailKey: "security.log.simFailDetail" },
   autolock: { sev: "info", titleKey: "security.log.autolockTitle", detailKey: "security.log.autolockDetail" },
+  autolock_triggered: { sev: "info", titleKey: "security.log.autolockTriggeredTitle", detailKey: "security.log.autolockTriggeredDetail" },
   device_check: { sev: "info", titleKey: "security.log.unlockTitle" },
 };
 

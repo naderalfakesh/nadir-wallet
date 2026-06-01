@@ -1,6 +1,20 @@
+import type { NetworkId } from "@nadir-wallet/types";
 import type { Chain, ChainId, DemoToken, DemoTransaction, SavedRecipient } from "./types";
 
 export type { Chain, ChainId, DemoToken, DemoTransaction, SavedRecipient, TxType } from "./types";
+
+// Maps the mobile's chain ids to the two API-supported testnet networks.
+export const CHAIN_TO_NETWORK: Partial<Record<ChainId, NetworkId>> = {
+  ethereum: "ethereum-sepolia",
+  polygon: "polygon-amoy",
+};
+export const NETWORK_TO_CHAIN: Record<NetworkId, ChainId> = {
+  "ethereum-sepolia": "ethereum",
+  "polygon-amoy": "polygon",
+};
+export function chainToNetworkId(chain: ChainId): NetworkId | null {
+  return CHAIN_TO_NETWORK[chain] ?? null;
+}
 
 // Testnet-only demo data. Balances, prices and values are estimated and hold
 // no real-world worth — they exist to validate the UI, not to track funds.
@@ -49,7 +63,7 @@ export const TRANSACTIONS: DemoTransaction[] = [
 export const RECIPIENTS: SavedRecipient[] = [
   { addr: "0x6b2fA0e1c4D9b8721a3F5e0c91A4", label: "demo.eth", network: "ethereum", known: true },
   { addr: "0x44Ae7C13b9F02d6E8a51c0937dD7c1", label: null, network: "polygon", known: false },
-  { addr: "0x000000000000000000000000000000000000dEaD", label: "Reported address", network: "ethereum", known: false, flagged: true },
+  { addr: "0xbeefbeefbeefbeefbeefbeefbeefbeefbeefbeef", label: "Reported address", network: "ethereum", known: false, flagged: true },
 ];
 
 export const ACCOUNT = {

@@ -16,9 +16,9 @@ import {
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useSheets } from "@/providers/SheetProvider";
-import { useDemoState } from "@/providers/DemoStateProvider";
+import { useWallet } from "@/providers/WalletDataProvider";
 import { fmtUSD, fmtToken } from "@/utils/format";
-import { TRANSACTIONS, type DemoTransaction, type TxType } from "@/features/wallet/data";
+import { type DemoTransaction, type TxType } from "@/features/wallet/data";
 
 type Filter = "all" | TxType;
 
@@ -49,7 +49,7 @@ export function ActivityScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
   const sheets = useSheets();
-  const { backend, retry } = useDemoState();
+  const { transactions, backend, refresh } = useWallet();
   const [filter, setFilter] = useState<Filter>("all");
 
   const verb: Record<TxType, string> = {
@@ -58,7 +58,7 @@ export function ActivityScreen() {
     swap: t("activity.verb.swap"),
   };
 
-  const rows = TRANSACTIONS.filter((tx) => (filter === "all" ? true : tx.type === filter));
+  const rows = transactions.filter((tx) => (filter === "all" ? true : tx.type === filter));
   const days = [...new Set(rows.map((tx) => tx.day))];
 
   const filters: { value: Filter; label: string }[] = [
@@ -121,7 +121,7 @@ export function ActivityScreen() {
       />
       {backend !== "online" && (
         <View style={{ paddingHorizontal: theme.spacing.pad, paddingBottom: 4 }}>
-          <BackendNotice status={backend} onRetry={retry} />
+          <BackendNotice status={backend} onRetry={refresh} />
         </View>
       )}
       <View style={{ flexDirection: "row", gap: 8, paddingHorizontal: theme.spacing.pad, paddingBottom: 4 }}>

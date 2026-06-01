@@ -21,6 +21,7 @@ export type SecurityEventType =
   | "risk_block"
   | "sim_fail"
   | "autolock"
+  | "autolock_triggered"
   | "device_check";
 
 export type SecurityEventSeverity = "info" | "success" | "warning" | "critical";

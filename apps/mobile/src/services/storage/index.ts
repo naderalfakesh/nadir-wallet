@@ -27,6 +27,7 @@ export interface Prefs {
 }
 
 export interface DemoPrefs {
+  liveApi: boolean;
   backend: BackendStatus;
   price: PriceStatus;
   sendSim: SendSim;
@@ -43,6 +44,7 @@ export const DEFAULT_PREFS: Prefs = {
 };
 
 export const DEFAULT_DEMO: DemoPrefs = {
+  liveApi: true,
   backend: "online",
   price: "fresh",
   sendSim: "pass",

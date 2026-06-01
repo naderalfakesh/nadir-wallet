@@ -80,6 +80,8 @@
     "simFailDetail": "Insufficient gas — not submitted",
     "autolockTitle": "Auto-lock updated",
     "autolockDetail": "Locks after {{min}} min",
+    "autolockTriggeredTitle": "Wallet auto-locked",
+    "autolockTriggeredDetail": "Locked after inactivity",
     "today": "Today"
   },
   "advanced": {

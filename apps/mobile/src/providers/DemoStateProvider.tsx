@@ -9,6 +9,7 @@ export type SendOutcome = "success" | "pending" | "failed";
 // state from the running app — the equivalent of the design's tweak panel.
 // None of this affects the local wallet, which is never "down".
 interface DemoStateValue extends DemoPrefs {
+  setLiveApi: (v: boolean) => void;
   setBackend: (v: BackendStatus) => void;
   setPrice: (v: PriceStatus) => void;
   setSendSim: (v: SendSim) => void;
@@ -29,6 +30,7 @@ export function DemoStateProvider({ initial, children }: { initial: DemoPrefs; c
     });
   }, []);
 
+  const setLiveApi = useCallback((liveApi: boolean) => update({ liveApi }), [update]);
   const setBackend = useCallback((backend: BackendStatus) => update({ backend }), [update]);
   const setPrice = useCallback((price: PriceStatus) => update({ price }), [update]);
   const setSendSim = useCallback((sendSim: SendSim) => update({ sendSim }), [update]);
@@ -37,8 +39,8 @@ export function DemoStateProvider({ initial, children }: { initial: DemoPrefs; c
   const retry = useCallback(() => update({ backend: "online", price: "fresh" }), [update]);
 
   const value = useMemo<DemoStateValue>(
-    () => ({ ...state, setBackend, setPrice, setSendSim, setSendOutcome, retry }),
-    [state, setBackend, setPrice, setSendSim, setSendOutcome, retry],
+    () => ({ ...state, setLiveApi, setBackend, setPrice, setSendSim, setSendOutcome, retry }),
+    [state, setLiveApi, setBackend, setPrice, setSendSim, setSendOutcome, retry],
   );
 
   return <DemoStateContext.Provider value={value}>{children}</DemoStateContext.Provider>;

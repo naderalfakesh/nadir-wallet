@@ -22,22 +22,10 @@ import {
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useSheets } from "@/providers/SheetProvider";
-import { useDemoState } from "@/providers/DemoStateProvider";
 import { useApp } from "@/providers/AppProvider";
+import { useWallet } from "@/providers/WalletDataProvider";
 import { fmtUSD, fmtToken } from "@/utils/format";
-import {
-  ACCOUNT,
-  TOKENS,
-  TRANSACTIONS,
-  SPARKLINE,
-  RANGES,
-  PORTFOLIO_TOTAL,
-  PORTFOLIO_CHANGE_ABS,
-  PORTFOLIO_CHANGE_PCT,
-  chainBadgeColor,
-  type Range,
-  type DemoTransaction,
-} from "@/features/wallet/data";
+import { ACCOUNT, SPARKLINE, RANGES, chainBadgeColor, type Range, type DemoTransaction } from "@/features/wallet/data";
 
 function QuickAction({
   icon,
@@ -87,14 +75,15 @@ export function HomeScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const sheets = useSheets();
-  const { backend, price, retry } = useDemoState();
+  const { tokens, transactions, total, change, backend, price, refresh } = useWallet();
   const { prefs, setPref } = useApp();
   const [range, setRange] = useState<Range>("1W");
   const hidden = prefs.hideBalances;
 
   const priceUnavail = price === "unavailable";
   const dimChart = backend === "rpc_unavailable" || priceUnavail;
-  const recent = TRANSACTIONS.slice(0, 3);
+  const changeAbs = total * (change / 100);
+  const recent = transactions.slice(0, 3);
   const verb: Record<DemoTransaction["type"], string> = {
     receive: t("activity.verb.receive"),
     send: t("activity.verb.send"),
@@ -149,7 +138,7 @@ export function HomeScreen() {
 
         {backend !== "online" && (
           <View style={{ paddingHorizontal: theme.spacing.pad, paddingTop: 10 }}>
-            <BackendNotice status={backend} onRetry={retry} />
+            <BackendNotice status={backend} onRetry={refresh} />
           </View>
         )}
 
@@ -174,21 +163,21 @@ export function HomeScreen() {
             </AppText>
           ) : (
             <AppText weight="bold" size={44} tnum style={{ letterSpacing: -1.4 }}>
-              {hidden ? "••••••" : fmtUSD(PORTFOLIO_TOTAL)}
+              {hidden ? "••••••" : fmtUSD(total)}
             </AppText>
           )}
           {!priceUnavail && (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 9, marginTop: 11 }}>
-              <ChangeBadge pct={PORTFOLIO_CHANGE_PCT} />
+              <ChangeBadge pct={change} />
               <AppText size={14} muted tnum>
-                {hidden ? "••••" : fmtUSD(PORTFOLIO_CHANGE_ABS, { sign: true })} · {t("home.today")}
+                {hidden ? "••••" : fmtUSD(changeAbs, { sign: true })} · {t("home.today")}
               </AppText>
             </View>
           )}
-          <PriceFreshness status={price} onRetry={retry} />
+          <PriceFreshness status={price} onRetry={refresh} />
 
           <View style={{ marginTop: 18, marginBottom: 12, opacity: dimChart ? 0.4 : 1 }}>
-            <Sparkline data={SPARKLINE} up={PORTFOLIO_CHANGE_PCT >= 0} height={92} />
+            <Sparkline data={SPARKLINE} up={change >= 0} height={92} />
           </View>
           <Segmented options={RANGES} value={range} onChange={setRange} small />
         </View>
@@ -250,10 +239,10 @@ export function HomeScreen() {
             {t("home.tokens")}
           </SectionLabel>
           <Card padding={0} style={{ paddingHorizontal: 16 }}>
-            {TOKENS.map((token, i) => (
+            {tokens.map((token, i) => (
               <Row
                 key={token.id}
-                last={i === TOKENS.length - 1}
+                last={i === tokens.length - 1}
                 onPress={() => router.push(`/token/${token.id}`)}
                 left={
                   <TokenGlyph

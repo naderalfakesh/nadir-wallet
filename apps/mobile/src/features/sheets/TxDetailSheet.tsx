@@ -3,18 +3,20 @@ import { View } from "react-native";
 import { SheetHeader, AppText, Button, Card, Row, Icon, TxIcon, StatusPill } from "@/components";
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
+import { useWallet } from "@/providers/WalletDataProvider";
 import { copyText, openExplorer } from "@/services/device";
 import { fmtUSD, fmtToken, shortAddr } from "@/utils/format";
-import { CHAINS, TRANSACTIONS, type TxType } from "@/features/wallet/data";
+import { CHAINS, type TxType } from "@/features/wallet/data";
 import type { SheetBodyProps } from "./types";
 
 export function TxDetailSheet({ params, close }: SheetBodyProps) {
   const theme = useTheme();
   const { t } = useTranslation();
+  const { transactions } = useWallet();
   const [copied, setCopied] = useState(false);
 
   const id = params?.id as string | undefined;
-  const tx = TRANSACTIONS.find((x) => x.id === id) ?? TRANSACTIONS[0];
+  const tx = transactions.find((x) => x.id === id) ?? transactions[0];
   const incoming = tx.type === "receive";
   const chain = CHAINS[tx.chain];
   const verb: Record<TxType, string> = {

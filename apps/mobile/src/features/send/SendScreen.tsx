@@ -22,9 +22,11 @@ import { useTranslation } from "@/i18n/useTranslation";
 import { useDemoState } from "@/providers/DemoStateProvider";
 import { useSheets } from "@/providers/SheetProvider";
 import { useApp } from "@/providers/AppProvider";
+import { useWallet } from "@/providers/WalletDataProvider";
 import { fmtUSD, fmtToken, shortAddr } from "@/utils/format";
-import { CHAINS, tokenById, RECIPIENTS, chainBadgeColor, type DemoToken, type ChainId } from "@/features/wallet/data";
+import { ACCOUNT, CHAINS, tokenById, RECIPIENTS, chainBadgeColor, chainToNetworkId, type DemoToken, type ChainId } from "@/features/wallet/data";
 import { assessRecipient, recipientNetwork, type AddressRisk } from "@/features/wallet/risk";
+import { useRiskCheck, useSimulation } from "./useSendChecks";
 import { SendConfirmOverlay, type SendPhase } from "./SendConfirmOverlay";
 
 const GAS_SYMBOL: Record<ChainId, string> = {
@@ -56,13 +58,16 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { backend, sendSim, sendOutcome } = useDemoState();
+  const { liveApi, backend, sendSim, sendOutcome } = useDemoState();
   const sheets = useSheets();
   const { logEvent } = useApp();
+  const { tokens } = useWallet();
   const logged = useRef<Set<string>>(new Set());
 
   const [step, setStep] = useState<Step>("to");
-  const [token, setToken] = useState<DemoToken>(tokenId ? tokenById(tokenId) : tokenById("eth"));
+  const [token, setToken] = useState<DemoToken>(
+    () => tokens.find((t) => t.id === tokenId) ?? tokens[0] ?? tokenById("eth"),
+  );
   const [to, setTo] = useState("");
   const [amt, setAmt] = useState("0");
   const [phase, setPhase] = useState<SendPhase | null>(null);
@@ -78,12 +83,40 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
   const toValid = looksAddr || looksEns;
   const toError = trimmedTo.length > 3 && !toValid;
 
-  const checksAvailable = backend === "online";
-  const risk = toValid && checksAvailable ? assessRecipient(trimmedTo) : null;
+  // Live checks run only when Live API is on and the token's network is one the
+  // API supports; otherwise fall back to the local demo logic.
+  const networkId = chainToNetworkId(token.chain);
+  const liveMode = liveApi && networkId != null;
+  const knownContact = RECIPIENTS.some(
+    (r) => r.addr.toLowerCase() === trimmedTo.toLowerCase() && r.known,
+  );
+  const liveRisk = useRiskCheck({ enabled: liveMode && toValid, address: trimmedTo, networkId, amount: amtNum, knownContact });
+  const liveSim = useSimulation({
+    enabled: liveMode && step === "review" && amtNum > 0,
+    networkId,
+    from: ACCOUNT.address,
+    to: trimmedTo,
+    value: amt,
+  });
+
+  const localRisk = toValid && backend === "online" ? assessRecipient(trimmedTo) : null;
+  const risk: AddressRisk | null = liveMode ? (liveRisk.status === "ok" ? liveRisk.risk : null) : localRisk;
+  const checksAvailable = liveMode ? liveRisk.status !== "unavailable" : backend === "online";
+  const riskLoading = liveMode && toValid && liveRisk.status === "idle";
   const blocked = !!risk?.blocked;
   const recipientNet = recipientNetwork(trimmedTo);
   const netMismatch = !!(recipientNet && recipientNet !== token.chain);
-  const simStatus = !checksAvailable ? "unavailable" : sendSim === "fail" ? "failed" : "passed";
+  const simStatus: "passed" | "failed" | "unavailable" = liveMode
+    ? liveSim.status === "passed"
+      ? "passed"
+      : liveSim.status === "failed"
+        ? "failed"
+        : "unavailable"
+    : !checksAvailable
+      ? "unavailable"
+      : sendSim === "fail"
+        ? "failed"
+        : "passed";
   const balanceAfter = Math.max(0, token.amount - amtNum);
 
   // Record system protections once per occurrence into the security log.
@@ -242,7 +275,7 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
         <FooterButton insets={insets}>
           <Button
             label={blocked ? t("send.to.blocked") : t("send.to.continue")}
-            disabled={!toValid || blocked}
+            disabled={!toValid || blocked || riskLoading}
             onPress={() => {
               if (risk && !logged.current.has("check")) {
                 logged.current.add("check");

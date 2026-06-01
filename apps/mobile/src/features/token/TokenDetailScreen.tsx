@@ -20,24 +20,24 @@ import {
 } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
-import { useDemoState } from "@/providers/DemoStateProvider";
+import { useWallet } from "@/providers/WalletDataProvider";
 import { useSheets } from "@/providers/SheetProvider";
 import { fmtUSD, fmtToken } from "@/utils/format";
-import { CHAINS, tokenById, TRANSACTIONS, SPARKLINE, RANGES, type Range, type TxType } from "@/features/wallet/data";
+import { CHAINS, tokenById, SPARKLINE, RANGES, type Range, type TxType } from "@/features/wallet/data";
 
 export function TokenDetailScreen({ id }: { id: string }) {
   const theme = useTheme();
   const router = useRouter();
   const { t } = useTranslation();
-  const { backend, price, retry } = useDemoState();
+  const { tokens, transactions, backend, price, refresh } = useWallet();
   const sheets = useSheets();
   const [range, setRange] = useState<Range>("1W");
 
-  const token = tokenById(id);
+  const token = tokens.find((x) => x.id === id) ?? tokenById(id);
   const chain = CHAINS[token.chain];
   const priceUnavail = price === "unavailable";
   const dimChart = backend === "rpc_unavailable" || priceUnavail;
-  const txs = TRANSACTIONS.filter((x) => x.token === token.symbol).slice(0, 3);
+  const txs = transactions.filter((x) => x.token === token.symbol).slice(0, 3);
 
   const verb: Record<TxType, string> = {
     receive: t("activity.verb.receive"),
@@ -56,7 +56,7 @@ export function TokenDetailScreen({ id }: { id: string }) {
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
         {backend !== "online" && (
           <View style={{ paddingHorizontal: theme.spacing.pad, paddingBottom: 4 }}>
-            <BackendNotice status={backend} onRetry={retry} />
+            <BackendNotice status={backend} onRetry={refresh} />
           </View>
         )}
 
@@ -74,7 +74,7 @@ export function TokenDetailScreen({ id }: { id: string }) {
                 <ChangeBadge pct={token.change} />
               </View>
             )}
-            <PriceFreshness status={price} onRetry={retry} />
+            <PriceFreshness status={price} onRetry={refresh} />
           </View>
 
           <View style={{ marginTop: 20, marginBottom: 12, opacity: dimChart ? 0.4 : 1 }}>

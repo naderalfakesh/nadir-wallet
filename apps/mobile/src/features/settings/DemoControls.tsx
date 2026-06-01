@@ -1,9 +1,10 @@
 import React from "react";
 import { Pressable, View } from "react-native";
-import { Card, AppText, Icon } from "@/components";
-import { useTheme } from "@/theme";
+import { Card, AppText, Icon, Toggle } from "@/components";
+import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useDemoState } from "@/providers/DemoStateProvider";
+import { useWallet } from "@/providers/WalletDataProvider";
 import type { BackendStatus, PriceStatus } from "@/types/status";
 import type { SendSim, SendOutcome } from "@/providers/DemoStateProvider";
 
@@ -54,7 +55,10 @@ function Choice<T extends string>({
 export function DemoControls() {
   const theme = useTheme();
   const { t } = useTranslation();
-  const { backend, price, sendSim, sendOutcome, setBackend, setPrice, setSendSim, setSendOutcome } = useDemoState();
+  const { liveApi, backend, price, sendSim, sendOutcome, setLiveApi, setBackend, setPrice, setSendSim, setSendOutcome } =
+    useDemoState();
+  const { backend: liveBackend } = useWallet();
+  const apiOnline = liveBackend === "online";
 
   return (
     <Card padding={16}>
@@ -64,36 +68,73 @@ export function DemoControls() {
           {t("settings.demo.note")}
         </AppText>
       </View>
-      <View style={{ gap: 14 }}>
-        <Choice<BackendStatus>
-          label={t("settings.demo.backend")}
-          value={backend}
-          onChange={setBackend}
-          options={[
-            { value: "online", label: t("settings.demo.backendOnline") },
-            { value: "api_unavailable", label: t("settings.demo.backendApi") },
-            { value: "rpc_unavailable", label: t("settings.demo.backendRpc") },
-          ]}
-        />
-        <Choice<PriceStatus>
-          label={t("settings.demo.price")}
-          value={price}
-          onChange={setPrice}
-          options={[
-            { value: "fresh", label: t("settings.demo.priceFresh") },
-            { value: "stale", label: t("settings.demo.priceStale") },
-            { value: "unavailable", label: t("settings.demo.priceNone") },
-          ]}
-        />
-        <Choice<SendSim>
-          label={t("settings.demo.sim")}
-          value={sendSim}
-          onChange={setSendSim}
-          options={[
-            { value: "pass", label: t("settings.demo.simPass") },
-            { value: "fail", label: t("settings.demo.simFail") },
-          ]}
-        />
+
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <View style={{ flex: 1 }}>
+          <AppText weight="semibold" size={14}>
+            {t("settings.demo.liveApi")}
+          </AppText>
+          <AppText size={12} muted style={{ marginTop: 1 }}>
+            {liveApi ? t("settings.demo.liveOn") : t("settings.demo.liveOff")}
+          </AppText>
+        </View>
+        <Toggle on={liveApi} onChange={() => setLiveApi(!liveApi)} />
+      </View>
+
+      {liveApi ? (
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+            marginTop: 12,
+            padding: 10,
+            borderRadius: 12,
+            backgroundColor: alpha(apiOnline ? theme.colors.pos : theme.colors.warn, 0.12),
+          }}
+        >
+          <View
+            style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: apiOnline ? theme.colors.pos : theme.colors.warn }}
+          />
+          <AppText size={12} color={apiOnline ? theme.colors.pos : theme.colors.warn} weight="semibold">
+            {apiOnline ? t("settings.demo.apiOnline") : t("settings.demo.apiOffline")}
+          </AppText>
+        </View>
+      ) : (
+        <View style={{ gap: 14, marginTop: 16 }}>
+          <Choice<BackendStatus>
+            label={t("settings.demo.backend")}
+            value={backend}
+            onChange={setBackend}
+            options={[
+              { value: "online", label: t("settings.demo.backendOnline") },
+              { value: "api_unavailable", label: t("settings.demo.backendApi") },
+              { value: "rpc_unavailable", label: t("settings.demo.backendRpc") },
+            ]}
+          />
+          <Choice<PriceStatus>
+            label={t("settings.demo.price")}
+            value={price}
+            onChange={setPrice}
+            options={[
+              { value: "fresh", label: t("settings.demo.priceFresh") },
+              { value: "stale", label: t("settings.demo.priceStale") },
+              { value: "unavailable", label: t("settings.demo.priceNone") },
+            ]}
+          />
+          <Choice<SendSim>
+            label={t("settings.demo.sim")}
+            value={sendSim}
+            onChange={setSendSim}
+            options={[
+              { value: "pass", label: t("settings.demo.simPass") },
+              { value: "fail", label: t("settings.demo.simFail") },
+            ]}
+          />
+        </View>
+      )}
+
+      <View style={{ marginTop: 16 }}>
         <Choice<SendOutcome>
           label={t("settings.demo.outcome")}
           value={sendOutcome}
