@@ -66,10 +66,11 @@ export const RECIPIENTS: SavedRecipient[] = [
   { addr: "0xbeefbeefbeefbeefbeefbeefbeefbeefbeefbeef", label: "Reported address", network: "ethereum", known: false, flagged: true },
 ];
 
+// The real address comes from prefs.walletAddress (derived on-device); this is
+// just the display name shown alongside it.
 export const ACCOUNT = {
   label: "Main Wallet",
-  address: "0x7Af3C2b9E4d18A6F0c5B71e93D2a4F88c61B0e2D",
-  ens: "demo.eth",
+  caption: "Testnet account",
 };
 
 export function tokenById(id: string): DemoToken {

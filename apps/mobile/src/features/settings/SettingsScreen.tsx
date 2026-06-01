@@ -68,8 +68,8 @@ export function SettingsScreen() {
                   </AppText>
                   <TestnetBadge label={t("common.testnet.badge")} />
                 </View>
-                <AppText mono size={12.5} color={theme.colors.accent} style={{ marginTop: 2 }}>
-                  {ACCOUNT.ens}
+                <AppText weight="semibold" size={12.5} color={theme.colors.accent} style={{ marginTop: 2 }}>
+                  {ACCOUNT.caption}
                 </AppText>
                 <AppText mono size={12} muted style={{ marginTop: 3 }}>
                   {displayAddress(prefs.walletAddress)}
