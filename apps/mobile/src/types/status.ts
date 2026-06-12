@@ -22,7 +22,9 @@ export type SecurityEventType =
   | "sim_fail"
   | "autolock"
   | "autolock_triggered"
-  | "device_check";
+  | "device_check"
+  | "liveness_pass"
+  | "liveness_fail";
 
 export type SecurityEventSeverity = "info" | "success" | "warning" | "critical";
 

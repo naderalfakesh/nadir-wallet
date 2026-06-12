@@ -54,7 +54,7 @@ namespace margelo::nitro::faceliveness {
 
   public:
     // Methods
-    double detectFaceCount(const std::shared_ptr<margelo::nitro::camera::HybridFrameSpec>& frame) override;
+    FaceObservation detect(const std::shared_ptr<margelo::nitro::camera::HybridFrameSpec>& frame) override;
 
   private:
     jni::global_ref<JHybridFaceLivenessSpec::JavaPart> _javaPart;

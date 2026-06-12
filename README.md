@@ -22,6 +22,7 @@ deliberate, clearly-scoped MVP boundary.
 | Crypto   | `viem/accounts` (generation/derivation) + `@scure/bip39` (validation), `react-native-get-random-values` |
 | Storage  | `expo-secure-store` (secrets), `@react-native-async-storage/async-storage` (prefs) |
 | Device   | `expo-local-authentication`, `expo-clipboard`, `expo-web-browser`, `react-native-qrcode-svg` |
+| Native   | `@nadir-wallet/face-liveness` — custom VisionCamera V5 frame-processor plugin (Nitro Module, Swift/Kotlin) wrapping Google ML Kit Face Detection |
 | Backend  | Hono + `@hono/node-server`, libsql + Drizzle ORM, Zod, viem |
 | Shared   | `@nadir-wallet/{types,crypto-core,wallet-core,config}` |
 | Tooling  | Turborepo, pnpm 9 |
@@ -36,6 +37,7 @@ packages/
   types/                 # @nadir-wallet/types — shared response/domain types
   crypto-core/           # @nadir-wallet/crypto-core — address + BIP39 wallet helpers
   wallet-core/           # @nadir-wallet/wallet-core — risk, simulation, portfolio logic
+  face-liveness/         # @nadir-wallet/face-liveness — native VisionCamera/ML Kit plugin (Nitro)
   config/                # @nadir-wallet/config — shared tsconfig / eslint / prettier
 docs/
   security-model.md      # trust boundary, what is/never sent to the API
@@ -133,6 +135,11 @@ RPC_URL_POLYGON_AMOY=https://polygon-amoy.g.alchemy.com/v2/YOUR_KEY
 - Live API wiring with graceful demo-data fallback; clipboard / share / testnet
   explorer actions.
 - Dark + light themes, persisted preferences, English i18n scaffold.
+- **Active face-liveness check** (Security Center): randomized blink /
+  turn-head challenges verified in real time by a hand-written native
+  frame-processor plugin (`packages/face-liveness`) running ML Kit on the
+  camera worklet thread — fully on-device (see
+  `docs/security-model.md` for the threat model).
 
 ## Current limitations
 
@@ -150,12 +157,13 @@ RPC_URL_POLYGON_AMOY=https://polygon-amoy.g.alchemy.com/v2/YOUR_KEY
 - Real testnet transaction signing (on-device, from the stored mnemonic)
 - Optional testnet broadcast
 - Real price API + real transaction indexer (Alchemy/RPC)
-- Camera QR scanner
+- Camera QR scanner (camera stack already in place via the liveness feature)
+- Step-up liveness gating for reveal-seed / high-value send
+- Passive anti-spoofing (PAD) layered under the active liveness check
 - Stronger encrypted-vault model
 - WalletConnect
 - e2e tests
 - Screenshots / demo video
-- Optional native / Nitro module experiment
 
 ## Screenshots / demo
 

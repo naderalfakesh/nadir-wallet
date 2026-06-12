@@ -8,6 +8,8 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `FaceObservation` to properly resolve imports.
+namespace margelo::nitro::faceliveness { struct FaceObservation; }
 // Forward declaration of `HybridFaceLivenessSpec` to properly resolve imports.
 namespace margelo::nitro::faceliveness { class HybridFaceLivenessSpec; }
 // Forward declaration of `HybridFrameSpec` to properly resolve imports.
@@ -20,6 +22,7 @@ namespace NadirFaceLiveness { class HybridFaceLivenessSpec_cxx; }
 namespace VisionCamera { class HybridFrameSpec_cxx; }
 
 // Include C++ defined types
+#include "FaceObservation.hpp"
 #include "HybridFaceLivenessSpec.hpp"
 #include <NitroModules/Result.hpp>
 #include <VisionCamera/HybridFrameSpec.hpp>
@@ -56,13 +59,13 @@ namespace margelo::nitro::faceliveness::bridge::swift {
   using std__weak_ptr_HybridFaceLivenessSpec_ = std::weak_ptr<HybridFaceLivenessSpec>;
   inline std__weak_ptr_HybridFaceLivenessSpec_ weakify_std__shared_ptr_HybridFaceLivenessSpec_(const std::shared_ptr<HybridFaceLivenessSpec>& strong) noexcept { return strong; }
   
-  // pragma MARK: Result<double>
-  using Result_double_ = Result<double>;
-  inline Result_double_ create_Result_double_(double value) noexcept {
-    return Result<double>::withValue(std::move(value));
+  // pragma MARK: Result<FaceObservation>
+  using Result_FaceObservation_ = Result<FaceObservation>;
+  inline Result_FaceObservation_ create_Result_FaceObservation_(const FaceObservation& value) noexcept {
+    return Result<FaceObservation>::withValue(value);
   }
-  inline Result_double_ create_Result_double_(const std::exception_ptr& error) noexcept {
-    return Result<double>::withError(error);
+  inline Result_FaceObservation_ create_Result_FaceObservation_(const std::exception_ptr& error) noexcept {
+    return Result<FaceObservation>::withError(error);
   }
 
 } // namespace margelo::nitro::faceliveness::bridge::swift

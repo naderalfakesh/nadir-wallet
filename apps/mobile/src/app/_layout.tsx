@@ -77,8 +77,7 @@ export default function RootLayout() {
                 <Stack.Screen name="backup" options={{ animation: "slide_from_right" }} />
                 <Stack.Screen name="reveal" options={{ animation: "slide_from_right" }} />
                 <Stack.Screen name="change-passcode" options={{ animation: "slide_from_right" }} />
-                {/* THROWAWAY: native-stack spike. Remove with dev-camera.tsx. */}
-                <Stack.Screen name="dev-camera" options={{ animation: "slide_from_bottom" }} />
+                <Stack.Screen name="liveness" options={{ animation: "slide_from_bottom" }} />
                   </Stack>
                   <SheetHost />
                   <AutoLock />

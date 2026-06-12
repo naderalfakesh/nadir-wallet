@@ -14,6 +14,8 @@ const META: Record<SecurityEventType, { sev: SecurityEventSeverity; titleKey: st
   autolock: { sev: "info", titleKey: "security.log.autolockTitle", detailKey: "security.log.autolockDetail" },
   autolock_triggered: { sev: "info", titleKey: "security.log.autolockTriggeredTitle", detailKey: "security.log.autolockTriggeredDetail" },
   device_check: { sev: "info", titleKey: "security.log.unlockTitle" },
+  liveness_pass: { sev: "success", titleKey: "security.log.livenessPassTitle", detailKey: "security.log.livenessPassDetail" },
+  liveness_fail: { sev: "warning", titleKey: "security.log.livenessFailTitle", detailKey: "security.log.livenessFailDetail" },
 };
 
 function formatWhen(at: Date): string {

@@ -82,7 +82,11 @@
     "autolockDetail": "Locks after {{min}} min",
     "autolockTriggeredTitle": "Wallet auto-locked",
     "autolockTriggeredDetail": "Locked after inactivity",
-    "today": "Today"
+    "today": "Today",
+    "livenessPassTitle": "Liveness check passed",
+    "livenessPassDetail": "Live presence confirmed on-device",
+    "livenessFailTitle": "Liveness check not completed",
+    "livenessFailDetail": "Challenges timed out"
   },
   "advanced": {
     "title": "Advanced",
@@ -90,6 +94,8 @@
     "revealSub": "Requires Face ID",
     "connected": "Connected apps",
     "connectedSub": "2 dApps connected",
-    "changePin": "Change passcode"
+    "changePin": "Change passcode",
+    "liveness": "Face liveness check",
+    "livenessSub": "Verify a live person holds this device"
   }
 }

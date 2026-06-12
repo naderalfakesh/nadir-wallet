@@ -1,0 +1,23 @@
+{
+  "title": "Liveness check",
+  "permissionTitle": "Camera access needed",
+  "permissionBody": "Allow camera access to verify a live person is holding this device. Frames are processed on-device and never stored or uploaded.",
+  "grant": "Allow camera",
+  "align": "Fit your face inside the oval",
+  "alignHold": "Hold still…",
+  "noFace": "No face detected",
+  "challenge": {
+    "blink": "Blink",
+    "turnLeft": "Turn your head to the left",
+    "turnRight": "Turn your head to the right"
+  },
+  "step": "Step {{n}} of {{total}}",
+  "passed": "Liveness confirmed",
+  "passedBody": "All challenges completed.",
+  "failed": "Check not completed",
+  "failedTimeout": "That took too long — try again in good lighting.",
+  "retry": "Try again",
+  "done": "Done",
+  "cancel": "Cancel",
+  "scopeNote": "Active liveness demo — on-device, nothing leaves your phone."
+}

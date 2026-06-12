@@ -7,9 +7,13 @@
 
 #include "JHybridFaceLivenessSpec.hpp"
 
+// Forward declaration of `FaceObservation` to properly resolve imports.
+namespace margelo::nitro::faceliveness { struct FaceObservation; }
 // Forward declaration of `HybridFrameSpec` to properly resolve imports.
 namespace margelo::nitro::camera { class HybridFrameSpec; }
 
+#include "FaceObservation.hpp"
+#include "JFaceObservation.hpp"
 #include <memory>
 #include <VisionCamera/HybridFrameSpec.hpp>
 #include <VisionCamera/JHybridFrameSpec.hpp>
@@ -47,10 +51,10 @@ namespace margelo::nitro::faceliveness {
   
 
   // Methods
-  double JHybridFaceLivenessSpec::detectFaceCount(const std::shared_ptr<margelo::nitro::camera::HybridFrameSpec>& frame) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<double(jni::alias_ref<margelo::nitro::camera::JHybridFrameSpec::JavaPart> /* frame */)>("detectFaceCount");
+  FaceObservation JHybridFaceLivenessSpec::detect(const std::shared_ptr<margelo::nitro::camera::HybridFrameSpec>& frame) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JFaceObservation>(jni::alias_ref<margelo::nitro::camera::JHybridFrameSpec::JavaPart> /* frame */)>("detect");
     auto __result = method(_javaPart, std::dynamic_pointer_cast<margelo::nitro::camera::JHybridFrameSpec>(frame)->getJavaPart());
-    return __result;
+    return __result->toCpp();
   }
 
 } // namespace margelo::nitro::faceliveness

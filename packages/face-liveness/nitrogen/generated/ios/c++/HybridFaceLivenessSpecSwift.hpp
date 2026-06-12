@@ -12,9 +12,12 @@
 // Forward declaration of `HybridFaceLivenessSpec_cxx` to properly resolve imports.
 namespace NadirFaceLiveness { class HybridFaceLivenessSpec_cxx; }
 
+// Forward declaration of `FaceObservation` to properly resolve imports.
+namespace margelo::nitro::faceliveness { struct FaceObservation; }
 // Forward declaration of `HybridFrameSpec` to properly resolve imports.
 namespace margelo::nitro::camera { class HybridFrameSpec; }
 
+#include "FaceObservation.hpp"
 #include <memory>
 #include <VisionCamera/HybridFrameSpec.hpp>
 
@@ -68,8 +71,8 @@ namespace margelo::nitro::faceliveness {
 
   public:
     // Methods
-    inline double detectFaceCount(const std::shared_ptr<margelo::nitro::camera::HybridFrameSpec>& frame) override {
-      auto __result = _swiftPart.detectFaceCount(frame);
+    inline FaceObservation detect(const std::shared_ptr<margelo::nitro::camera::HybridFrameSpec>& frame) override {
+      auto __result = _swiftPart.detect(frame);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

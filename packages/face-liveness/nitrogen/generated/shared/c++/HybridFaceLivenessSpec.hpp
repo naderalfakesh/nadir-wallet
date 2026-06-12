@@ -13,9 +13,12 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `FaceObservation` to properly resolve imports.
+namespace margelo::nitro::faceliveness { struct FaceObservation; }
 // Forward declaration of `HybridFrameSpec` to properly resolve imports.
 namespace margelo::nitro::camera { class HybridFrameSpec; }
 
+#include "FaceObservation.hpp"
 #include <memory>
 #include <VisionCamera/HybridFrameSpec.hpp>
 
@@ -50,7 +53,7 @@ namespace margelo::nitro::faceliveness {
 
     public:
       // Methods
-      virtual double detectFaceCount(const std::shared_ptr<margelo::nitro::camera::HybridFrameSpec>& frame) = 0;
+      virtual FaceObservation detect(const std::shared_ptr<margelo::nitro::camera::HybridFrameSpec>& frame) = 0;
 
     protected:
       // Hybrid Setup

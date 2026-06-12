@@ -14,7 +14,7 @@ namespace margelo::nitro::faceliveness {
     HybridObject::loadHybridMethods();
     // load custom methods/properties
     registerHybrids(this, [](Prototype& prototype) {
-      prototype.registerHybridMethod("detectFaceCount", &HybridFaceLivenessSpec::detectFaceCount);
+      prototype.registerHybridMethod("detect", &HybridFaceLivenessSpec::detect);
     });
   }
 

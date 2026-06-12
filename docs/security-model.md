@@ -112,3 +112,38 @@ mainnet, no real-money custody, and no broadcast. Prices, balances, and history
 are deterministic mock data from the API; the service layer is structured so real
 testnet RPC can be connected later without changing the API contract or this
 trust boundary.
+
+## Face liveness check (active challenge–response)
+
+The Security Center includes an on-device **active liveness check**: the front
+camera runs through a custom VisionCamera V5 frame-processor plugin
+(`@nadir-wallet/face-liveness`, a Nitro module wrapping Google ML Kit Face
+Detection), and a randomized challenge sequence (blink, turn left/right) is
+verified in real time against head Euler angles and eye-open probabilities.
+
+Privacy properties:
+
+- All inference runs **on-device** (ML Kit's bundled model). No frame, image,
+  or biometric measurement ever leaves the phone — the backend has no liveness
+  endpoint at all.
+- Nothing is persisted: frames are processed on the camera thread and disposed
+  immediately; only a pass/fail entry is appended to the local security log.
+
+Threat model — what active liveness does and does not defend against:
+
+| Attack | Covered? | Notes |
+| --- | --- | --- |
+| Printed photo held to camera | Largely | Cannot blink or turn on command |
+| Static screen replay | Largely | Same as photo |
+| Pre-recorded video replay | Partially | Random challenge order raises the bar; a lucky or edited video could pass |
+| Real-time deepfake / puppeteering | No | Needs passive presentation-attack detection (PAD) |
+| 3D mask | No | Needs PAD (texture/depth analysis) |
+| Compromised OS / injected camera feed | No | Out of scope for any in-app check |
+
+This is deliberately an **active-only demo**, not production anti-spoofing. A
+production eKYC pipeline would layer a passive PAD model (e.g. a
+Silent-Face-Anti-Spoofing-class CNN scoring every frame for print/replay/mask
+artifacts) underneath the challenge flow, plus server-side risk signals. The
+plugin's frame pipeline is the natural insertion point for such a model — it
+would slot in as a second on-device inference pass without changing the trust
+boundary above.

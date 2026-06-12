@@ -14,7 +14,7 @@ public protocol HybridFaceLivenessSpec_protocol: HybridObject {
   
 
   // Methods
-  func detectFaceCount(frame: (any HybridFrameSpec)) throws -> Double
+  func detect(frame: (any HybridFrameSpec)) throws -> FaceObservation
 }
 
 public extension HybridFaceLivenessSpec_protocol {

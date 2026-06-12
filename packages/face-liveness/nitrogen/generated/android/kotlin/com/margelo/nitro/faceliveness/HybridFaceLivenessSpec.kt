@@ -31,7 +31,7 @@ abstract class HybridFaceLivenessSpec: HybridObject() {
   // Methods
   @DoNotStrip
   @Keep
-  abstract fun detectFaceCount(frame: com.margelo.nitro.camera.HybridFrameSpec): Double
+  abstract fun detect(frame: com.margelo.nitro.camera.HybridFrameSpec): FaceObservation
 
   // Default implementation of `HybridObject.toString()`
   override fun toString(): String {

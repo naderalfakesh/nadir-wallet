@@ -8,12 +8,15 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `FaceObservation` to properly resolve imports.
+namespace margelo::nitro::faceliveness { struct FaceObservation; }
 // Forward declaration of `HybridFaceLivenessSpec` to properly resolve imports.
 namespace margelo::nitro::faceliveness { class HybridFaceLivenessSpec; }
 // Forward declaration of `HybridFrameSpec` to properly resolve imports.
 namespace margelo::nitro::camera { class HybridFrameSpec; }
 
 // Include C++ defined types
+#include "FaceObservation.hpp"
 #include "HybridFaceLivenessSpec.hpp"
 #include <NitroModules/Result.hpp>
 #include <VisionCamera/HybridFrameSpec.hpp>

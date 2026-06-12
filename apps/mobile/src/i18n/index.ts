@@ -11,6 +11,7 @@ import token from "./locales/en/token.json";
 import tx from "./locales/en/tx.json";
 import receive from "./locales/en/receive.json";
 import sheets from "./locales/en/sheets.json";
+import liveness from "./locales/en/liveness.json";
 
 // English is the source and fallback language. Strings live in per-domain files
 // so the app can become multilingual without a rewrite.
@@ -28,6 +29,7 @@ const resources = {
   tx,
   receive,
   sheets,
+  liveness,
 } as const;
 
 type Vars = Record<string, string | number>;
