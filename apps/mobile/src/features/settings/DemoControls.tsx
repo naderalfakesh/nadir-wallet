@@ -1,5 +1,6 @@
 import React from "react";
 import { Pressable, View } from "react-native";
+import { useRouter } from "expo-router";
 import { Card, AppText, Icon, Toggle } from "@/components";
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -54,6 +55,7 @@ function Choice<T extends string>({
 
 export function DemoControls() {
   const theme = useTheme();
+  const router = useRouter();
   const { t } = useTranslation();
   const { liveApi, backend, price, sendSim, sendOutcome, setLiveApi, setBackend, setPrice, setSendSim, setSendOutcome } =
     useDemoState();
@@ -146,6 +148,23 @@ export function DemoControls() {
           ]}
         />
       </View>
+
+      {/* THROWAWAY: native-stack spike entry point. Remove with dev-camera.tsx. */}
+      <Pressable
+        onPress={() => router.push("/dev-camera")}
+        style={{
+          marginTop: 16,
+          height: 40,
+          borderRadius: 12,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: theme.colors.surface2,
+        }}
+      >
+        <AppText weight="semibold" size={13}>
+          Dev: camera spike
+        </AppText>
+      </Pressable>
     </Card>
   );
 }

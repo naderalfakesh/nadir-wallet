@@ -1,0 +1,24 @@
+{
+  "$schema": "https://nitro.margelo.com/nitro.schema.json",
+  "cxxNamespace": ["faceliveness"],
+  "ios": {
+    "iosModuleName": "NadirFaceLiveness"
+  },
+  "android": {
+    "androidNamespace": ["faceliveness"],
+    "androidCxxLibName": "NadirFaceLiveness"
+  },
+  "autolinking": {
+    "FaceLiveness": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridFaceLiveness"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "HybridFaceLiveness"
+      }
+    }
+  },
+  "ignorePaths": ["**/node_modules"]
+}

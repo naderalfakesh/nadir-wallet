@@ -36,3 +36,6 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Native build intermediates (CMake output in native packages)
+.cxx/

@@ -9,10 +9,17 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.nadiralfakesh.nadirwallet"
+      "bundleIdentifier": "com.nadiralfakesh.nadirwallet",
+      "appleTeamId": "G8DA2W29T2",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Nadir Wallet uses the camera for the face liveness check."
+      }
     },
     "android": {
       "package": "com.nadiralfakesh.nadirwallet",
+      "permissions": [
+        "android.permission.CAMERA"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -43,7 +50,9 @@
         {
           "faceIDPermission": "Unlock Nadir Wallet and approve transactions with Face ID."
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,
