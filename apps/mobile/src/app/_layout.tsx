@@ -78,6 +78,7 @@ export default function RootLayout() {
                 <Stack.Screen name="reveal" options={{ animation: "slide_from_right" }} />
                 <Stack.Screen name="change-passcode" options={{ animation: "slide_from_right" }} />
                 <Stack.Screen name="liveness" options={{ animation: "slide_from_bottom" }} />
+                <Stack.Screen name="scan" options={{ animation: "slide_from_bottom" }} />
                   </Stack>
                   <SheetHost />
                   <AutoLock />

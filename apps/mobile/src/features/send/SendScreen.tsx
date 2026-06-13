@@ -26,6 +26,7 @@ import { useWallet } from "@/providers/WalletDataProvider";
 import { fmtUSD, fmtToken, shortAddr } from "@/utils/format";
 import { CHAINS, tokenById, RECIPIENTS, chainBadgeColor, chainToNetworkId, type DemoToken, type ChainId } from "@/features/wallet/data";
 import { assessRecipient, recipientNetwork, type AddressRisk } from "@/features/wallet/risk";
+import { beginScan } from "@/features/scan/scanBridge";
 import { useRiskCheck, useSimulation } from "./useSendChecks";
 import { SendConfirmOverlay, type SendPhase } from "./SendConfirmOverlay";
 
@@ -214,7 +215,15 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
             <Pressable onPress={() => setTo(DEMO_PASTE_ADDRESS)} style={iconInputBtn(theme.colors.surface2)}>
               <Icon name="paste" size={19} />
             </Pressable>
-            <Pressable onPress={() => sheets.open("scan")} style={iconInputBtn(theme.colors.surface2)}>
+            <Pressable
+              onPress={() => {
+                beginScan((addr) => {
+                  if (addr) setTo(addr);
+                });
+                router.push("/scan");
+              }}
+              style={iconInputBtn(theme.colors.surface2)}
+            >
               <Icon name="scan" size={19} />
             </Pressable>
           </View>

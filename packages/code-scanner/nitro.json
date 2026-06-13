@@ -1,0 +1,24 @@
+{
+  "$schema": "https://nitro.margelo.com/nitro.schema.json",
+  "cxxNamespace": ["codescanner"],
+  "ios": {
+    "iosModuleName": "NadirCodeScanner"
+  },
+  "android": {
+    "androidNamespace": ["codescanner"],
+    "androidCxxLibName": "NadirCodeScanner"
+  },
+  "autolinking": {
+    "CodeScanner": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridCodeScanner"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "HybridCodeScanner"
+      }
+    }
+  },
+  "ignorePaths": ["**/node_modules"]
+}

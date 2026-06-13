@@ -1,0 +1,42 @@
+{
+  "name": "@nadir-wallet/code-scanner",
+  "version": "0.1.0",
+  "description": "QR / barcode VisionCamera V5 frame-processor plugin, wrapping Google ML Kit Barcode Scanning",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "react-native": "src/index.ts",
+  "source": "src/index.ts",
+  "license": "MIT",
+  "author": "Nadir Alfakesh",
+  "homepage": "https://github.com/naderalfakesh/NadirWallet",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/naderalfakesh/NadirWallet.git"
+  },
+  "files": [
+    "src",
+    "ios",
+    "android",
+    "nitrogen/generated",
+    "nitro.json",
+    "NadirCodeScanner.podspec"
+  ],
+  "scripts": {
+    "specs": "nitrogen",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react-native": "*",
+    "react-native-nitro-modules": "*",
+    "react-native-vision-camera": "*"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "nitrogen": "0.35.9",
+    "react": "19.2.3",
+    "react-native": "0.85.3",
+    "react-native-nitro-modules": "0.35.9",
+    "react-native-vision-camera": "5.0.11",
+    "typescript": "~6.0.3"
+  }
+}
