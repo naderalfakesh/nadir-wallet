@@ -201,6 +201,36 @@ export function SecurityScreen() {
           </Card>
         </View>
 
+        {/* step-up verification */}
+        <View style={section}>
+          <SectionLabel>{t("security.stepup.title")}</SectionLabel>
+          <Card padding={0} style={{ paddingHorizontal: 16 }}>
+            <Row
+              left={<MiniIcon name="faceid" tone="accent" />}
+              title={t("security.stepup.revealLabel")}
+              sub={t("security.stepup.revealSub")}
+              right={
+                <Toggle
+                  on={prefs.requireLivenessReveal}
+                  onChange={() => setPref("requireLivenessReveal", !prefs.requireLivenessReveal)}
+                />
+              }
+            />
+            <Row
+              last
+              left={<MiniIcon name="faceid" tone="accent" />}
+              title={t("security.stepup.sendLabel")}
+              sub={t("security.stepup.sendSub")}
+              right={
+                <Toggle
+                  on={prefs.requireLivenessSend}
+                  onChange={() => setPref("requireLivenessSend", !prefs.requireLivenessSend)}
+                />
+              }
+            />
+          </Card>
+        </View>
+
         {/* device security */}
         <View style={section}>
           <SectionLabel>{t("security.device.title")}</SectionLabel>
@@ -294,7 +324,13 @@ export function SecurityScreen() {
           <SectionLabel>{t("security.advanced.title")}</SectionLabel>
           <Card padding={0} style={{ paddingHorizontal: 16 }}>
             <Row onPress={() => router.push("/liveness")} left={<MiniIcon name="faceid" />} title={t("security.advanced.liveness")} sub={t("security.advanced.livenessSub")} chevron />
-            <Row onPress={() => router.push("/reveal")} left={<MiniIcon name="key" />} title={t("security.advanced.reveal")} sub={t("security.advanced.revealSub")} chevron />
+            <Row
+              onPress={() => router.push(prefs.requireLivenessReveal ? "/liveness?next=/reveal" : "/reveal")}
+              left={<MiniIcon name="key" />}
+              title={t("security.advanced.reveal")}
+              sub={t("security.advanced.revealSub")}
+              chevron
+            />
             <Row onPress={() => sheets.open("soon", { title: t("security.advanced.connected") })} left={<MiniIcon name="link" />} title={t("security.advanced.connected")} sub={t("security.advanced.connectedSub")} chevron />
             <Row onPress={() => router.push("/change-passcode")} left={<MiniIcon name="lock" />} title={t("security.advanced.changePin")} chevron last />
           </Card>

@@ -97,5 +97,12 @@
     "changePin": "Change passcode",
     "liveness": "Face liveness check",
     "livenessSub": "Verify a live person holds this device"
+  },
+  "stepup": {
+    "title": "Step-up verification",
+    "revealLabel": "Liveness before reveal",
+    "revealSub": "Require a face liveness check before showing the recovery phrase",
+    "sendLabel": "Liveness on high-value send",
+    "sendSub": "Require a liveness check to confirm sends over $1,000"
   }
 }

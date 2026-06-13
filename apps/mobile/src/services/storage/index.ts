@@ -24,6 +24,10 @@ export interface Prefs {
   biometricEnabled: boolean;
   autoLockMinutes: number;
   hideBalances: boolean;
+  /** Require a passed liveness check before revealing the recovery phrase. */
+  requireLivenessReveal: boolean;
+  /** Require a passed liveness check before confirming a high-value send. */
+  requireLivenessSend: boolean;
   lastAccountId: string;
   /** Public derived EVM address — non-secret. */
   walletAddress: string;
@@ -44,6 +48,8 @@ export const DEFAULT_PREFS: Prefs = {
   biometricEnabled: false,
   autoLockMinutes: 1,
   hideBalances: false,
+  requireLivenessReveal: false,
+  requireLivenessSend: false,
   lastAccountId: "main",
   walletAddress: "",
   walletCreatedAt: 0,

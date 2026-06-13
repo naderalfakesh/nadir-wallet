@@ -9,8 +9,9 @@ import { openExplorer } from "@/services/device";
 import { fmtUSD, fmtToken, shortAddr } from "@/utils/format";
 import { CHAINS, type DemoToken } from "@/features/wallet/data";
 import type { SendOutcome } from "@/providers/DemoStateProvider";
+import { LivenessFlow } from "@/features/liveness/LivenessFlow";
 
-export type SendPhase = "auth" | "pending" | "success" | "failed";
+export type SendPhase = "liveness" | "auth" | "pending" | "success" | "failed";
 
 interface OverlayProps {
   phase: SendPhase;
@@ -21,6 +22,8 @@ interface OverlayProps {
   fiat: number;
   to: string;
   onRetry: () => void;
+  /** Dismiss the overlay back to the review step (used by the liveness gate). */
+  onCancel: () => void;
 }
 
 function demoHash(token: DemoToken, to: string): string {
@@ -37,7 +40,7 @@ function Centered({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fiat, to, onRetry }: OverlayProps) {
+export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fiat, to, onRetry, onCancel }: OverlayProps) {
   const theme = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -56,6 +59,12 @@ export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fi
       return () => clearTimeout(id);
     }
   }, [phase, outcome, setPhase]);
+
+  // Step-up liveness gate before signing a high-value send (after hooks, so
+  // hook order stays stable across phases).
+  if (phase === "liveness") {
+    return <LivenessFlow mode="gate" onPass={() => setPhase("auth")} onCancel={onCancel} />;
+  }
 
   if (phase === "auth") {
     return (

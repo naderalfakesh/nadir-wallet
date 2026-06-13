@@ -37,6 +37,8 @@ const GAS_SYMBOL: Record<ChainId, string> = {
   polygon: "POL",
 };
 const FEE_NATIVE = 0.00042;
+/** Sends at/above this fiat value trigger the optional liveness step-up. */
+const HIGH_VALUE_USD = 1000;
 const DEMO_PASTE_ADDRESS = "0x6b2fA0e1c4D9b8721a3F5e0c91A4";
 
 type Step = "to" | "amount" | "review";
@@ -146,6 +148,11 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
   const back = () => (step === "to" ? router.back() : setStep(step === "review" ? "amount" : "to"));
   const stepIndex = { to: 0, amount: 1, review: 2 }[step];
 
+  const backToReview = () => {
+    setPhase(null);
+    setStep("review");
+  };
+
   if (phase) {
     return (
       <SendConfirmOverlay
@@ -156,10 +163,8 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
         amount={amtNum}
         fiat={fiat}
         to={trimmedTo}
-        onRetry={() => {
-          setPhase(null);
-          setStep("review");
-        }}
+        onRetry={backToReview}
+        onCancel={backToReview}
       />
     );
   }
@@ -427,7 +432,7 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
               label={blocked ? t("send.confirm.blocked") : simStatus === "failed" ? t("send.confirm.simFailed") : t("send.confirm.cta")}
               icon="faceid"
               disabled={blocked || simStatus === "failed"}
-              onPress={() => setPhase("auth")}
+              onPress={() => setPhase(prefs.requireLivenessSend && fiat >= HIGH_VALUE_USD ? "liveness" : "auth")}
             />
           </FooterButton>
         </>

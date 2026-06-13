@@ -20,6 +20,7 @@
   "failedTimeout": "That took too long — try again in good lighting.",
   "retry": "Try again",
   "done": "Done",
+  "continue": "Continue",
   "cancel": "Cancel",
   "scopeNote": "Active liveness demo — on-device, nothing leaves your phone."
 }
