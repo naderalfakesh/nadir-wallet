@@ -57,8 +57,22 @@ curl "localhost:8787/tokens?networkId=ethereum-sepolia"
 {
   "networkId": "ethereum-sepolia",
   "tokens": [
-    { "networkId": "ethereum-sepolia", "address": "0x0000000000000000000000000000000000000000", "symbol": "ETH", "name": "Sepolia Ether", "decimals": 18, "isNative": true },
-    { "networkId": "ethereum-sepolia", "address": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", "symbol": "USDC", "name": "USD Coin (Testnet)", "decimals": 6, "isNative": false }
+    {
+      "networkId": "ethereum-sepolia",
+      "address": "0x0000000000000000000000000000000000000000",
+      "symbol": "ETH",
+      "name": "Sepolia Ether",
+      "decimals": 18,
+      "isNative": true
+    },
+    {
+      "networkId": "ethereum-sepolia",
+      "address": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      "symbol": "USDC",
+      "name": "USD Coin (Testnet)",
+      "decimals": 6,
+      "isNative": false
+    }
   ]
 }
 ```
@@ -90,7 +104,11 @@ curl "localhost:8787/wallet/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/balances?
   "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
   "networkId": "ethereum-sepolia",
   "balances": [
-    { "token": { "symbol": "ETH", "decimals": 18, "isNative": true, "...": "..." }, "raw": "3910000000000000000", "formatted": "3.91" }
+    {
+      "token": { "symbol": "ETH", "decimals": 18, "isNative": true, "...": "..." },
+      "raw": "3910000000000000000",
+      "formatted": "3.91"
+    }
   ]
 }
 ```
@@ -143,7 +161,12 @@ Response:
 {
   "isValid": true,
   "riskLevel": "low",
-  "estimatedFee": { "gasLimit": "21000", "maxFeePerGasGwei": "2.5", "feeNative": "0.0000525", "symbol": "ETH" },
+  "estimatedFee": {
+    "gasLimit": "21000",
+    "maxFeePerGasGwei": "2.5",
+    "feeNative": "0.0000525",
+    "symbol": "ETH"
+  },
   "warnings": [],
   "preview": {
     "networkId": "ethereum-sepolia",

@@ -23,13 +23,13 @@ The wallet is created and owned entirely on the device:
 
 The app stores two kinds of data, deliberately separated:
 
-| Data | Where | Secret? |
-| ---- | ----- | ------- |
-| BIP39 mnemonic | **SecureStore** (`nadir.mnemonic`) | **Yes** |
-| App-lock PIN (demo placeholder) | **SecureStore** (`nadir.demoPasscode`) | sensitive |
-| Public derived address, `walletCreatedAt` | AsyncStorage (prefs) | No |
-| onboarding/backup/biometric/auto-lock/theme/hide-balances | AsyncStorage | No |
-| Security event log | AsyncStorage | No |
+| Data                                                      | Where                                  | Secret?   |
+| --------------------------------------------------------- | -------------------------------------- | --------- |
+| BIP39 mnemonic                                            | **SecureStore** (`nadir.mnemonic`)     | **Yes**   |
+| App-lock PIN (demo placeholder)                           | **SecureStore** (`nadir.demoPasscode`) | sensitive |
+| Public derived address, `walletCreatedAt`                 | AsyncStorage (prefs)                   | No        |
+| onboarding/backup/biometric/auto-lock/theme/hide-balances | AsyncStorage                           | No        |
+| Security event log                                        | AsyncStorage                           | No        |
 
 - **SecureStore** (`expo-secure-store`) is backed by the iOS Keychain and Android
   Keystore. It is the _only_ place secret material lives.
@@ -118,8 +118,9 @@ trust boundary.
 The Security Center includes an on-device **active liveness check**: the front
 camera runs through a custom VisionCamera V5 frame-processor plugin
 (`@nadir-wallet/face-liveness`, a Nitro module wrapping Google ML Kit Face
-Detection), and a randomized challenge sequence (blink, turn left/right) is
-verified in real time against head Euler angles and eye-open probabilities.
+Detection), and a randomized challenge sequence (blink, turn left/right, nod,
+smile) is verified in real time against head Euler angles and eye-open / smile
+probabilities, with a live "face-in-oval" gate throughout.
 
 Privacy properties:
 
@@ -131,14 +132,14 @@ Privacy properties:
 
 Threat model — what active liveness does and does not defend against:
 
-| Attack | Covered? | Notes |
-| --- | --- | --- |
-| Printed photo held to camera | Largely | Cannot blink or turn on command |
-| Static screen replay | Largely | Same as photo |
-| Pre-recorded video replay | Partially | Random challenge order raises the bar; a lucky or edited video could pass |
-| Real-time deepfake / puppeteering | No | Needs passive presentation-attack detection (PAD) |
-| 3D mask | No | Needs PAD (texture/depth analysis) |
-| Compromised OS / injected camera feed | No | Out of scope for any in-app check |
+| Attack                                | Covered?  | Notes                                                                     |
+| ------------------------------------- | --------- | ------------------------------------------------------------------------- |
+| Printed photo held to camera          | Largely   | Cannot blink or turn on command                                           |
+| Static screen replay                  | Largely   | Same as photo                                                             |
+| Pre-recorded video replay             | Partially | Random challenge order raises the bar; a lucky or edited video could pass |
+| Real-time deepfake / puppeteering     | No        | Needs passive presentation-attack detection (PAD)                         |
+| 3D mask                               | No        | Needs PAD (texture/depth analysis)                                        |
+| Compromised OS / injected camera feed | No        | Out of scope for any in-app check                                         |
 
 This is deliberately an **active-only demo**, not production anti-spoofing. A
 production eKYC pipeline would layer a passive PAD model (e.g. a
@@ -147,3 +148,15 @@ artifacts) underneath the challenge flow, plus server-side risk signals. The
 plugin's frame pipeline is the natural insertion point for such a model — it
 would slot in as a second on-device inference pass without changing the trust
 boundary above.
+
+**Step-up gating.** Beyond the standalone Security Center demo, the liveness
+check can be required as an extra gate before two sensitive actions (toggles in
+the Security Center, off by default):
+
+- **Revealing the recovery phrase** — runs in front of the existing
+  biometric/passcode gate, so the keychain read still requires the OS gate
+  regardless; liveness is an added check, not a replacement.
+- **Confirming a high-value send** (≥ $1,000) — runs before the signing step.
+
+This is defense-in-depth for the demo, not a custody guarantee; the real lock on
+the recovery phrase remains the device keychain + biometric/passcode gate.

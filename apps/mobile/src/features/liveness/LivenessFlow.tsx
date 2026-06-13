@@ -8,11 +8,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import {
-  Camera,
-  useCameraPermission,
-  useFrameOutput,
-} from "react-native-vision-camera";
+import { Camera, useCameraPermission, useFrameOutput } from "react-native-vision-camera";
 import { scheduleOnRN } from "react-native-worklets";
 import { createFaceLiveness } from "@nadir-wallet/face-liveness";
 import { AppText, Button, Icon } from "@/components";
@@ -145,14 +141,24 @@ export function LivenessFlow({ mode, onPass, onCancel }: Props) {
           <AppText weight="bold" size={18} color="#FFFFFF" style={{ marginTop: 14 }}>
             {t("liveness.permissionTitle")}
           </AppText>
-          <AppText size={13.5} color={alpha("#FFFFFF", 0.7)} style={{ marginTop: 6, textAlign: "center" }}>
+          <AppText
+            size={13.5}
+            color={alpha("#FFFFFF", 0.7)}
+            style={{ marginTop: 6, textAlign: "center" }}
+          >
             {t("liveness.permissionBody")}
           </AppText>
-          <Button label={t("liveness.grant")} onPress={requestPermission} style={{ marginTop: 20, alignSelf: "stretch" }} />
+          <Button
+            label={t("liveness.grant")}
+            onPress={requestPermission}
+            style={{ marginTop: 20, alignSelf: "stretch" }}
+          />
         </View>
       )}
 
-      {hasPermission && <FaceMaskOverlay fit={state.faceFit} phase={state.phase} progress={progress} />}
+      {hasPermission && (
+        <FaceMaskOverlay fit={state.faceFit} phase={state.phase} progress={progress} />
+      )}
 
       {/* Result badge: springs in on pass. */}
       {passed && (
@@ -170,7 +176,9 @@ export function LivenessFlow({ mode, onPass, onCancel }: Props) {
         </Pressable>
         <View style={styles.stepPill}>
           <AppText weight="semibold" size={12.5} color="#FFFFFF">
-            {state.phase === "challenge" ? t("liveness.step", { n: state.index + 1, total }) : t("liveness.title")}
+            {state.phase === "challenge"
+              ? t("liveness.step", { n: state.index + 1, total })
+              : t("liveness.title")}
           </AppText>
         </View>
         <View style={{ width: 36 }} />
@@ -185,12 +193,20 @@ export function LivenessFlow({ mode, onPass, onCancel }: Props) {
             </AppText>
           </Animated.View>
           {passed && (
-            <AppText size={13} color={alpha("#FFFFFF", 0.75)} style={{ textAlign: "center", marginTop: 5 }}>
+            <AppText
+              size={13}
+              color={alpha("#FFFFFF", 0.75)}
+              style={{ textAlign: "center", marginTop: 5 }}
+            >
               {t("liveness.passedBody")}
             </AppText>
           )}
           {failed && (
-            <AppText size={13} color={alpha("#FFFFFF", 0.75)} style={{ textAlign: "center", marginTop: 5 }}>
+            <AppText
+              size={13}
+              color={alpha("#FFFFFF", 0.75)}
+              style={{ textAlign: "center", marginTop: 5 }}
+            >
               {t("liveness.failedTimeout")}
             </AppText>
           )}
@@ -203,14 +219,24 @@ export function LivenessFlow({ mode, onPass, onCancel }: Props) {
               )}
               <View style={{ flex: 1 }}>
                 <Button
-                  label={passed ? (mode === "gate" ? t("liveness.continue") : t("liveness.done")) : t("liveness.cancel")}
+                  label={
+                    passed
+                      ? mode === "gate"
+                        ? t("liveness.continue")
+                        : t("liveness.done")
+                      : t("liveness.cancel")
+                  }
                   variant={passed ? "primary" : "ghost"}
                   onPress={passed ? onPass : onCancel}
                 />
               </View>
             </View>
           ) : (
-            <AppText size={11.5} color={alpha("#FFFFFF", 0.5)} style={{ textAlign: "center", marginTop: 14 }}>
+            <AppText
+              size={11.5}
+              color={alpha("#FFFFFF", 0.5)}
+              style={{ textAlign: "center", marginTop: 14 }}
+            >
               {t("liveness.scopeNote")}
             </AppText>
           )}
@@ -239,7 +265,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  stepPill: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16, backgroundColor: "rgba(0,0,0,0.45)" },
+  stepPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 16,
+    backgroundColor: "rgba(0,0,0,0.45)",
+  },
   badgeWrap: {
     position: "absolute",
     top: 0,
@@ -249,6 +280,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  badge: { width: 104, height: 104, borderRadius: 52, alignItems: "center", justifyContent: "center" },
-  bottom: { position: "absolute", left: 0, right: 0, bottom: 0, paddingHorizontal: 24, paddingTop: 18 },
+  badge: {
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bottom: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 24,
+    paddingTop: 18,
+  },
 });

@@ -80,17 +80,30 @@ export function ScanScreen() {
   return (
     <View style={styles.root}>
       {hasPermission && device ? (
-        <Camera style={StyleSheet.absoluteFill} device={device} isActive={!found} outputs={[frameOutput]} />
+        <Camera
+          style={StyleSheet.absoluteFill}
+          device={device}
+          isActive={!found}
+          outputs={[frameOutput]}
+        />
       ) : (
         <View style={styles.permission}>
           <Icon name="scan" size={36} color={colors.accent} />
           <AppText weight="bold" size={18} color="#FFFFFF" style={{ marginTop: 14 }}>
             {t("scan.permissionTitle")}
           </AppText>
-          <AppText size={13.5} color={alpha("#FFFFFF", 0.7)} style={{ marginTop: 6, textAlign: "center" }}>
+          <AppText
+            size={13.5}
+            color={alpha("#FFFFFF", 0.7)}
+            style={{ marginTop: 6, textAlign: "center" }}
+          >
             {t("scan.permissionBody")}
           </AppText>
-          <Button label={t("scan.grant")} onPress={requestPermission} style={{ marginTop: 20, alignSelf: "stretch" }} />
+          <Button
+            label={t("scan.grant")}
+            onPress={requestPermission}
+            style={{ marginTop: 20, alignSelf: "stretch" }}
+          />
         </View>
       )}
 
@@ -134,8 +147,20 @@ function Corner({ pos, color }: { pos: "tl" | "tr" | "bl" | "br"; color: string 
   const map = {
     tl: { top: 0, left: 0, borderTopWidth: 3, borderLeftWidth: 3, borderTopLeftRadius: 14 },
     tr: { top: 0, right: 0, borderTopWidth: 3, borderRightWidth: 3, borderTopRightRadius: 14 },
-    bl: { bottom: 0, left: 0, borderBottomWidth: 3, borderLeftWidth: 3, borderBottomLeftRadius: 14 },
-    br: { bottom: 0, right: 0, borderBottomWidth: 3, borderRightWidth: 3, borderBottomRightRadius: 14 },
+    bl: {
+      bottom: 0,
+      left: 0,
+      borderBottomWidth: 3,
+      borderLeftWidth: 3,
+      borderBottomLeftRadius: 14,
+    },
+    br: {
+      bottom: 0,
+      right: 0,
+      borderBottomWidth: 3,
+      borderRightWidth: 3,
+      borderBottomRightRadius: 14,
+    },
   };
   return <View style={[base, map[pos]]} />;
 }
@@ -143,7 +168,15 @@ function Corner({ pos, color }: { pos: "tl" | "tr" | "bl" | "br"; color: string 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#000" },
   permission: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 36 },
-  reticleWrap: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" },
+  reticleWrap: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   reticle: { width: 240, height: 240 },
   header: {
     position: "absolute",
@@ -153,7 +186,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  close: { width: 36, height: 36, borderRadius: 18, backgroundColor: "rgba(0,0,0,0.45)", alignItems: "center", justifyContent: "center" },
-  pill: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16, backgroundColor: "rgba(0,0,0,0.45)" },
+  close: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pill: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 16,
+    backgroundColor: "rgba(0,0,0,0.45)",
+  },
   bottom: { position: "absolute", left: 0, right: 0, bottom: 0, paddingHorizontal: 24 },
 });

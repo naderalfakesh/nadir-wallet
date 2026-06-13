@@ -35,9 +35,16 @@ device; the backend is a stateless support service for public data.**
 - **`@nadir-wallet/wallet-core`** — pure domain logic shared by the backend:
   address-risk assessment, transaction simulation, portfolio math.
 - **`@nadir-wallet/config`** — shared tsconfig / eslint / prettier.
+- **`@nadir-wallet/face-liveness`** / **`@nadir-wallet/code-scanner`** — custom
+  native VisionCamera V5 frame-processor plugins (Nitro Modules, Swift/Kotlin)
+  wrapping ML Kit Face Detection and Barcode Scanning. Unlike the TS packages
+  these ship native code (podspec + Gradle/CMake + committed `nitrogen/`
+  output); they autolink into the app and run on the camera worklet thread.
 
-Packages export raw `.ts`; Metro is configured (`metro.config.js`) to watch the
-repo root and honour package exports, so there is no per-package build step.
+The TypeScript packages export raw `.ts`; Metro is configured (`metro.config.js`)
+to watch the repo root and honour package exports, so there is no per-package
+build step. The two native packages are built by the iOS/Android toolchains via
+autolinking.
 
 ## Mobile layers (`apps/mobile/src`)
 

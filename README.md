@@ -16,16 +16,16 @@ deliberate, clearly-scoped MVP boundary.
 
 ## Tech stack
 
-| Area     | Choices |
-| -------- | ------- |
-| Mobile   | React Native 0.85 (Expo SDK 56), expo-router, TypeScript, react-native-svg |
-| Crypto   | `viem/accounts` (generation/derivation) + `@scure/bip39` (validation), `react-native-get-random-values` |
-| Storage  | `expo-secure-store` (secrets), `@react-native-async-storage/async-storage` (prefs) |
-| Device   | `expo-local-authentication`, `expo-clipboard`, `expo-web-browser`, `react-native-qrcode-svg` |
-| Native   | `@nadir-wallet/face-liveness` — custom VisionCamera V5 frame-processor plugin (Nitro Module, Swift/Kotlin) wrapping Google ML Kit Face Detection |
-| Backend  | Hono + `@hono/node-server`, libsql + Drizzle ORM, Zod, viem |
-| Shared   | `@nadir-wallet/{types,crypto-core,wallet-core,config}` |
-| Tooling  | Turborepo, pnpm 9 |
+| Area    | Choices                                                                                                                                                                     |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mobile  | React Native 0.85 (Expo SDK 56), expo-router, TypeScript, react-native-svg                                                                                                  |
+| Crypto  | `viem/accounts` (generation/derivation) + `@scure/bip39` (validation), `react-native-get-random-values`                                                                     |
+| Storage | `expo-secure-store` (secrets), `@react-native-async-storage/async-storage` (prefs)                                                                                          |
+| Device  | `expo-local-authentication`, `expo-clipboard`, `expo-web-browser`, `react-native-qrcode-svg`                                                                                |
+| Native  | Two custom VisionCamera V5 frame-processor plugins (Nitro Modules, Swift/Kotlin) over Google ML Kit: `face-liveness` (Face Detection) and `code-scanner` (Barcode Scanning) |
+| Backend | Hono + `@hono/node-server`, libsql + Drizzle ORM, Zod, viem                                                                                                                 |
+| Shared  | `@nadir-wallet/{types,crypto-core,wallet-core,config}`                                                                                                                      |
+| Tooling | Turborepo, pnpm 9                                                                                                                                                           |
 
 ## Monorepo structure
 
@@ -37,7 +37,8 @@ packages/
   types/                 # @nadir-wallet/types — shared response/domain types
   crypto-core/           # @nadir-wallet/crypto-core — address + BIP39 wallet helpers
   wallet-core/           # @nadir-wallet/wallet-core — risk, simulation, portfolio logic
-  face-liveness/         # @nadir-wallet/face-liveness — native VisionCamera/ML Kit plugin (Nitro)
+  face-liveness/         # @nadir-wallet/face-liveness — native ML Kit Face Detection plugin (Nitro)
+  code-scanner/          # @nadir-wallet/code-scanner — native ML Kit Barcode Scanning plugin (Nitro)
   config/                # @nadir-wallet/config — shared tsconfig / eslint / prettier
 docs/
   security-model.md      # trust boundary, what is/never sent to the API
@@ -135,11 +136,14 @@ RPC_URL_POLYGON_AMOY=https://polygon-amoy.g.alchemy.com/v2/YOUR_KEY
 - Live API wiring with graceful demo-data fallback; clipboard / share / testnet
   explorer actions.
 - Dark + light themes, persisted preferences, English i18n scaffold.
-- **Active face-liveness check** (Security Center): randomized blink /
-  turn-head challenges verified in real time by a hand-written native
-  frame-processor plugin (`packages/face-liveness`) running ML Kit on the
-  camera worklet thread — fully on-device (see
-  `docs/security-model.md` for the threat model).
+- **Active face-liveness check**: randomized blink / turn / nod / smile
+  challenges verified in real time by a hand-written native frame-processor
+  plugin (`packages/face-liveness`) running ML Kit on the camera worklet thread,
+  with a live face-in-oval gate — fully on-device (see `docs/security-model.md`
+  for the threat model). Optionally **gates revealing the recovery phrase and
+  high-value sends** (toggles in the Security Center).
+- **QR address scanner** in the send flow, backed by a second hand-written
+  native plugin (`packages/code-scanner`) wrapping ML Kit Barcode Scanning.
 
 ## Current limitations
 
@@ -148,17 +152,20 @@ RPC_URL_POLYGON_AMOY=https://polygon-amoy.g.alchemy.com/v2/YOUR_KEY
   pending/success/failed outcomes via a demo control; nothing is broadcast.
 - Balances, prices, and history are **deterministic mock data** from the API (no
   real RPC/indexer yet).
-- No camera QR scanner, no WalletConnect, no swaps.
+- Liveness is **active-only** (challenge-response); no passive anti-spoofing —
+  documented as a threat model, not claimed as production-grade.
+- No WalletConnect, no swaps.
 - SecureStore protects secrets with the OS keychain/Keystore but adds no extra
   app-level encryption (see `docs/security-model.md`).
+- The face-liveness and QR-scanner features need a **development build on a
+  physical device** — they use the camera and don't run in Expo Go or reliably
+  on a simulator.
 
 ## Roadmap
 
 - Real testnet transaction signing (on-device, from the stored mnemonic)
 - Optional testnet broadcast
 - Real price API + real transaction indexer (Alchemy/RPC)
-- Camera QR scanner (camera stack already in place via the liveness feature)
-- Step-up liveness gating for reveal-seed / high-value send
 - Passive anti-spoofing (PAD) layered under the active liveness check
 - Stronger encrypted-vault model
 - WalletConnect
@@ -168,9 +175,23 @@ RPC_URL_POLYGON_AMOY=https://polygon-amoy.g.alchemy.com/v2/YOUR_KEY
 ## Screenshots / demo
 
 > _Add screenshots and a short screen-recording here for the portfolio._
->
-> Suggested shots: Welcome · Recovery-phrase reveal · Home · Send review (risk +
-> simulation) · High-risk blocked · Receive (QR) · Security center · Settings.
+
+Suggested captures:
+
+- **Static shots** (any device or simulator): Welcome · Recovery-phrase reveal ·
+  Home · Send review (risk + simulation) · High-risk blocked · Receive (QR) ·
+  Security center (with the step-up toggles) · Settings.
+- **Native-feature clips** (record on a physical device — these are the
+  portfolio centerpiece):
+  - Face-liveness run — fitting the oval, then blink / turn / nod / smile with
+    the progress ring filling and the pass flourish.
+  - Step-up gate — toggling "Liveness before reveal" in the Security Center,
+    then the check running before the recovery phrase appears.
+  - QR scan — tapping the scan button in send and the recipient address filling
+    from a wallet QR.
+
+Drop files under `images/` and embed them here, e.g.
+`![Liveness](images/liveness.gif)`.
 
 ## Docs
 
@@ -179,6 +200,8 @@ RPC_URL_POLYGON_AMOY=https://polygon-amoy.g.alchemy.com/v2/YOUR_KEY
 - [`docs/interview-notes.md`](docs/interview-notes.md) — interview cheat sheet
 - [`docs/api.md`](docs/api.md) — endpoint reference
 - [`apps/api/README.md`](apps/api/README.md) — API specifics
+- [`packages/face-liveness/README.md`](packages/face-liveness/README.md) — native ML Kit liveness plugin (Nitro)
+- [`packages/code-scanner/README.md`](packages/code-scanner/README.md) — native ML Kit QR scanner plugin (Nitro)
 
 ## Workspace scripts
 
