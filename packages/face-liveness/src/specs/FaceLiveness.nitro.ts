@@ -26,6 +26,8 @@ export interface FaceObservation {
   leftEyeOpen: number;
   /** Probability 0..1 that the right eye is open; -1 when unavailable. */
   rightEyeOpen: number;
+  /** Probability 0..1 that the face is smiling; -1 when unavailable. */
+  smile: number;
   x: number;
   y: number;
   width: number;

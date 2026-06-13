@@ -18,8 +18,8 @@ public extension FaceObservation {
   /**
    * Create a new instance of `FaceObservation`.
    */
-  init(hasFace: Bool, yaw: Double, pitch: Double, roll: Double, leftEyeOpen: Double, rightEyeOpen: Double, x: Double, y: Double, width: Double, height: Double, timestampMs: Double) {
-    self.init(hasFace, yaw, pitch, roll, leftEyeOpen, rightEyeOpen, x, y, width, height, timestampMs)
+  init(hasFace: Bool, yaw: Double, pitch: Double, roll: Double, leftEyeOpen: Double, rightEyeOpen: Double, smile: Double, x: Double, y: Double, width: Double, height: Double, timestampMs: Double) {
+    self.init(hasFace, yaw, pitch, roll, leftEyeOpen, rightEyeOpen, smile, x, y, width, height, timestampMs)
   }
 
   @inline(__always)
@@ -50,6 +50,11 @@ public extension FaceObservation {
   @inline(__always)
   var rightEyeOpen: Double {
     return self.__rightEyeOpen
+  }
+  
+  @inline(__always)
+  var smile: Double {
+    return self.__smile
   }
   
   @inline(__always)

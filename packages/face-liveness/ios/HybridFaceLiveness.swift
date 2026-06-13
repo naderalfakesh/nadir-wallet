@@ -52,6 +52,7 @@ class HybridFaceLiveness: HybridFaceLivenessSpec {
       roll: face.hasHeadEulerAngleZ ? Double(face.headEulerAngleZ) : 0,
       leftEyeOpen: face.hasLeftEyeOpenProbability ? Double(face.leftEyeOpenProbability) : -1,
       rightEyeOpen: face.hasRightEyeOpenProbability ? Double(face.rightEyeOpenProbability) : -1,
+      smile: face.hasSmilingProbability ? Double(face.smilingProbability) : -1,
       x: bounds.origin.x,
       y: bounds.origin.y,
       width: bounds.size.width,
@@ -63,7 +64,7 @@ class HybridFaceLiveness: HybridFaceLivenessSpec {
   private static func noFace(timestampMs: Double) -> FaceObservation {
     return FaceObservation(
       hasFace: false, yaw: 0, pitch: 0, roll: 0,
-      leftEyeOpen: -1, rightEyeOpen: -1,
+      leftEyeOpen: -1, rightEyeOpen: -1, smile: -1,
       x: 0, y: 0, width: 0, height: 0,
       timestampMs: timestampMs
     )

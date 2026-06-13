@@ -38,6 +38,9 @@ data class FaceObservation(
   val rightEyeOpen: Double,
   @DoNotStrip
   @Keep
+  val smile: Double,
+  @DoNotStrip
+  @Keep
   val x: Double,
   @DoNotStrip
   @Keep
@@ -63,6 +66,7 @@ data class FaceObservation(
       && Objects.deepEquals(this.roll, other.roll)
       && Objects.deepEquals(this.leftEyeOpen, other.leftEyeOpen)
       && Objects.deepEquals(this.rightEyeOpen, other.rightEyeOpen)
+      && Objects.deepEquals(this.smile, other.smile)
       && Objects.deepEquals(this.x, other.x)
       && Objects.deepEquals(this.y, other.y)
       && Objects.deepEquals(this.width, other.width)
@@ -78,6 +82,7 @@ data class FaceObservation(
       roll,
       leftEyeOpen,
       rightEyeOpen,
+      smile,
       x,
       y,
       width,
@@ -94,8 +99,8 @@ data class FaceObservation(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(hasFace: Boolean, yaw: Double, pitch: Double, roll: Double, leftEyeOpen: Double, rightEyeOpen: Double, x: Double, y: Double, width: Double, height: Double, timestampMs: Double): FaceObservation {
-      return FaceObservation(hasFace, yaw, pitch, roll, leftEyeOpen, rightEyeOpen, x, y, width, height, timestampMs)
+    private fun fromCpp(hasFace: Boolean, yaw: Double, pitch: Double, roll: Double, leftEyeOpen: Double, rightEyeOpen: Double, smile: Double, x: Double, y: Double, width: Double, height: Double, timestampMs: Double): FaceObservation {
+      return FaceObservation(hasFace, yaw, pitch, roll, leftEyeOpen, rightEyeOpen, smile, x, y, width, height, timestampMs)
     }
   }
 }

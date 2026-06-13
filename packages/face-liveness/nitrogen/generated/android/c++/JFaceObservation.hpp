@@ -43,6 +43,8 @@ namespace margelo::nitro::faceliveness {
       double leftEyeOpen = this->getFieldValue(fieldLeftEyeOpen);
       static const auto fieldRightEyeOpen = clazz->getField<double>("rightEyeOpen");
       double rightEyeOpen = this->getFieldValue(fieldRightEyeOpen);
+      static const auto fieldSmile = clazz->getField<double>("smile");
+      double smile = this->getFieldValue(fieldSmile);
       static const auto fieldX = clazz->getField<double>("x");
       double x = this->getFieldValue(fieldX);
       static const auto fieldY = clazz->getField<double>("y");
@@ -60,6 +62,7 @@ namespace margelo::nitro::faceliveness {
         roll,
         leftEyeOpen,
         rightEyeOpen,
+        smile,
         x,
         y,
         width,
@@ -74,7 +77,7 @@ namespace margelo::nitro::faceliveness {
      */
     [[maybe_unused]]
     static jni::local_ref<JFaceObservation::javaobject> fromCpp(const FaceObservation& value) {
-      using JSignature = JFaceObservation(jboolean, double, double, double, double, double, double, double, double, double, double);
+      using JSignature = JFaceObservation(jboolean, double, double, double, double, double, double, double, double, double, double, double);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -85,6 +88,7 @@ namespace margelo::nitro::faceliveness {
         value.roll,
         value.leftEyeOpen,
         value.rightEyeOpen,
+        value.smile,
         value.x,
         value.y,
         value.width,

@@ -3,13 +3,15 @@
   "permissionTitle": "Camera access needed",
   "permissionBody": "Allow camera access to verify a live person is holding this device. Frames are processed on-device and never stored or uploaded.",
   "grant": "Allow camera",
-  "align": "Fit your face inside the oval",
+  "align": "Fit your whole face inside the oval",
   "alignHold": "Hold still…",
   "noFace": "No face detected",
   "challenge": {
     "blink": "Blink",
     "turnLeft": "Turn your head to the left",
-    "turnRight": "Turn your head to the right"
+    "turnRight": "Turn your head to the right",
+    "nod": "Nod your head",
+    "smile": "Smile"
   },
   "step": "Step {{n}} of {{total}}",
   "passed": "Liveness confirmed",

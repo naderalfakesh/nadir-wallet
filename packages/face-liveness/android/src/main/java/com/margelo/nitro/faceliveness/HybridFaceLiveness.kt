@@ -58,6 +58,7 @@ class HybridFaceLiveness : HybridFaceLivenessSpec() {
       roll = face.headEulerAngleZ.toDouble(),
       leftEyeOpen = face.leftEyeOpenProbability?.toDouble() ?: -1.0,
       rightEyeOpen = face.rightEyeOpenProbability?.toDouble() ?: -1.0,
+      smile = face.smilingProbability?.toDouble() ?: -1.0,
       x = (x / uprightWidth).coerceIn(0.0, 1.0),
       y = (y / uprightHeight).coerceIn(0.0, 1.0),
       width = (w / uprightWidth).coerceIn(0.0, 1.0),
@@ -68,7 +69,7 @@ class HybridFaceLiveness : HybridFaceLivenessSpec() {
 
   private fun noFace(timestampMs: Double) = FaceObservation(
     hasFace = false, yaw = 0.0, pitch = 0.0, roll = 0.0,
-    leftEyeOpen = -1.0, rightEyeOpen = -1.0,
+    leftEyeOpen = -1.0, rightEyeOpen = -1.0, smile = -1.0,
     x = 0.0, y = 0.0, width = 0.0, height = 0.0,
     timestampMs = timestampMs,
   )

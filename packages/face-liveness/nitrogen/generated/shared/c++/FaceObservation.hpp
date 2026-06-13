@@ -45,6 +45,7 @@ namespace margelo::nitro::faceliveness {
     double roll     SWIFT_PRIVATE;
     double leftEyeOpen     SWIFT_PRIVATE;
     double rightEyeOpen     SWIFT_PRIVATE;
+    double smile     SWIFT_PRIVATE;
     double x     SWIFT_PRIVATE;
     double y     SWIFT_PRIVATE;
     double width     SWIFT_PRIVATE;
@@ -53,7 +54,7 @@ namespace margelo::nitro::faceliveness {
 
   public:
     FaceObservation() = default;
-    explicit FaceObservation(bool hasFace, double yaw, double pitch, double roll, double leftEyeOpen, double rightEyeOpen, double x, double y, double width, double height, double timestampMs): hasFace(hasFace), yaw(yaw), pitch(pitch), roll(roll), leftEyeOpen(leftEyeOpen), rightEyeOpen(rightEyeOpen), x(x), y(y), width(width), height(height), timestampMs(timestampMs) {}
+    explicit FaceObservation(bool hasFace, double yaw, double pitch, double roll, double leftEyeOpen, double rightEyeOpen, double smile, double x, double y, double width, double height, double timestampMs): hasFace(hasFace), yaw(yaw), pitch(pitch), roll(roll), leftEyeOpen(leftEyeOpen), rightEyeOpen(rightEyeOpen), smile(smile), x(x), y(y), width(width), height(height), timestampMs(timestampMs) {}
 
   public:
     friend bool operator==(const FaceObservation& lhs, const FaceObservation& rhs) = default;
@@ -75,6 +76,7 @@ namespace margelo::nitro {
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "roll"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "leftEyeOpen"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "rightEyeOpen"))),
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "smile"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "x"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "y"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "width"))),
@@ -90,6 +92,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "roll"), JSIConverter<double>::toJSI(runtime, arg.roll));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "leftEyeOpen"), JSIConverter<double>::toJSI(runtime, arg.leftEyeOpen));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "rightEyeOpen"), JSIConverter<double>::toJSI(runtime, arg.rightEyeOpen));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "smile"), JSIConverter<double>::toJSI(runtime, arg.smile));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "x"), JSIConverter<double>::toJSI(runtime, arg.x));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "y"), JSIConverter<double>::toJSI(runtime, arg.y));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "width"), JSIConverter<double>::toJSI(runtime, arg.width));
@@ -111,6 +114,7 @@ namespace margelo::nitro {
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "roll")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "leftEyeOpen")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "rightEyeOpen")))) return false;
+      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "smile")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "x")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "y")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "width")))) return false;
