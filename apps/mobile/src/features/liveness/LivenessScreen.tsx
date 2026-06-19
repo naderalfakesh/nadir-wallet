@@ -2,6 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LivenessFlow } from "./LivenessFlow";
+import { grantLiveness } from "./livenessGate";
 
 /**
  * Route wrapper around {@link LivenessFlow}. Standalone (Security Center) when
@@ -18,8 +19,14 @@ export function LivenessScreen() {
       <LivenessFlow
         mode={gated ? "gate" : "standalone"}
         onPass={() => {
-          if (gated) router.replace(next as never);
-          else router.back();
+          if (gated) {
+            // Grant a one-shot pass so the destination route lets us through
+            // instead of bouncing us straight back here.
+            grantLiveness(next);
+            router.replace(next as never);
+          } else {
+            router.back();
+          }
         }}
         onCancel={() => router.back()}
       />

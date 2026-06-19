@@ -325,7 +325,7 @@ export function SecurityScreen() {
           <Card padding={0} style={{ paddingHorizontal: 16 }}>
             <Row onPress={() => router.push("/liveness")} left={<MiniIcon name="faceid" />} title={t("security.advanced.liveness")} sub={t("security.advanced.livenessSub")} chevron />
             <Row
-              onPress={() => router.push(prefs.requireLivenessReveal ? "/liveness?next=/reveal" : "/reveal")}
+              onPress={() => router.push("/reveal")}
               left={<MiniIcon name="key" />}
               title={t("security.advanced.reveal")}
               sub={t("security.advanced.revealSub")}
