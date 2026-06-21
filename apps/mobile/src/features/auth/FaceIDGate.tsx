@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Animated, View } from "react-native";
+import { View } from "react-native";
 import { useTheme } from "@/theme";
-import { AppText, Button, Icon } from "@/components";
+import { AppText, Button } from "@/components";
 import { useTranslation } from "@/i18n/useTranslation";
+import { BiometricBadge } from "./BiometricBadge";
+import { usePulse } from "./usePulse";
 
 interface FaceIDGateProps {
   title: string;
@@ -15,62 +17,25 @@ export function FaceIDGate({ title, subtitle, onDone, auto = false }: FaceIDGate
   const theme = useTheme();
   const { t } = useTranslation();
   const [scanning, setScanning] = useState(false);
-  const [pulse] = useState(() => new Animated.Value(0.9));
+  const pulse = usePulse(scanning);
 
   const go = () => setScanning(true);
 
   useEffect(() => {
-    if (auto) {
-      const id = setTimeout(go, 400);
-      return () => clearTimeout(id);
-    }
+    if (!auto) return;
+    const id = setTimeout(go, 400);
+    return () => clearTimeout(id);
   }, [auto]);
 
   useEffect(() => {
     if (!scanning) return;
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1.3, duration: 900, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0.9, duration: 0, useNativeDriver: true }),
-      ]),
-    );
-    loop.start();
     const done = setTimeout(onDone, 1500);
-    return () => {
-      loop.stop();
-      clearTimeout(done);
-    };
-  }, [scanning, pulse, onDone]);
+    return () => clearTimeout(done);
+  }, [scanning, onDone]);
 
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: theme.spacing.pad }}>
-      <View style={{ width: 116, height: 116, alignItems: "center", justifyContent: "center" }}>
-        {scanning && (
-          <Animated.View
-            style={{
-              position: "absolute",
-              width: 116,
-              height: 116,
-              borderRadius: 58,
-              backgroundColor: theme.colors.accent,
-              opacity: 0.18,
-              transform: [{ scale: pulse }],
-            }}
-          />
-        )}
-        <View
-          style={{
-            width: 96,
-            height: 96,
-            borderRadius: 30,
-            backgroundColor: theme.colors.accentDim,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Icon name="faceid" size={50} stroke={1.8} color={theme.colors.accent} />
-        </View>
-      </View>
+      <BiometricBadge pulse={pulse} active={scanning} ringSize={116} />
       <AppText weight="bold" size={21} style={{ marginTop: 26 }}>
         {title}
       </AppText>

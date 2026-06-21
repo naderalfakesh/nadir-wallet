@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -9,6 +9,8 @@ import { useTranslation } from "@/i18n/useTranslation";
 import { t as translate } from "@/i18n";
 import { useApp } from "@/providers/AppProvider";
 import { PasscodeUnlock } from "@/features/auth/PasscodeUnlock";
+import { BiometricBadge } from "@/features/auth/BiometricBadge";
+import { usePulse } from "@/features/auth/usePulse";
 
 type BioStatus = "idle" | "authenticating" | "failed" | "cancelled" | "unavailable";
 
@@ -22,8 +24,8 @@ export function LockScreen() {
   const [mode, setMode] = useState<"bio" | "passcode">(prefs.biometricEnabled ? "bio" : "passcode");
   const [available, setAvailable] = useState(false);
   const [status, setStatus] = useState<BioStatus>("idle");
-  const [pulse] = useState(() => new Animated.Value(0.9));
   const started = useRef(false);
+  const pulse = usePulse(status === "authenticating");
 
   const unlock = useCallback(
     (methodLabel: string) => {
@@ -66,18 +68,6 @@ export function LockScreen() {
     })();
   }, [prefs.biometricEnabled, authenticate]);
 
-  useEffect(() => {
-    if (status !== "authenticating") return;
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1.3, duration: 900, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0.9, duration: 0, useNativeDriver: true }),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [status, pulse]);
-
   if (mode === "passcode") {
     return (
       <Screen>
@@ -118,33 +108,7 @@ export function LockScreen() {
         </AppText>
 
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <View style={{ width: 96, height: 96, alignItems: "center", justifyContent: "center" }}>
-            {status === "authenticating" && (
-              <Animated.View
-                style={{
-                  position: "absolute",
-                  width: 96,
-                  height: 96,
-                  borderRadius: 48,
-                  backgroundColor: theme.colors.accent,
-                  opacity: 0.18,
-                  transform: [{ scale: pulse }],
-                }}
-              />
-            )}
-            <View
-              style={{
-                width: 96,
-                height: 96,
-                borderRadius: 30,
-                backgroundColor: theme.colors.accentDim,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Icon name="faceid" size={50} stroke={1.8} color={theme.colors.accent} />
-            </View>
-          </View>
+          <BiometricBadge pulse={pulse} active={status === "authenticating"} />
           <AppText weight="bold" size={21} style={{ marginTop: 26 }}>
             {t("lock.locked")}
           </AppText>
