@@ -13,9 +13,10 @@ const KEYS = {
 } as const;
 
 // SecureStore (device keychain) holds the only real secret — the BIP39
-// mnemonic — plus the app-lock PIN placeholder. Never AsyncStorage.
-const SECURE_PASSCODE = "nadir.demoPasscode";
+// mnemonic — plus the app-lock PIN. Never AsyncStorage.
+const SECURE_PASSCODE = "nadir.passcode";
 const SECURE_MNEMONIC = "nadir.mnemonic";
+// Testnet demo fallback used only when no PIN has been stored yet.
 const DEFAULT_PASSCODE = "123456";
 
 export interface Prefs {
