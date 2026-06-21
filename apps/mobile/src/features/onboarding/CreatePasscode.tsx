@@ -4,6 +4,7 @@ import { ScreenHeader, AppText, Icon } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { PinDots, PinKeypad } from "@/features/auth/PinPad";
+import { usePinEntry } from "@/features/auth/usePinEntry";
 
 // Demo-only passcode setup — nothing is persisted. The flow exists to mirror
 // the design's app-lock step. The PIN is handed back so the flow can store it
@@ -13,44 +14,25 @@ export function CreatePasscode({ onDone, onBack }: { onDone: (pin: string) => vo
   const { t } = useTranslation();
   const [stage, setStage] = useState<"set" | "confirm">("set");
   const [first, setFirst] = useState("");
-  const [pin, setPin] = useState("");
-  const [error, setError] = useState(false);
-  const [shake, setShake] = useState(false);
 
-  const press = (k: string) => {
-    setError(false);
-    if (k === "del") {
-      setPin((p) => p.slice(0, -1));
-      return;
-    }
-    setPin((p) => {
-      if (p.length >= 6) return p;
-      const next = p + k;
-      if (next.length === 6) {
-        setTimeout(() => {
-          if (stage === "set") {
-            setFirst(next);
-            setPin("");
-            setStage("confirm");
-          } else if (next === first) {
-            onDone(next);
-          } else {
-            setError(true);
-            setShake(true);
-            setTimeout(() => {
-              setShake(false);
-              setPin("");
-              setFirst("");
-              setStage("set");
-            }, 600);
-          }
-        }, 120);
+  const { pin, error, shake, press, clear } = usePinEntry({
+    onComplete: (entered, helpers) => {
+      if (stage === "set") {
+        setFirst(entered);
+        helpers.clear();
+        setStage("confirm");
+      } else if (entered === first) {
+        onDone(entered);
+      } else {
+        helpers.fail(() => {
+          setFirst("");
+          setStage("set");
+        });
       }
-      return next;
-    });
-  };
+    },
+  });
 
-  const back = stage === "confirm" ? () => { setStage("set"); setPin(""); setFirst(""); } : onBack;
+  const back = stage === "confirm" ? () => { setStage("set"); clear(); setFirst(""); } : onBack;
 
   return (
     <View style={{ flex: 1 }}>

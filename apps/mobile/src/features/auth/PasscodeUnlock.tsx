@@ -4,6 +4,7 @@ import { AppText, Icon } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { PinDots, PinKeypad } from "./PinPad";
+import { usePinEntry } from "./usePinEntry";
 
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_SECONDS = 30;
@@ -18,12 +19,22 @@ interface PasscodeUnlockProps {
 export function PasscodeUnlock({ correct, onUnlock, onUseBiometric, biometricAvailable }: PasscodeUnlockProps) {
   const theme = useTheme();
   const { t } = useTranslation();
-  const [pin, setPin] = useState("");
-  const [error, setError] = useState(false);
-  const [shake, setShake] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [lockLeft, setLockLeft] = useState(0);
   const locked = lockLeft > 0;
+
+  const { pin, error, shake, press } = usePinEntry({
+    onComplete: (entered, { fail }) => {
+      if (entered === correct) {
+        onUnlock();
+        return;
+      }
+      const a = attempts + 1;
+      setAttempts(a);
+      if (a >= MAX_ATTEMPTS) setLockLeft(LOCKOUT_SECONDS);
+      fail();
+    },
+  });
 
   useEffect(() => {
     if (!locked) return;
@@ -39,35 +50,8 @@ export function PasscodeUnlock({ correct, onUnlock, onUseBiometric, biometricAva
     return () => clearInterval(id);
   }, [locked]);
 
-  const press = (k: string) => {
-    if (locked) return;
-    setError(false);
-    if (k === "del") {
-      setPin((p) => p.slice(0, -1));
-      return;
-    }
-    setPin((p) => {
-      if (p.length >= 6) return p;
-      const next = p + k;
-      if (next.length === 6) {
-        setTimeout(() => {
-          if (next === correct) {
-            onUnlock();
-          } else {
-            const a = attempts + 1;
-            setAttempts(a);
-            setError(true);
-            setShake(true);
-            setTimeout(() => {
-              setShake(false);
-              setPin("");
-            }, 500);
-            if (a >= MAX_ATTEMPTS) setLockLeft(LOCKOUT_SECONDS);
-          }
-        }, 120);
-      }
-      return next;
-    });
+  const onKey = (k: string) => {
+    if (!locked) press(k);
   };
 
   const remaining = MAX_ATTEMPTS - attempts;
@@ -110,7 +94,7 @@ export function PasscodeUnlock({ correct, onUnlock, onUseBiometric, biometricAva
 
       <View style={{ flex: 1, minHeight: 24 }} />
       <View style={{ width: "100%", opacity: locked ? 0.4 : 1 }} pointerEvents={locked ? "none" : "auto"}>
-        <PinKeypad onKey={press} onBiometric={onUseBiometric} biometric={biometricAvailable} />
+        <PinKeypad onKey={onKey} onBiometric={onUseBiometric} biometric={biometricAvailable} />
       </View>
       {biometricAvailable && (
         <Pressable

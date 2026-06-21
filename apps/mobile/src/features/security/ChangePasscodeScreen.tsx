@@ -6,6 +6,7 @@ import { Screen, ScreenHeader, AppText, Button, Icon } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { PinDots, PinKeypad } from "@/features/auth/PinPad";
+import { usePinEntry } from "@/features/auth/usePinEntry";
 
 const DEMO_PASSCODE = "123456";
 
@@ -18,55 +19,30 @@ export function ChangePasscodeScreen() {
   const { t } = useTranslation();
   const [stage, setStage] = useState<Stage>("current");
   const [first, setFirst] = useState("");
-  const [pin, setPin] = useState("");
-  const [error, setError] = useState(false);
-  const [shake, setShake] = useState(false);
 
-  const fail = (reset?: () => void) => {
-    setError(true);
-    setShake(true);
-    setTimeout(() => {
-      setShake(false);
-      setPin("");
-      reset?.();
-    }, 600);
-  };
-
-  const press = (k: string) => {
-    setError(false);
-    if (k === "del") {
-      setPin((p) => p.slice(0, -1));
-      return;
-    }
-    setPin((p) => {
-      if (p.length >= 6) return p;
-      const next = p + k;
-      if (next.length === 6) {
-        setTimeout(() => {
-          if (stage === "current") {
-            if (next === DEMO_PASSCODE) {
-              setPin("");
-              setStage("new");
-            } else fail();
-          } else if (stage === "new") {
-            setFirst(next);
-            setPin("");
-            setStage("confirm");
-          } else if (stage === "confirm") {
-            if (next === first) {
-              setPin("");
-              setStage("done");
-            } else
-              fail(() => {
-                setFirst("");
-                setStage("new");
-              });
-          }
-        }, 120);
+  const { pin, error, shake, press, clear } = usePinEntry({
+    onComplete: (entered, helpers) => {
+      if (stage === "current") {
+        if (entered === DEMO_PASSCODE) {
+          helpers.clear();
+          setStage("new");
+        } else helpers.fail();
+      } else if (stage === "new") {
+        setFirst(entered);
+        helpers.clear();
+        setStage("confirm");
+      } else if (stage === "confirm") {
+        if (entered === first) {
+          helpers.clear();
+          setStage("done");
+        } else
+          helpers.fail(() => {
+            setFirst("");
+            setStage("new");
+          });
       }
-      return next;
-    });
-  };
+    },
+  });
 
   if (stage === "done") {
     return (
@@ -109,8 +85,7 @@ export function ChangePasscodeScreen() {
     stage === "current"
       ? () => router.back()
       : () => {
-          setPin("");
-          setError(false);
+          clear();
           setStage(stage === "confirm" ? "new" : "current");
         };
 
