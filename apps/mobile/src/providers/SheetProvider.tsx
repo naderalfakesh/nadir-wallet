@@ -1,23 +1,30 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import type { DemoToken } from "@/features/wallet/types";
 
-export type SheetName =
-  | "receive"
-  | "txDetail"
-  | "accounts"
-  | "pickToken"
-  | "howItWorks"
-  | "theme"
-  | "scan"
-  | "soon";
-
-export interface SheetRequest {
-  name: SheetName;
-  params?: Record<string, unknown>;
+export interface SheetParams {
+  receive: { token?: string } | undefined;
+  txDetail: { id: string };
+  accounts: undefined;
+  pickToken: { current?: string; onPick?: (token: DemoToken) => void } | undefined;
+  howItWorks: undefined;
+  theme: undefined;
+  scan: undefined;
+  soon: { title?: string } | undefined;
 }
+
+export type SheetName = keyof SheetParams;
+
+export type SheetRequest = {
+  [K in SheetName]: { name: K; params: SheetParams[K] };
+}[SheetName];
+
+type OpenArgs<K extends SheetName> = undefined extends SheetParams[K]
+  ? [params?: SheetParams[K]]
+  : [params: SheetParams[K]];
 
 interface SheetValue {
   active: SheetRequest | null;
-  open: (name: SheetName, params?: Record<string, unknown>) => void;
+  open: <K extends SheetName>(name: K, ...args: OpenArgs<K>) => void;
   close: () => void;
 }
 
@@ -26,8 +33,8 @@ const SheetContext = createContext<SheetValue | null>(null);
 export function SheetProvider({ children }: { children: React.ReactNode }) {
   const [active, setActive] = useState<SheetRequest | null>(null);
 
-  const open = useCallback((name: SheetName, params?: Record<string, unknown>) => {
-    setActive({ name, params });
+  const open = useCallback(<K extends SheetName>(name: K, ...args: OpenArgs<K>) => {
+    setActive({ name, params: args[0] } as SheetRequest);
   }, []);
   const close = useCallback(() => setActive(null), []);
 

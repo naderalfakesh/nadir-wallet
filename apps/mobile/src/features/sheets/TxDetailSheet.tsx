@@ -10,14 +10,13 @@ import { CHAINS } from "@/features/wallet/data";
 import { getTransactionAmount, getTransactionVerbs } from "@/features/wallet/transactions";
 import type { SheetBodyProps } from "./types";
 
-export function TxDetailSheet({ params, close }: SheetBodyProps) {
+export function TxDetailSheet({ params, close }: SheetBodyProps<"txDetail">) {
   const theme = useTheme();
   const { t } = useTranslation();
   const { transactions } = useWallet();
   const [copied, setCopied] = useState(false);
 
-  const id = params?.id as string | undefined;
-  const tx = transactions.find((x) => x.id === id) ?? transactions[0];
+  const tx = transactions.find((x) => x.id === params.id) ?? transactions[0];
   const incoming = tx.type === "receive";
   const chain = CHAINS[tx.chain];
   const verbs = getTransactionVerbs(t);

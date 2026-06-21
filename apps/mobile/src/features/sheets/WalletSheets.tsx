@@ -7,10 +7,10 @@ import { fmtUSD, fmtToken } from "@/utils/format";
 import { displayAddress } from "@/services/wallet/account";
 import { useWallet } from "@/providers/WalletDataProvider";
 import { useApp } from "@/providers/AppProvider";
-import { ACCOUNT, type DemoToken } from "@/features/wallet/data";
-import type { SheetBodyProps } from "./types";
+import { ACCOUNT } from "@/features/wallet/data";
+import type { SheetBodyProps, SheetCloseProps } from "./types";
 
-export function AccountsSheet({ close }: SheetBodyProps) {
+export function AccountsSheet({ close }: SheetCloseProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const { prefs } = useApp();
@@ -31,12 +31,12 @@ export function AccountsSheet({ close }: SheetBodyProps) {
   );
 }
 
-export function PickTokenSheet({ params, close }: SheetBodyProps) {
+export function PickTokenSheet({ params, close }: SheetBodyProps<"pickToken">) {
   const theme = useTheme();
   const { t } = useTranslation();
   const { tokens } = useWallet();
-  const current = params?.current as string | undefined;
-  const onPick = params?.onPick as ((token: DemoToken) => void) | undefined;
+  const current = params?.current;
+  const onPick = params?.onPick;
 
   return (
     <View>

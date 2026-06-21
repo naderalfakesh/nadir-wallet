@@ -8,12 +8,12 @@ import { useApp } from "@/providers/AppProvider";
 import { CHAINS, TOKENS, type ChainId } from "@/features/wallet/data";
 import type { SheetBodyProps } from "./types";
 
-export function ReceiveSheet({ params, close }: SheetBodyProps) {
+export function ReceiveSheet({ params, close }: SheetBodyProps<"receive">) {
   const theme = useTheme();
   const { t } = useTranslation();
   const { prefs } = useApp();
   const address = prefs.walletAddress;
-  const symbol = params?.token as string | undefined;
+  const symbol = params?.token;
   const initialChain = symbol ? (TOKENS.find((x) => x.symbol === symbol)?.chain ?? "ethereum") : "ethereum";
   const [chain, setChain] = useState<ChainId>(initialChain);
   const [copied, setCopied] = useState(false);

@@ -1,22 +1,31 @@
 import React, { useState } from "react";
 import { BottomSheet } from "@/components";
-import { useSheets, type SheetName } from "@/providers/SheetProvider";
-import type { SheetBodyProps } from "./types";
+import { useSheets, type SheetRequest } from "@/providers/SheetProvider";
 import { ReceiveSheet } from "./ReceiveSheet";
 import { TxDetailSheet } from "./TxDetailSheet";
 import { AccountsSheet, PickTokenSheet } from "./WalletSheets";
 import { ScanSheet, SoonSheet, HowItWorksSheet, ThemeSheet } from "./InfoSheets";
 
-const REGISTRY: Record<SheetName, React.ComponentType<SheetBodyProps>> = {
-  receive: ReceiveSheet,
-  txDetail: TxDetailSheet,
-  accounts: AccountsSheet,
-  pickToken: PickTokenSheet,
-  scan: ScanSheet,
-  soon: SoonSheet,
-  howItWorks: HowItWorksSheet,
-  theme: ThemeSheet,
-};
+function SheetBody({ request, close }: { request: SheetRequest; close: () => void }) {
+  switch (request.name) {
+    case "receive":
+      return <ReceiveSheet params={request.params} close={close} />;
+    case "txDetail":
+      return <TxDetailSheet params={request.params} close={close} />;
+    case "accounts":
+      return <AccountsSheet close={close} />;
+    case "pickToken":
+      return <PickTokenSheet params={request.params} close={close} />;
+    case "scan":
+      return <ScanSheet close={close} />;
+    case "soon":
+      return <SoonSheet params={request.params} close={close} />;
+    case "howItWorks":
+      return <HowItWorksSheet close={close} />;
+    case "theme":
+      return <ThemeSheet close={close} />;
+  }
+}
 
 export function SheetHost() {
   const { active, close } = useSheets();
@@ -25,11 +34,9 @@ export function SheetHost() {
   const [displayed, setDisplayed] = useState(active);
   if (active && active !== displayed) setDisplayed(active);
 
-  const Body = displayed ? REGISTRY[displayed.name] : null;
-
   return (
     <BottomSheet visible={!!active} onClose={close}>
-      {Body && displayed ? <Body params={displayed.params} close={close} /> : null}
+      {displayed ? <SheetBody request={displayed} close={close} /> : null}
     </BottomSheet>
   );
 }

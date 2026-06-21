@@ -4,9 +4,9 @@ import { SheetHeader, AppText, Button, Icon, type IconName, TestnetBadge } from 
 import { useTheme, useThemeControls } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import type { ColorScheme } from "@/theme";
-import type { SheetBodyProps } from "./types";
+import type { SheetBodyProps, SheetCloseProps } from "./types";
 
-export function ScanSheet({ close }: SheetBodyProps) {
+export function ScanSheet({ close }: SheetCloseProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   return (
@@ -47,10 +47,10 @@ export function ScanSheet({ close }: SheetBodyProps) {
   );
 }
 
-export function SoonSheet({ params, close }: SheetBodyProps) {
+export function SoonSheet({ params, close }: SheetBodyProps<"soon">) {
   const theme = useTheme();
   const { t } = useTranslation();
-  const title = (params?.title as string | undefined) ?? t("sheets.soon.fallback");
+  const title = params?.title ?? t("sheets.soon.fallback");
   return (
     <View>
       <SheetHeader title={title} onClose={close} />
@@ -79,7 +79,7 @@ export function SoonSheet({ params, close }: SheetBodyProps) {
   );
 }
 
-export function HowItWorksSheet({ close }: SheetBodyProps) {
+export function HowItWorksSheet({ close }: SheetCloseProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const points: { icon: IconName; title: string; body: string }[] = [
@@ -136,7 +136,7 @@ export function HowItWorksSheet({ close }: SheetBodyProps) {
   );
 }
 
-export function ThemeSheet({ close }: SheetBodyProps) {
+export function ThemeSheet({ close }: SheetCloseProps) {
   const theme = useTheme();
   const { scheme, setScheme } = useThemeControls();
   const { t } = useTranslation();
