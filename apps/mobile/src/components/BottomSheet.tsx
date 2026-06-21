@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Animated, Modal, Pressable, ScrollView, View } from "react-native";
+import { Animated, Dimensions, Modal, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "@/theme";
+import { alpha, useTheme } from "@/theme";
 
-const OFFSCREEN = 900;
+// Start the sheet a full screen-height below so the open animation always
+// slides up from true offscreen, on any device.
+const OFFSCREEN = Dimensions.get("window").height;
 
 interface BottomSheetProps {
   visible: boolean;
@@ -48,7 +50,7 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.55)",
+            backgroundColor: alpha("#000", 0.55),
             opacity: backdrop,
           }}
         >

@@ -36,7 +36,16 @@ export function makeShadows(colors: ThemeColors, scheme: "dark" | "light") {
     elevation: 6,
   };
 
-  return { card, accentGlow };
+  // Lift under the switch knob so it reads on both the on/off tracks.
+  const toggleKnob: Shadow = {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 2,
+  };
+
+  return { card, accentGlow, toggleKnob };
 }
 
 export type Shadows = ReturnType<typeof makeShadows>;
