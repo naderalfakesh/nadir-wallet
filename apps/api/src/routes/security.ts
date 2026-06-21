@@ -23,10 +23,11 @@ export const securityRoutes = new Hono();
 securityRoutes.post("/security/check-address", async (c) => {
   const body = await c.req.json().catch(() => null);
   const input = parseOrThrow(checkSchema, body);
+  const address = requireEvmAddress(input.address);
   const networkId = requireNetworkId(input.networkId);
 
   const result = await checkAddress({
-    address: input.address,
+    address,
     networkId,
     amount: input.amount,
     knownContact: input.knownContact,
