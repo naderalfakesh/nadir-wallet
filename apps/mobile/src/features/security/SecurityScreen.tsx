@@ -1,29 +1,24 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
-import Svg, { Circle } from "react-native-svg";
 import {
   Screen,
   ScreenHeader,
   AppText,
   Card,
   Row,
-  Icon,
-  type IconName,
   MiniIcon,
   Toggle,
   SectionLabel,
   SecurityEventRow,
 } from "@/components";
-import { useTheme, alpha } from "@/theme";
+import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useSheets } from "@/providers/SheetProvider";
 import { useApp } from "@/providers/AppProvider";
-import { DEVICE_CHECK_KEYS } from "./data";
-
-const RING_R = 52;
-const RING_C = 2 * Math.PI * RING_R;
-const AUTO_LOCK_OPTIONS = [1, 5, 15];
+import { useSecurityChecklist } from "./useSecurityChecklist";
+import { createSecurityStyles } from "./SecurityScreen.styles";
+import { DeviceSecurityCard, ScoreCard, SecurityModelCard, TxProtectionCard } from "./SecurityScreen.parts";
 
 export function SecurityScreen() {
   const theme = useTheme();
@@ -31,151 +26,26 @@ export function SecurityScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const sheets = useSheets();
-  const { prefs, setPref, events, logEvent } = useApp();
+  const { prefs, setPref, events } = useApp();
   const [txProtection, setTxProtection] = useState(true);
+  const styles = useMemo(() => createSecurityStyles(theme), [theme]);
 
-  const toggleBiometric = () => {
-    const next = !prefs.biometricEnabled;
-    setPref("biometricEnabled", next);
-    logEvent(next ? "biometric_on" : "biometric_off");
-  };
-
-  const cycleAutoLock = () => {
-    const idx = AUTO_LOCK_OPTIONS.indexOf(prefs.autoLockMinutes);
-    const next = AUTO_LOCK_OPTIONS[(idx + 1) % AUTO_LOCK_OPTIONS.length];
-    setPref("autoLockMinutes", next);
-    logEvent("autolock", { detailVars: { min: next } });
-  };
-
-  type Item = {
-    key: string;
-    label: string;
-    done: boolean;
-    sub: string;
-    onPress?: () => void;
-    toggle?: () => void;
-    cycle?: boolean;
-  };
-  const items: Item[] = [
-    {
-      key: "backup",
-      label: t("security.protection.backup"),
-      done: prefs.backupConfirmed,
-      sub: prefs.backupConfirmed ? t("security.protection.backupDone") : t("security.protection.backupTodo"),
-      onPress: () => router.push("/backup"),
-    },
-    { key: "bio", label: t("security.protection.biometric"), done: prefs.biometricEnabled, sub: t("security.protection.biometricSub"), toggle: toggleBiometric },
-    { key: "pin", label: t("security.protection.pin"), done: true, sub: t("security.protection.pinSub") },
-    { key: "autolock", label: t("security.protection.autolock"), done: true, sub: t("security.protection.autolockSub", { min: prefs.autoLockMinutes }), onPress: cycleAutoLock, cycle: true },
-    { key: "signing", label: t("security.protection.signing"), done: true, sub: t("security.protection.signingSub") },
-  ];
-  const score = items.filter((i) => i.done).length;
-  const pct = score / items.length;
-  const tier =
-    pct >= 1
-      ? { c: colors.pos, label: t("security.score.excellent") }
-      : pct >= 0.7
-        ? { c: colors.warn, label: t("security.score.actionNeeded") }
-        : { c: colors.neg, label: t("security.score.atRisk") };
-
-  const modelRows: { icon: IconName; title: string; body: string }[] = [
-    { icon: "key", title: t("security.model.keysTitle"), body: t("security.model.keysBody") },
-    { icon: "faceid", title: t("security.model.signTitle"), body: t("security.model.signBody") },
-    { icon: "globe", title: t("security.model.backendTitle"), body: t("security.model.backendBody") },
-  ];
-
-  const riskLevels: { color: string; label: string; body: string }[] = [
-    { color: colors.pos, label: t("security.txProtection.low"), body: t("security.txProtection.lowBody") },
-    { color: colors.warn, label: t("security.txProtection.caution"), body: t("security.txProtection.cautionBody") },
-    { color: colors.neg, label: t("security.txProtection.high"), body: t("security.txProtection.highBody") },
-  ];
-
-  const section = { paddingHorizontal: theme.spacing.pad, paddingTop: 18 } as const;
+  const { items, score, total, pct, tier } = useSecurityChecklist();
 
   return (
     <Screen>
       <ScreenHeader title={t("security.title")} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
-        {/* score */}
         <View style={{ paddingHorizontal: theme.spacing.pad }}>
-          <Card padding={20}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 20 }}>
-              <View style={{ width: 116, height: 116 }}>
-                <Svg width={116} height={116} viewBox="0 0 116 116">
-                  <Circle cx={58} cy={58} r={RING_R} fill="none" stroke={colors.surface3} strokeWidth={9} />
-                  <Circle
-                    cx={58}
-                    cy={58}
-                    r={RING_R}
-                    fill="none"
-                    stroke={tier.c}
-                    strokeWidth={9}
-                    strokeLinecap="round"
-                    strokeDasharray={RING_C}
-                    strokeDashoffset={RING_C * (1 - pct)}
-                    rotation={-90}
-                    origin="58, 58"
-                  />
-                </Svg>
-                <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>
-                  <AppText weight="bold" size={30} tnum>
-                    {score}
-                    <AppText size={16} faint>
-                      /{items.length}
-                    </AppText>
-                  </AppText>
-                </View>
-              </View>
-              <View style={{ flex: 1 }}>
-                <AppText weight="semibold" size={12.5} muted>
-                  {t("security.score.label")}
-                </AppText>
-                <AppText weight="bold" size={21} color={tier.c} style={{ marginVertical: 2 }}>
-                  {tier.label}
-                </AppText>
-                <AppText size={13} muted style={{ lineHeight: 18 }}>
-                  {prefs.backupConfirmed ? t("security.score.protected") : t("security.score.finishBackup")}
-                </AppText>
-              </View>
-            </View>
-          </Card>
+          <ScoreCard score={score} total={total} pct={pct} tier={tier} backedUp={prefs.backupConfirmed} />
         </View>
 
-        {/* security model */}
-        <View style={section}>
+        <View style={styles.section}>
           <SectionLabel>{t("security.model.title")}</SectionLabel>
-          <Card padding={16}>
-            <View style={{ gap: 13 }}>
-              {modelRows.map((r) => (
-                <View key={r.title} style={{ flexDirection: "row", gap: 12 }}>
-                  <View
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 11,
-                      backgroundColor: colors.accentDim,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Icon name={r.icon} size={19} color={colors.accent} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <AppText weight="bold" size={14}>
-                      {r.title}
-                    </AppText>
-                    <AppText size={12.5} muted style={{ lineHeight: 18, marginTop: 2 }}>
-                      {r.body}
-                    </AppText>
-                  </View>
-                </View>
-              ))}
-            </View>
-          </Card>
+          <SecurityModelCard />
         </View>
 
-        {/* protection checklist */}
-        <View style={section}>
+        <View style={styles.section}>
           <SectionLabel>{t("security.protection.title")}</SectionLabel>
           <Card padding={0} style={{ paddingHorizontal: 16 }}>
             {items.map((it, i) => (
@@ -201,8 +71,7 @@ export function SecurityScreen() {
           </Card>
         </View>
 
-        {/* step-up verification */}
-        <View style={section}>
+        <View style={styles.section}>
           <SectionLabel>{t("security.stepup.title")}</SectionLabel>
           <Card padding={0} style={{ paddingHorizontal: 16 }}>
             <Row
@@ -231,86 +100,17 @@ export function SecurityScreen() {
           </Card>
         </View>
 
-        {/* device security */}
-        <View style={section}>
+        <View style={styles.section}>
           <SectionLabel>{t("security.device.title")}</SectionLabel>
-          <Card padding={16}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 13 }}>
-              <MiniIcon name="device" tone="pos" />
-              <View style={{ flex: 1 }}>
-                <AppText weight="bold" size={15}>
-                  {t("security.device.secure")}
-                </AppText>
-                <AppText size={12.5} muted style={{ marginTop: 1 }}>
-                  {t("security.device.lastChecked")}
-                </AppText>
-              </View>
-            </View>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 16 }}>
-              {DEVICE_CHECK_KEYS.map((key) => (
-                <View
-                  key={key}
-                  style={{ width: "50%", flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 5 }}
-                >
-                  <Icon name="checkCircle" size={17} color={colors.pos} />
-                  <AppText size={12.5} muted>
-                    {t(`security.device.checks.${key}`)}
-                  </AppText>
-                </View>
-              ))}
-            </View>
-          </Card>
+          <DeviceSecurityCard />
         </View>
 
-        {/* transaction protection */}
-        <View style={section}>
+        <View style={styles.section}>
           <SectionLabel>{t("security.txProtection.title")}</SectionLabel>
-          <Card padding={16}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 13 }}>
-              <MiniIcon name="radar" tone="accent" />
-              <View style={{ flex: 1 }}>
-                <AppText weight="bold" size={15}>
-                  {t("security.txProtection.heading")}
-                </AppText>
-                <AppText size={12.5} muted style={{ marginTop: 1 }}>
-                  {t("security.txProtection.sub")}
-                </AppText>
-              </View>
-              <Toggle
-                on={txProtection}
-                onChange={() => setTxProtection((v) => !v)}
-              />
-            </View>
-            <View style={{ borderTopWidth: 1, borderTopColor: colors.hairline, marginTop: 14, paddingTop: 14, gap: 9 }}>
-              <AppText weight="bold" size={11.5} faint style={{ letterSpacing: 0.3 }}>
-                {t("security.txProtection.riskLevels")}
-              </AppText>
-              {riskLevels.map((r) => (
-                <View key={r.label} style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
-                  <View
-                    style={{
-                      width: 64,
-                      paddingVertical: 3,
-                      borderRadius: 7,
-                      backgroundColor: alpha(r.color, 0.14),
-                      alignItems: "center",
-                    }}
-                  >
-                    <AppText weight="bold" size={11.5} color={r.color}>
-                      {r.label}
-                    </AppText>
-                  </View>
-                  <AppText size={12.5} muted style={{ flex: 1, lineHeight: 17 }}>
-                    {r.body}
-                  </AppText>
-                </View>
-              ))}
-            </View>
-          </Card>
+          <TxProtectionCard on={txProtection} onToggle={() => setTxProtection((v) => !v)} />
         </View>
 
-        {/* recent security activity */}
-        <View style={section}>
+        <View style={styles.section}>
           <SectionLabel>{t("security.events.title")}</SectionLabel>
           <Card padding={0} style={{ paddingHorizontal: 16 }}>
             {events.map((ev, i) => (
@@ -319,8 +119,7 @@ export function SecurityScreen() {
           </Card>
         </View>
 
-        {/* advanced */}
-        <View style={section}>
+        <View style={styles.section}>
           <SectionLabel>{t("security.advanced.title")}</SectionLabel>
           <Card padding={0} style={{ paddingHorizontal: 16 }}>
             <Row onPress={() => router.push("/liveness")} left={<MiniIcon name="faceid" />} title={t("security.advanced.liveness")} sub={t("security.advanced.livenessSub")} chevron />

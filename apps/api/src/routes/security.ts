@@ -1,8 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import type { ReportAddressResponse } from "@nadir-wallet/types";
-import { isEvmAddress, isSupportedNetworkId } from "@nadir-wallet/crypto-core";
-import { badRequest } from "../lib/errors";
+import { optionalNetworkId, requireEvmAddress, requireNetworkId } from "../lib/request";
 import { parseOrThrow } from "../lib/validation";
 import { checkAddress, reportAddress } from "../services/security";
 
@@ -24,14 +23,11 @@ export const securityRoutes = new Hono();
 securityRoutes.post("/security/check-address", async (c) => {
   const body = await c.req.json().catch(() => null);
   const input = parseOrThrow(checkSchema, body);
-
-  if (!isSupportedNetworkId(input.networkId)) {
-    throw badRequest(`Unsupported networkId: ${input.networkId}`);
-  }
+  const networkId = requireNetworkId(input.networkId);
 
   const result = await checkAddress({
     address: input.address,
-    networkId: input.networkId,
+    networkId,
     amount: input.amount,
     knownContact: input.knownContact,
   });
@@ -42,18 +38,13 @@ securityRoutes.post("/security/check-address", async (c) => {
 securityRoutes.post("/security/report-address", async (c) => {
   const body = await c.req.json().catch(() => null);
   const input = parseOrThrow(reportSchema, body);
-
-  if (!isEvmAddress(input.address)) {
-    throw badRequest("Invalid address");
-  }
-  if (input.networkId && !isSupportedNetworkId(input.networkId)) {
-    throw badRequest(`Unsupported networkId: ${input.networkId}`);
-  }
+  const address = requireEvmAddress(input.address);
+  const networkId = optionalNetworkId(input.networkId);
 
   const { id } = await reportAddress({
-    address: input.address,
+    address,
     reason: input.reason,
-    networkId: isSupportedNetworkId(input.networkId) ? input.networkId : undefined,
+    networkId,
   });
 
   return c.json({ ok: true, id } satisfies ReportAddressResponse, 201);

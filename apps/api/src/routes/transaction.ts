@@ -1,8 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { isSupportedNetworkId } from "@nadir-wallet/crypto-core";
 import { simulateTransaction } from "@nadir-wallet/wallet-core";
-import { badRequest } from "../lib/errors";
+import { requireNetworkId } from "../lib/request";
 import { parseOrThrow } from "../lib/validation";
 
 const simulateSchema = z.object({
@@ -19,13 +18,10 @@ export const transactionRoutes = new Hono();
 transactionRoutes.post("/transaction/simulate", async (c) => {
   const body = await c.req.json().catch(() => null);
   const draft = parseOrThrow(simulateSchema, body);
-
-  if (!isSupportedNetworkId(draft.networkId)) {
-    throw badRequest(`Unsupported networkId: ${draft.networkId}`);
-  }
+  const networkId = requireNetworkId(draft.networkId);
 
   const result = simulateTransaction({
-    networkId: draft.networkId,
+    networkId,
     from: draft.from,
     to: draft.to,
     value: draft.value,

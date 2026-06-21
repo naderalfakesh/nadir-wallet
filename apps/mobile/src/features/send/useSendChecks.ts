@@ -18,14 +18,14 @@ export function useRiskCheck(opts: {
     status: "idle",
     risk: null,
   });
-  // Reset to a clean "idle" when inputs change (derive during render, not in an effect).
-  if (enabled && key !== state.key) setState({ key, status: "idle", risk: null });
 
   const reqId = useRef(0);
   useEffect(() => {
     if (!enabled || !networkId) return;
+
     const id = ++reqId.current;
     let cancelled = false;
+
     void (async () => {
       const res = await api.checkAddress({
         address,
@@ -47,6 +47,7 @@ export function useRiskCheck(opts: {
     };
   }, [enabled, address, networkId, amount, knownContact, key]);
 
+  if (!enabled || state.key !== key) return { status: "idle", risk: null };
   return { status: state.status, risk: state.risk };
 }
 
@@ -64,13 +65,14 @@ export function useSimulation(opts: {
     key: "",
     status: "idle",
   });
-  if (enabled && key !== state.key) setState({ key, status: "idle" });
 
   const reqId = useRef(0);
   useEffect(() => {
     if (!enabled || !networkId) return;
+
     const id = ++reqId.current;
     let cancelled = false;
+
     void (async () => {
       const res = await api.simulateTransaction({ networkId, from, to, value });
       if (cancelled || id !== reqId.current) return;
@@ -81,5 +83,6 @@ export function useSimulation(opts: {
     };
   }, [enabled, networkId, from, to, value, key]);
 
+  if (!enabled || state.key !== key) return { status: "idle" };
   return { status: state.status };
 }

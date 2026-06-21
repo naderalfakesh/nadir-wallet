@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import type { TokensResponse } from "@nadir-wallet/types";
-import { getTokens, isSupportedNetworkId } from "@nadir-wallet/crypto-core";
-import { badRequest } from "../lib/errors";
+import { getTokens } from "@nadir-wallet/crypto-core";
+import { requireNetworkId } from "../lib/request";
 import { parseOrThrow } from "../lib/validation";
 
 const querySchema = z.object({ networkId: z.string() });
@@ -10,9 +10,7 @@ const querySchema = z.object({ networkId: z.string() });
 export const tokensRoutes = new Hono();
 
 tokensRoutes.get("/tokens", (c) => {
-  const { networkId } = parseOrThrow(querySchema, c.req.query());
-  if (!isSupportedNetworkId(networkId)) {
-    throw badRequest(`Unsupported networkId: ${networkId}`);
-  }
+  const input = parseOrThrow(querySchema, c.req.query());
+  const networkId = requireNetworkId(input.networkId);
   return c.json({ networkId, tokens: getTokens(networkId) } satisfies TokensResponse);
 });
