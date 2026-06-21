@@ -5,8 +5,9 @@ import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useWallet } from "@/providers/WalletDataProvider";
 import { copyText, openExplorer } from "@/services/device";
-import { fmtUSD, fmtToken, shortAddr } from "@/utils/format";
-import { CHAINS, type TxType } from "@/features/wallet/data";
+import { fmtUSD, shortAddr } from "@/utils/format";
+import { CHAINS } from "@/features/wallet/data";
+import { getTransactionAmount, getTransactionVerbs } from "@/features/wallet/transactions";
 import type { SheetBodyProps } from "./types";
 
 export function TxDetailSheet({ params, close }: SheetBodyProps) {
@@ -19,12 +20,8 @@ export function TxDetailSheet({ params, close }: SheetBodyProps) {
   const tx = transactions.find((x) => x.id === id) ?? transactions[0];
   const incoming = tx.type === "receive";
   const chain = CHAINS[tx.chain];
-  const verb: Record<TxType, string> = {
-    receive: t("activity.verb.receive"),
-    send: t("activity.verb.send"),
-    swap: t("activity.verb.swap"),
-  };
-  const amtColor = tx.status === "failed" ? theme.colors.textFaint : incoming ? theme.colors.pos : theme.colors.text;
+  const verbs = getTransactionVerbs(t);
+  const amount = getTransactionAmount(tx, theme);
   const partyLabel = tx.type === "swap" ? t("tx.pair") : incoming ? t("tx.from") : t("tx.to");
 
   return (
@@ -34,17 +31,11 @@ export function TxDetailSheet({ params, close }: SheetBodyProps) {
       <View style={{ alignItems: "center", paddingBottom: 8 }}>
         <TxIcon type={tx.type} size={60} />
         <AppText weight="semibold" size={15} muted style={{ marginTop: 12 }}>
-          {verb[tx.type]} {tx.token}
+          {verbs[tx.type]} {tx.token}
         </AppText>
-        <AppText
-          weight="bold"
-          size={30}
-          tnum
-          color={amtColor}
-          style={[{ marginTop: 4 }, tx.status === "failed" ? { textDecorationLine: "line-through" } : null]}
-        >
-          {incoming ? "+" : "−"}
-          {fmtToken(tx.amount, tx.token)}
+        <AppText weight="bold" size={30} tnum color={amount.color} style={[{ marginTop: 4 }, amount.style]}>
+          {amount.prefix}
+          {amount.text}
         </AppText>
         <AppText size={14} muted tnum style={{ marginTop: 3 }}>
           {fmtUSD(tx.fiat)}

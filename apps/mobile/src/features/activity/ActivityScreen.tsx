@@ -1,110 +1,41 @@
-import React, { useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import React, { useMemo, useState } from "react";
+import { ScrollView, View } from "react-native";
 import {
   Screen,
   ScreenHeader,
   AppText,
   Card,
-  Row,
   IconButton,
-  TxIcon,
-  StatusPill,
   SectionLabel,
   EmptyState,
   BackendNotice,
 } from "@/components";
-import { useTheme, alpha } from "@/theme";
+import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useSheets } from "@/providers/SheetProvider";
 import { useWallet } from "@/providers/WalletDataProvider";
-import { fmtUSD, fmtToken } from "@/utils/format";
-import { type DemoTransaction, type TxType } from "@/features/wallet/data";
-
-type Filter = "all" | TxType;
-
-function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
-  const theme = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      style={{
-        height: 36,
-        paddingHorizontal: 13,
-        borderRadius: theme.radius.chip,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: on ? alpha(theme.colors.accent, 0.15) : theme.colors.surface2,
-        borderWidth: 1,
-        borderColor: on ? "transparent" : theme.colors.hairline,
-      }}
-    >
-      <AppText weight="semibold" size={13.5} color={on ? theme.colors.accent : theme.colors.textMuted}>
-        {label}
-      </AppText>
-    </Pressable>
-  );
-}
+import { TransactionRow } from "@/features/wallet/TransactionRow";
+import { createActivityStyles } from "./ActivityScreen.styles";
+import { FilterChip } from "./ActivityScreen.parts";
+import { filterTransactions, getActivityDays, getActivitySubtitle } from "./activity.utils";
+import type { ActivityFilter, ActivityFilterOption } from "./activity.types";
 
 export function ActivityScreen() {
   const theme = useTheme();
+  const styles = useMemo(() => createActivityStyles(theme), [theme]);
   const { t } = useTranslation();
   const sheets = useSheets();
   const { transactions, backend, refresh } = useWallet();
-  const [filter, setFilter] = useState<Filter>("all");
+  const [filter, setFilter] = useState<ActivityFilter>("all");
 
-  const verb: Record<TxType, string> = {
-    receive: t("activity.verb.receive"),
-    send: t("activity.verb.send"),
-    swap: t("activity.verb.swap"),
-  };
-
-  const rows = transactions.filter((tx) => (filter === "all" ? true : tx.type === filter));
-  const days = [...new Set(rows.map((tx) => tx.day))];
-
-  const filters: { value: Filter; label: string }[] = [
+  const rows = filterTransactions(transactions, filter);
+  const days = getActivityDays(rows);
+  const filters: ActivityFilterOption[] = [
     { value: "all", label: t("activity.filters.all") },
     { value: "receive", label: t("activity.filters.receive") },
     { value: "send", label: t("activity.filters.send") },
     { value: "swap", label: t("activity.filters.swap") },
   ];
-
-  const renderRow = (tx: DemoTransaction, last: boolean) => {
-    const incoming = tx.type === "receive";
-    const amtColor =
-      tx.status === "failed" ? theme.colors.textFaint : incoming ? theme.colors.pos : theme.colors.text;
-    const prefix = incoming ? "+" : tx.type === "send" ? "−" : "";
-    const partyLabel =
-      tx.type === "swap" ? tx.party : `${incoming ? t("activity.from") : t("activity.to")}${tx.party}`;
-    return (
-      <Row
-        key={tx.id}
-        last={last}
-        onPress={() => sheets.open("txDetail", { id: tx.id })}
-        left={<TxIcon type={tx.type} />}
-        title={`${verb[tx.type]} ${tx.token}`}
-        sub={`${partyLabel}  ·  ${tx.when.split(" · ")[1] ?? ""}`}
-        right={
-          <AppText
-            weight="semibold"
-            size={15.5}
-            tnum
-            color={amtColor}
-            style={tx.status === "failed" ? { textDecorationLine: "line-through" } : undefined}
-          >
-            {prefix}
-            {fmtToken(tx.amount, tx.token)}
-          </AppText>
-        }
-        rightSub={
-          tx.status !== "confirmed" ? (
-            <StatusPill status={tx.status} />
-          ) : (
-            <AppText size={13} muted tnum>{fmtUSD(tx.fiat)}</AppText>
-          )
-        }
-      />
-    );
-  };
 
   return (
     <Screen>
@@ -120,13 +51,13 @@ export function ActivityScreen() {
         }
       />
       {backend !== "online" && (
-        <View style={{ paddingHorizontal: theme.spacing.pad, paddingBottom: 4 }}>
+        <View style={styles.notice}>
           <BackendNotice status={backend} onRetry={refresh} />
         </View>
       )}
-      <View style={{ flexDirection: "row", gap: 8, paddingHorizontal: theme.spacing.pad, paddingBottom: 4 }}>
+      <View style={styles.filters}>
         {filters.map((f) => (
-          <Chip key={f.value} label={f.label} on={filter === f.value} onPress={() => setFilter(f.value)} />
+          <FilterChip key={f.value} label={f.label} active={filter === f.value} onPress={() => setFilter(f.value)} />
         ))}
       </View>
 
@@ -137,20 +68,28 @@ export function ActivityScreen() {
           body={t("activity.empty.filteredBody")}
         />
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
-          <View style={{ paddingHorizontal: theme.spacing.pad, paddingTop: 8 }}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.list}>
+          <View style={styles.listInner}>
             {days.map((day) => {
               const dayRows = rows.filter((tx) => tx.day === day);
               return (
-                <View key={day} style={{ marginBottom: 6 }}>
+                <View key={day} style={styles.daySection}>
                   <SectionLabel>{day}</SectionLabel>
-                  <Card padding={0} style={{ paddingHorizontal: 16, marginBottom: 14 }}>
-                    {dayRows.map((tx, i) => renderRow(tx, i === dayRows.length - 1))}
+                  <Card padding={0} style={styles.dayCard}>
+                    {dayRows.map((tx, i) => (
+                      <TransactionRow
+                        key={tx.id}
+                        tx={tx}
+                        subtitle={getActivitySubtitle(tx, t)}
+                        last={i === dayRows.length - 1}
+                        onPress={() => sheets.open("txDetail", { id: tx.id })}
+                      />
+                    ))}
                   </Card>
                 </View>
               );
             })}
-            <View style={{ alignItems: "center", paddingVertical: 4 }}>
+            <View style={styles.footer}>
               <AppText size={13} faint>
                 {t("activity.footer")}
               </AppText>

@@ -4,11 +4,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { LivenessFlow } from "./LivenessFlow";
 import { grantLiveness } from "./livenessGate";
 
-/**
- * Route wrapper around {@link LivenessFlow}. Standalone (Security Center) when
- * opened with no params; a step-up gate when given a `next` route to continue
- * to on pass — e.g. `/liveness?next=/reveal`.
- */
 export function LivenessScreen() {
   const router = useRouter();
   const { next } = useLocalSearchParams<{ next?: string }>();
@@ -20,8 +15,6 @@ export function LivenessScreen() {
         mode={gated ? "gate" : "standalone"}
         onPass={() => {
           if (gated) {
-            // Grant a one-shot pass so the destination route lets us through
-            // instead of bouncing us straight back here.
             grantLiveness(next);
             router.replace(next as never);
           } else {

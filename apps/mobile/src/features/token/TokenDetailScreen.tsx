@@ -1,32 +1,27 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
   Screen,
   ScreenHeader,
-  AppText,
   Button,
-  Card,
-  Row,
   IconButton,
-  TokenGlyph,
-  TxIcon,
-  ChangeBadge,
   SectionLabel,
   Segmented,
   Sparkline,
   BackendNotice,
-  PriceFreshness,
 } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useWallet } from "@/providers/WalletDataProvider";
 import { useSheets } from "@/providers/SheetProvider";
-import { fmtUSD, fmtToken } from "@/utils/format";
-import { CHAINS, tokenById, SPARKLINE, RANGES, type Range, type TxType } from "@/features/wallet/data";
+import { CHAINS, tokenById, SPARKLINE, RANGES, type Range } from "@/features/wallet/data";
+import { createTokenDetailStyles } from "./TokenDetailScreen.styles";
+import { MarketCard, RecentTransactions, TokenHero } from "./TokenDetailScreen.parts";
 
 export function TokenDetailScreen({ id }: { id: string }) {
   const theme = useTheme();
+  const styles = useMemo(() => createTokenDetailStyles(theme), [theme]);
   const router = useRouter();
   const { t } = useTranslation();
   const { tokens, transactions, backend, price, refresh } = useWallet();
@@ -35,15 +30,9 @@ export function TokenDetailScreen({ id }: { id: string }) {
 
   const token = tokens.find((x) => x.id === id) ?? tokenById(id);
   const chain = CHAINS[token.chain];
-  const priceUnavail = price === "unavailable";
-  const dimChart = backend === "rpc_unavailable" || priceUnavail;
+  const priceUnavailable = price === "unavailable";
+  const dimChart = backend === "rpc_unavailable" || priceUnavailable;
   const txs = transactions.filter((x) => x.token === token.symbol).slice(0, 3);
-
-  const verb: Record<TxType, string> = {
-    receive: t("activity.verb.receive"),
-    send: t("activity.verb.send"),
-    swap: t("activity.verb.swap"),
-  };
 
   return (
     <Screen>
@@ -51,72 +40,61 @@ export function TokenDetailScreen({ id }: { id: string }) {
         title={token.name}
         subtitle={chain.name}
         onBack={() => router.back()}
-        trailing={<IconButton name="more" size={20} accessibilityLabel="More options" onPress={() => sheets.open("soon", { title: token.symbol })} />}
+        trailing={
+          <IconButton
+            name="more"
+            size={20}
+            accessibilityLabel="More options"
+            onPress={() => sheets.open("soon", { title: token.symbol })}
+          />
+        }
       />
-      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {backend !== "online" && (
-          <View style={{ paddingHorizontal: theme.spacing.pad, paddingBottom: 4 }}>
+          <View style={styles.notice}>
             <BackendNotice status={backend} onRetry={refresh} />
           </View>
         )}
 
-        <View style={{ paddingHorizontal: theme.spacing.pad }}>
-          <View style={{ alignItems: "center", paddingTop: 4 }}>
-            <TokenGlyph symbol={token.symbol} color={token.color} size={64} />
-            <AppText weight="bold" size={34} tnum style={{ marginTop: 14, letterSpacing: -1 }}>
-              {fmtToken(token.amount, token.symbol)}
-            </AppText>
-            <AppText size={16} muted tnum style={{ marginTop: 4 }}>
-              {priceUnavail ? t("token.valueUnavailable") : fmtUSD(token.value)}
-            </AppText>
-            {!priceUnavail && (
-              <View style={{ marginTop: 10 }}>
-                <ChangeBadge pct={token.change} />
-              </View>
-            )}
-            <PriceFreshness status={price} onRetry={refresh} />
-          </View>
+        <View style={styles.body}>
+          <TokenHero
+            token={token}
+            priceUnavailable={priceUnavailable}
+            priceStatus={price}
+            unavailableLabel={t("token.valueUnavailable")}
+            onRetry={refresh}
+          />
 
-          <View style={{ marginTop: 20, marginBottom: 12, opacity: dimChart ? 0.4 : 1 }}>
+          <View style={[styles.chartWrap, { opacity: dimChart ? 0.4 : 1 }]}>
             <Sparkline data={SPARKLINE} up={token.change >= 0} height={104} />
           </View>
           <Segmented options={RANGES} value={range} onChange={setRange} small />
 
-          <View style={{ flexDirection: "row", gap: 10, marginTop: 20 }}>
-            <Button label={t("common.actions.receive")} icon="receive" variant="soft" style={{ flex: 1 }} onPress={() => sheets.open("receive", { token: token.symbol })} />
-            <Button label={t("common.actions.send")} icon="send" style={{ flex: 1 }} height={52} onPress={() => router.push(`/send?token=${token.id}`)} />
+          <View style={styles.actions}>
+            <Button
+              label={t("common.actions.receive")}
+              icon="receive"
+              variant="soft"
+              style={styles.actionButton}
+              onPress={() => sheets.open("receive", { token: token.symbol })}
+            />
+            <Button
+              label={t("common.actions.send")}
+              icon="send"
+              height={52}
+              style={styles.actionButton}
+              onPress={() => router.push(`/send?token=${token.id}`)}
+            />
           </View>
 
-          <View style={{ height: 22 }} />
+          <View style={styles.spacer} />
           <SectionLabel>{t("token.market")}</SectionLabel>
-          <Card padding={0} style={{ paddingHorizontal: 16 }}>
-            <Row title={t("token.price")} right={priceUnavail ? "—" : fmtUSD(token.price, { cents: token.price < 10 })} />
-            <Row title={t("token.change24")} right={priceUnavail ? <AppText faint size={15.5}>—</AppText> : <ChangeBadge pct={token.change} size={13} plain />} />
-            <Row title={t("token.network")} right={chain.name} last />
-          </Card>
+          <MarketCard token={token} chainName={chain.name} priceUnavailable={priceUnavailable} />
 
           {txs.length > 0 && (
             <>
-              <View style={{ height: 22 }} />
-              <SectionLabel>{t("token.recent")}</SectionLabel>
-              <Card padding={0} style={{ paddingHorizontal: 16 }}>
-                {txs.map((x, i) => (
-                  <Row
-                    key={x.id}
-                    last={i === txs.length - 1}
-                    onPress={() => sheets.open("txDetail", { id: x.id })}
-                    left={<TxIcon type={x.type} size={40} />}
-                    title={`${verb[x.type]} ${x.token}`}
-                    sub={x.when}
-                    right={
-                      <AppText weight="semibold" size={15.5} tnum color={x.type === "receive" ? theme.colors.pos : theme.colors.text}>
-                        {x.type === "receive" ? "+" : "−"}
-                        {fmtToken(x.amount, x.token)}
-                      </AppText>
-                    }
-                  />
-                ))}
-              </Card>
+              <View style={styles.spacer} />
+              <RecentTransactions transactions={txs} onTransactionPress={(txId) => sheets.open("txDetail", { id: txId })} />
             </>
           )}
         </View>

@@ -8,7 +8,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useTheme, alpha } from "@/theme";
 import { OVAL } from "./config";
-import type { FaceFit, LivenessPhase } from "./useLivenessChallenge";
+import type { FaceFit, LivenessPhase } from "./liveness.types";
 
 const AnimatedEllipse = Animated.createAnimatedComponent(Ellipse);
 

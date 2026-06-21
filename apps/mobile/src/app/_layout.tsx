@@ -67,18 +67,18 @@ export default function RootLayout() {
               <WalletDataProvider>
                 <SheetProvider>
                   <ThemedStatusBar />
-              <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
-                <Stack.Screen name="index" />
-                <Stack.Screen name="onboarding" />
-                <Stack.Screen name="lock" options={{ animation: "slide_from_bottom" }} />
-                <Stack.Screen name="(tabs)" />
-                <Stack.Screen name="send" options={{ animation: "slide_from_right" }} />
-                <Stack.Screen name="token/[id]" options={{ animation: "slide_from_right" }} />
-                <Stack.Screen name="backup" options={{ animation: "slide_from_right" }} />
-                <Stack.Screen name="reveal" options={{ animation: "slide_from_right" }} />
-                <Stack.Screen name="change-passcode" options={{ animation: "slide_from_right" }} />
-                <Stack.Screen name="liveness" options={{ animation: "slide_from_bottom" }} />
-                <Stack.Screen name="scan" options={{ animation: "slide_from_bottom" }} />
+                  <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
+                    <Stack.Screen name="index" />
+                    <Stack.Screen name="onboarding" />
+                    <Stack.Screen name="lock" options={{ animation: "slide_from_bottom" }} />
+                    <Stack.Screen name="(tabs)" />
+                    <Stack.Screen name="send" options={{ animation: "slide_from_right" }} />
+                    <Stack.Screen name="token/[id]" options={{ animation: "slide_from_right" }} />
+                    <Stack.Screen name="backup" options={{ animation: "slide_from_right" }} />
+                    <Stack.Screen name="reveal" options={{ animation: "slide_from_right" }} />
+                    <Stack.Screen name="change-passcode" options={{ animation: "slide_from_right" }} />
+                    <Stack.Screen name="liveness" options={{ animation: "slide_from_bottom" }} />
+                    <Stack.Screen name="scan" options={{ animation: "slide_from_bottom" }} />
                   </Stack>
                   <SheetHost />
                   <AutoLock />
