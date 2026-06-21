@@ -12,6 +12,8 @@ export function NumberPad({ onKey }: { onKey: (key: string) => void }) {
         <Pressable
           key={k}
           onPress={() => onKey(k)}
+          accessibilityRole="button"
+          accessibilityLabel={k === "del" ? "Delete" : k === "." ? "Decimal point" : k}
           style={({ pressed }) => ({
             width: "33.33%",
             height: 58,

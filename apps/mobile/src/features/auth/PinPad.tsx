@@ -70,6 +70,8 @@ export function PinKeypad({
           <View key={i} style={{ width: "33.33%", padding: 5 }}>
             <Pressable
               onPress={() => (k === "bio" ? onBiometric?.() : onKey(k))}
+              accessibilityRole="button"
+              accessibilityLabel={k === "del" ? "Delete" : k === "bio" ? "Use Face ID" : k}
               style={({ pressed }) => ({
                 height: 64,
                 borderRadius: 20,

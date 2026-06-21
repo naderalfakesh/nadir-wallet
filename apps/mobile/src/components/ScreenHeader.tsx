@@ -30,6 +30,8 @@ export function ScreenHeader({ title, subtitle, onBack, trailing }: ScreenHeader
         <Pressable
           onPress={onBack}
           hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
           style={{
             width: 40,
             height: 40,

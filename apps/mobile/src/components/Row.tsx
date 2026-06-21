@@ -73,7 +73,11 @@ export function Row({ left, title, sub, right, rightSub, onPress, chevron, last 
 
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={({ pressed }) => pressed && { opacity: 0.6 }}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        style={({ pressed }) => pressed && { opacity: 0.6 }}
+      >
         {content}
       </Pressable>
     );
