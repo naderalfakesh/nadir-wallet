@@ -179,7 +179,13 @@ export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fi
         <View style={{ paddingHorizontal: theme.spacing.pad, paddingBottom: insets.bottom + theme.spacing.pad, gap: 10 }}>
           <Button label={t("send.overlay.retry")} icon="refresh" onPress={onRetry} />
           <View style={{ flexDirection: "row", gap: 10 }}>
-            <Button label={t("send.overlay.details")} icon="external" variant="ghost" style={{ flex: 1 }} />
+            <Button
+              label={t("send.overlay.details")}
+              icon="external"
+              variant="ghost"
+              style={{ flex: 1 }}
+              onPress={() => void openExplorer(chain.explorerHost, `tx/${hash}`)}
+            />
             <Button label={t("send.overlay.backToWallet")} variant="ghost" onPress={goWallet} style={{ flex: 1 }} />
           </View>
         </View>
@@ -216,7 +222,12 @@ export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fi
         </View>
       </Centered>
       <View style={{ paddingHorizontal: theme.spacing.pad, paddingBottom: insets.bottom + theme.spacing.pad, gap: 10 }}>
-        <Button label={t("send.overlay.viewOn", { explorer: chain.explorerName })} icon="external" variant="ghost" />
+        <Button
+          label={t("send.overlay.viewOn", { explorer: chain.explorerName })}
+          icon="external"
+          variant="ghost"
+          onPress={() => void openExplorer(chain.explorerHost, `tx/${hash}`)}
+        />
         <Button label={t("send.overlay.done")} onPress={goWallet} />
       </View>
     </Screen>
