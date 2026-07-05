@@ -57,7 +57,9 @@ autolinking.
   - `ThemeProvider`, `DemoStateProvider` (live-API toggle + manual state
     overrides), `WalletDataProvider` (the single data source), `SheetProvider`.
 - **`features/`** — screen logic grouped by domain (onboarding, lock, home,
-  send, token, activity, security, settings, sheets, auth, wallet).
+  send, token, activity, security, settings, sheets, auth, wallet, liveness,
+  scan). Screens follow a consistent split: `Screen.tsx` (composition) +
+  `.parts.tsx` / `.styles.ts` / `.types.ts` / `.utils.ts` / `use*` hooks.
 - **`components/`** — themed primitives (Text, Button, Card, Row, Icon set,
   Sparkline, QR, BottomSheet, notices, …).
 - **`services/`** — `api` (typed client), `storage` (AsyncStorage + SecureStore),
@@ -76,6 +78,14 @@ autolinking.
 - **`db/`** — Drizzle schema + libsql client + migrations; tables: `price_cache`,
   `reported_addresses`, `security_checks`.
 - **`lib/`** — errors, validation, mock helpers.
+
+## Testing
+
+Pure logic is unit-tested with Vitest from the repo root (`pnpm test`): the
+liveness challenge state machine (`reduceLiveness`), BIP39/address helpers
+(`crypto-core`), risk assessment and transaction simulation (`wallet-core`), QR
+address extraction, and the send/security/transaction display helpers. GitHub
+Actions runs lint, typecheck, and the suite on every push.
 
 ## API data flow (app side)
 

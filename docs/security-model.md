@@ -26,7 +26,7 @@ The app stores two kinds of data, deliberately separated:
 | Data                                                      | Where                                  | Secret?   |
 | --------------------------------------------------------- | -------------------------------------- | --------- |
 | BIP39 mnemonic                                            | **SecureStore** (`nadir.mnemonic`)     | **Yes**   |
-| App-lock PIN (demo placeholder)                           | **SecureStore** (`nadir.demoPasscode`) | sensitive |
+| App-lock PIN (demo placeholder)                           | **SecureStore** (`nadir.passcode`)     | sensitive |
 | Public derived address, `walletCreatedAt`                 | AsyncStorage (prefs)                   | No        |
 | onboarding/backup/biometric/auto-lock/theme/hide-balances | AsyncStorage                           | No        |
 | Security event log                                        | AsyncStorage                           | No        |

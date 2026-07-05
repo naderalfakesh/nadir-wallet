@@ -122,7 +122,7 @@ address.
 | **Medium — large amount** | A valid address with `amount` above `5` |
 | **Medium — contract/burn** | The zero/burn address `0x0000…0000` |
 | **High — reported** | The seeded demo address `0xbeef…beef` |
-| **High — invalid** | A malformed address (`isValidAddress: false`) |
+| **Error — invalid address** | A malformed address is rejected with `400 bad_request` |
 | **Error — unsupported network** | Any unknown `networkId` |
 
 The high-risk reported address `0xbeefbeefbeefbeefbeefbeefbeefbeefbeefbeef` is
@@ -150,10 +150,10 @@ curl -X POST localhost:8787/security/check-address -H 'content-type: application
   -d '{"address":"0xbeefbeefbeefbeefbeefbeefbeefbeefbeefbeef","networkId":"ethereum-sepolia"}'
 # -> { "riskLevel": "high", ... }
 
-# High risk (invalid address)
+# Error (invalid address — rejected before the risk engine, like report-address)
 curl -X POST localhost:8787/security/check-address -H 'content-type: application/json' \
   -d '{"address":"0x123","networkId":"ethereum-sepolia"}'
-# -> { "riskLevel": "high", "isValidAddress": false, ... }
+# -> 400 { "error": { "code": "bad_request", "message": "Invalid address" } }
 
 # Error (unsupported network)
 curl -X POST localhost:8787/security/check-address -H 'content-type: application/json' \

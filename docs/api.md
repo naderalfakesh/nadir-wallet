@@ -206,8 +206,10 @@ Response:
 }
 ```
 
-See the demo risk matrix in [`apps/api/README.md`](../apps/api/README.md) for low /
-medium / high / invalid / error examples.
+A malformed `address` is rejected with `400 bad_request` before reaching the
+risk engine (same validation as `/security/report-address`). See the demo risk
+matrix in [`apps/api/README.md`](../apps/api/README.md) for low / medium / high /
+error examples.
 
 ## POST /security/report-address
 
