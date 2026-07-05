@@ -14,6 +14,21 @@ token metadata, transaction drafts for simulation). It runs only on Ethereum
 Sepolia and Polygon Amoy testnets, with no real signing or broadcast yet — a
 deliberate, clearly-scoped MVP boundary.
 
+The centerpiece is the native layer: two hand-written VisionCamera
+frame-processor plugins (Swift + Kotlin, Nitro Modules) run Google ML Kit on the
+camera worklet thread — an **active face-liveness check** with randomized
+challenges, and a **QR address scanner** for the send flow.
+
+## Demo
+
+> The face-liveness and QR features use the camera and require a development
+> build on a physical device, so they are shown here on video.
+
+<!-- images/liveness.gif — hero clip: oval gate → blink / turn / nod / smile → pass -->
+<!-- images/step-up.gif — liveness gate before revealing the recovery phrase -->
+<!-- images/qr-scan.gif — QR scan filling the send recipient -->
+<!-- Stills: images/home.png · images/send-review.png · images/security.png -->
+
 ## Tech stack
 
 | Area    | Choices                                                                                                                                                                     |
@@ -25,7 +40,7 @@ deliberate, clearly-scoped MVP boundary.
 | Native  | Two custom VisionCamera V5 frame-processor plugins (Nitro Modules, Swift/Kotlin) over Google ML Kit: `face-liveness` (Face Detection) and `code-scanner` (Barcode Scanning) |
 | Backend | Hono + `@hono/node-server`, libsql + Drizzle ORM, Zod, viem                                                                                                                 |
 | Shared  | `@nadir-wallet/{types,crypto-core,wallet-core,config}`                                                                                                                      |
-| Tooling | Turborepo, pnpm 9                                                                                                                                                           |
+| Tooling | Turborepo, pnpm 11, Vitest, GitHub Actions                                                                                                                                  |
 
 ## Monorepo structure
 
@@ -43,7 +58,6 @@ packages/
 docs/
   security-model.md      # trust boundary, what is/never sent to the API
   architecture.md        # layers, data flow, design decisions
-  interview-notes.md     # interview cheat sheet
   api.md                 # endpoint request/response reference
 ```
 
@@ -53,7 +67,7 @@ Mobile follows a feature-based layout under `apps/mobile/src` (`app/` routes,
 ## Requirements
 
 - Node.js >= 22.13 (required by Expo SDK 56)
-- pnpm 9
+- pnpm 11
 - Xcode (iOS Simulator) and/or Android Studio for device builds
 
 ## Getting started
@@ -145,6 +159,25 @@ RPC_URL_POLYGON_AMOY=https://polygon-amoy.g.alchemy.com/v2/YOUR_KEY
 - **QR address scanner** in the send flow, backed by a second hand-written
   native plugin (`packages/code-scanner`) wrapping ML Kit Barcode Scanning.
 
+## Testing & quality
+
+Unit tests (Vitest) target the logic where a regression would be silent:
+
+- the **face-liveness challenge state machine** (`reduceLiveness`, a pure
+  reducer) — alignment gating, every challenge type, timeouts, and face-loss
+  restarts
+- **BIP39** word/checksum validation and EVM address derivation (`crypto-core`)
+- **address-risk scoring** and **transaction simulation** (`wallet-core`)
+- QR address extraction and the one-shot scan channel
+- send input validation, simulation-status mapping, security score tiers, and
+  transaction display helpers
+
+```sh
+pnpm test
+```
+
+GitHub Actions runs lint, typecheck, and the test suite on every push.
+
 ## Current limitations
 
 - **Testnet-only** (Ethereum Sepolia, Polygon Amoy); no mainnet.
@@ -169,35 +202,12 @@ RPC_URL_POLYGON_AMOY=https://polygon-amoy.g.alchemy.com/v2/YOUR_KEY
 - Passive anti-spoofing (PAD) layered under the active liveness check
 - Stronger encrypted-vault model
 - WalletConnect
-- e2e tests
-- Screenshots / demo video
-
-## Screenshots / demo
-
-> _Add screenshots and a short screen-recording here for the portfolio._
-
-Suggested captures:
-
-- **Static shots** (any device or simulator): Welcome · Recovery-phrase reveal ·
-  Home · Send review (risk + simulation) · High-risk blocked · Receive (QR) ·
-  Security center (with the step-up toggles) · Settings.
-- **Native-feature clips** (record on a physical device — these are the
-  portfolio centerpiece):
-  - Face-liveness run — fitting the oval, then blink / turn / nod / smile with
-    the progress ring filling and the pass flourish.
-  - Step-up gate — toggling "Liveness before reveal" in the Security Center,
-    then the check running before the recovery phrase appears.
-  - QR scan — tapping the scan button in send and the recipient address filling
-    from a wallet QR.
-
-Drop files under `images/` and embed them here, e.g.
-`![Liveness](images/liveness.gif)`.
+- e2e tests for the core non-camera flows
 
 ## Docs
 
 - [`docs/security-model.md`](docs/security-model.md) — trust boundary & secrets
 - [`docs/architecture.md`](docs/architecture.md) — layers & data flow
-- [`docs/interview-notes.md`](docs/interview-notes.md) — interview cheat sheet
 - [`docs/api.md`](docs/api.md) — endpoint reference
 - [`apps/api/README.md`](apps/api/README.md) — API specifics
 - [`packages/face-liveness/README.md`](packages/face-liveness/README.md) — native ML Kit liveness plugin (Nitro)
@@ -211,6 +221,7 @@ pnpm dev:api        # backend only
 pnpm dev:mobile     # mobile only
 pnpm lint           # turbo run lint
 pnpm typecheck      # turbo run typecheck (all packages + apps)
+pnpm test           # vitest run (packages + app logic)
 pnpm format         # prettier across the repo
 ```
 
