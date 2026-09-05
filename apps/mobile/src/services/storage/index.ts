@@ -1,6 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
+import { hashPasscode, isPasscodeRecord } from "@nadir-wallet/crypto-core";
 import type { ColorScheme } from "@/theme";
+import { EMPTY_LOCKOUT, sanitizeLockout, type LockoutState } from "@/features/auth/lockout";
 import type { BackendStatus, PriceStatus, SecurityEvent } from "@/types/status";
 import type { SendSim, SendOutcome } from "@/providers/DemoStateProvider";
 
@@ -10,14 +12,13 @@ const KEYS = {
   theme: "nadir.theme",
   demo: "nadir.demo",
   events: "nadir.events",
+  lockout: "nadir.lockout",
 } as const;
 
-// SecureStore (device keychain) holds the only real secret — the BIP39
-// mnemonic — plus the app-lock PIN. Never AsyncStorage.
+// SecureStore (device keychain) holds the only real secret, the BIP39
+// mnemonic, plus the salted hash of the app-lock PIN. Never AsyncStorage.
 const SECURE_PASSCODE = "nadir.passcode";
 const SECURE_MNEMONIC = "nadir.mnemonic";
-// Testnet demo fallback used only when no PIN has been stored yet.
-const DEFAULT_PASSCODE = "123456";
 
 export interface Prefs {
   onboardingCompleted: boolean;
@@ -30,7 +31,7 @@ export interface Prefs {
   /** Require a passed liveness check before confirming a high-value send. */
   requireLivenessSend: boolean;
   lastAccountId: string;
-  /** Public derived EVM address — non-secret. */
+  /** Public derived EVM address - non-secret. */
   walletAddress: string;
   walletCreatedAt: number;
 }
@@ -69,7 +70,9 @@ export interface PersistedState {
   theme: ColorScheme;
   demo: DemoPrefs;
   events: SecurityEvent[];
-  passcode: string;
+  /** Serialized PBKDF2 record, or null until the user sets a PIN. */
+  passcodeHash: string | null;
+  lockout: LockoutState;
 }
 
 async function readJson<T>(key: string, fallback: T): Promise<T> {
@@ -82,17 +85,31 @@ async function readJson<T>(key: string, fallback: T): Promise<T> {
   }
 }
 
-async function getPasscode(): Promise<string> {
+async function getPasscodeHash(): Promise<string | null> {
   try {
     const stored = await SecureStore.getItemAsync(SECURE_PASSCODE);
-    return stored ?? DEFAULT_PASSCODE;
+    if (!stored) return null;
+    if (isPasscodeRecord(stored)) return stored;
+    // Earlier builds kept the PIN itself in the keychain. Upgrade it in place.
+    const record = hashPasscode(stored);
+    await SecureStore.setItemAsync(SECURE_PASSCODE, record);
+    return record;
   } catch {
-    return DEFAULT_PASSCODE;
+    return null;
+  }
+}
+
+async function getLockout(): Promise<LockoutState> {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.lockout);
+    return raw ? sanitizeLockout(JSON.parse(raw)) : EMPTY_LOCKOUT;
+  } catch {
+    return EMPTY_LOCKOUT;
   }
 }
 
 export async function loadPersistedState(): Promise<PersistedState> {
-  const [prefs, demo, events, passcode, theme] = await Promise.all([
+  const [prefs, demo, events, passcodeHash, theme, lockout] = await Promise.all([
     readJson<Prefs>(KEYS.prefs, DEFAULT_PREFS),
     readJson<DemoPrefs>(KEYS.demo, DEFAULT_DEMO),
     AsyncStorage.getItem(KEYS.events).then((raw) => {
@@ -102,10 +119,11 @@ export async function loadPersistedState(): Promise<PersistedState> {
         return null;
       }
     }),
-    getPasscode(),
+    getPasscodeHash(),
     AsyncStorage.getItem(KEYS.theme).then((v) => (v === "light" ? "light" : "dark") as ColorScheme),
+    getLockout(),
   ]);
-  return { prefs, demo, events: events ?? [], passcode, theme };
+  return { prefs, demo, events: events ?? [], passcodeHash, theme, lockout };
 }
 
 export const storage = {
@@ -113,9 +131,11 @@ export const storage = {
   saveTheme: (theme: ColorScheme) => AsyncStorage.setItem(KEYS.theme, theme),
   saveDemo: (demo: DemoPrefs) => AsyncStorage.setItem(KEYS.demo, JSON.stringify(demo)),
   saveEvents: (events: SecurityEvent[]) => AsyncStorage.setItem(KEYS.events, JSON.stringify(events)),
-  savePasscode: async (pin: string) => {
+  saveLockout: (state: LockoutState) => AsyncStorage.setItem(KEYS.lockout, JSON.stringify(state)),
+  // Only the salted hash is written; the PIN itself is never persisted.
+  savePasscodeHash: async (record: string) => {
     try {
-      await SecureStore.setItemAsync(SECURE_PASSCODE, pin);
+      await SecureStore.setItemAsync(SECURE_PASSCODE, record);
     } catch {
       // SecureStore is unavailable on some targets (e.g. web); ignore.
     }
@@ -134,7 +154,7 @@ export const storage = {
     await Promise.all([
       SecureStore.deleteItemAsync(SECURE_MNEMONIC).catch(() => undefined),
       SecureStore.deleteItemAsync(SECURE_PASSCODE).catch(() => undefined),
-      AsyncStorage.multiRemove([KEYS.prefs, KEYS.events]),
+      AsyncStorage.multiRemove([KEYS.prefs, KEYS.events, KEYS.lockout]),
     ]);
   },
 };

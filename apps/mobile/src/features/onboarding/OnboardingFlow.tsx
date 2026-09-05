@@ -94,7 +94,7 @@ export function OnboardingFlow() {
       <Screen>
         <CreatePasscode
           onDone={(pin) => {
-            setPasscode(pin);
+            void setPasscode(pin);
             setStep("biometric");
           }}
           onBack={() => setStep("welcome")}

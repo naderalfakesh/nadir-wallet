@@ -3,3 +3,4 @@ export * from "./tokens";
 export * from "./address";
 export * from "./amount";
 export * from "./wallet";
+export * from "./passcode";

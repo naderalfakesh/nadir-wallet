@@ -5,60 +5,66 @@ import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { PinDots, PinKeypad } from "./PinPad";
 import { usePinEntry } from "./usePinEntry";
-
-const MAX_ATTEMPTS = 5;
-const LOCKOUT_SECONDS = 30;
+import { attemptsLeft, lockRemainingMs, type LockoutState } from "./lockout";
 
 interface PasscodeUnlockProps {
-  correct: string;
+  /** Resolves true when the entered PIN matches the stored hash. */
+  verify: (pin: string) => Promise<boolean>;
+  lockout: LockoutState;
   onUnlock: () => void;
+  /** Called on a wrong entry; the owner persists the new lockout state. */
+  onFailure: () => void;
   onUseBiometric: () => void;
   biometricAvailable: boolean;
 }
 
-export function PasscodeUnlock({ correct, onUnlock, onUseBiometric, biometricAvailable }: PasscodeUnlockProps) {
+export function PasscodeUnlock({
+  verify,
+  lockout,
+  onUnlock,
+  onFailure,
+  onUseBiometric,
+  biometricAvailable,
+}: PasscodeUnlockProps) {
   const theme = useTheme();
   const { t } = useTranslation();
-  const [attempts, setAttempts] = useState(0);
-  const [lockLeft, setLockLeft] = useState(0);
+  const [lockLeft, setLockLeft] = useState(() => Math.ceil(lockRemainingMs(lockout, Date.now()) / 1000));
+  const [checking, setChecking] = useState(false);
   const locked = lockLeft > 0;
 
   const { pin, error, shake, press } = usePinEntry({
     onComplete: (entered, { fail }) => {
-      if (entered === correct) {
-        onUnlock();
-        return;
-      }
-      const a = attempts + 1;
-      setAttempts(a);
-      if (a >= MAX_ATTEMPTS) setLockLeft(LOCKOUT_SECONDS);
-      fail();
+      setChecking(true);
+      verify(entered)
+        .then((ok) => {
+          if (ok) onUnlock();
+          else {
+            onFailure();
+            fail();
+          }
+        })
+        .finally(() => setChecking(false));
     },
   });
 
+  // Re-sync the countdown whenever the owner reports a new lockout state, then
+  // tick it down once a second while locked.
   useEffect(() => {
-    if (!locked) return;
-    const id = setInterval(() => {
-      setLockLeft((s) => {
-        if (s <= 1) {
-          setAttempts(0);
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
+    const update = () => setLockLeft(Math.ceil(lockRemainingMs(lockout, Date.now()) / 1000));
+    update();
+    if (lockRemainingMs(lockout, Date.now()) <= 0) return;
+    const id = setInterval(update, 1000);
     return () => clearInterval(id);
-  }, [locked]);
+  }, [lockout]);
 
   const onKey = (k: string) => {
-    if (!locked) press(k);
+    if (!locked && !checking) press(k);
   };
 
-  const remaining = MAX_ATTEMPTS - attempts;
   const message = locked
     ? t("lock.lockout", { seconds: lockLeft })
     : error
-      ? t("lock.incorrect", { count: remaining })
+      ? t("lock.incorrect", { count: attemptsLeft(lockout) })
       : t("lock.unlockWallet");
 
   return (
@@ -107,9 +113,6 @@ export function PasscodeUnlock({ correct, onUnlock, onUseBiometric, biometricAva
           </AppText>
         </Pressable>
       )}
-      <AppText size={11} faint style={{ marginTop: 10 }}>
-        {t("lock.demoPasscode")}
-      </AppText>
     </View>
   );
 }

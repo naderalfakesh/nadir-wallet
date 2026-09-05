@@ -19,7 +19,7 @@ export function LockScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { prefs, passcode, logEvent } = useApp();
+  const { prefs, verifyPasscode, lockout, recordUnlockFailure, clearLockout, logEvent } = useApp();
 
   const [mode, setMode] = useState<"bio" | "passcode">(prefs.biometricEnabled ? "bio" : "passcode");
   const [available, setAvailable] = useState(false);
@@ -29,10 +29,11 @@ export function LockScreen() {
 
   const unlock = useCallback(
     (methodLabel: string) => {
+      clearLockout();
       logEvent("unlock", { detail: methodLabel });
       router.replace("/home");
     },
-    [logEvent, router],
+    [clearLockout, logEvent, router],
   );
 
   const authenticate = useCallback(async () => {
@@ -72,7 +73,9 @@ export function LockScreen() {
     return (
       <Screen>
         <PasscodeUnlock
-          correct={passcode}
+          verify={verifyPasscode}
+          lockout={lockout}
+          onFailure={recordUnlockFailure}
           onUnlock={() => unlock(translate("security.log.unlockPasscode"))}
           onUseBiometric={() => {
             setMode("bio");

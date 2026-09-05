@@ -86,7 +86,9 @@
     "livenessPassTitle": "Liveness check passed",
     "livenessPassDetail": "Live presence confirmed on-device",
     "livenessFailTitle": "Liveness check not completed",
-    "livenessFailDetail": "Challenges timed out"
+    "livenessFailDetail": "Challenges timed out",
+    "passcodeChangedTitle": "Passcode changed",
+    "passcodeChangedDetail": "New app-lock passcode saved to the keychain"
   },
   "advanced": {
     "title": "Advanced",

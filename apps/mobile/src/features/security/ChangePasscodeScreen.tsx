@@ -7,8 +7,7 @@ import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { PinDots, PinKeypad } from "@/features/auth/PinPad";
 import { usePinEntry } from "@/features/auth/usePinEntry";
-
-const DEMO_PASSCODE = "123456";
+import { useApp } from "@/providers/AppProvider";
 
 type Stage = "current" | "new" | "confirm" | "done";
 
@@ -17,16 +16,19 @@ export function ChangePasscodeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { verifyPasscode, setPasscode, logEvent } = useApp();
   const [stage, setStage] = useState<Stage>("current");
   const [first, setFirst] = useState("");
 
   const { pin, error, shake, press, clear } = usePinEntry({
     onComplete: (entered, helpers) => {
       if (stage === "current") {
-        if (entered === DEMO_PASSCODE) {
-          helpers.clear();
-          setStage("new");
-        } else helpers.fail();
+        void verifyPasscode(entered).then((ok) => {
+          if (ok) {
+            helpers.clear();
+            setStage("new");
+          } else helpers.fail();
+        });
       } else if (stage === "new") {
         setFirst(entered);
         helpers.clear();
@@ -34,7 +36,10 @@ export function ChangePasscodeScreen() {
       } else if (stage === "confirm") {
         if (entered === first) {
           helpers.clear();
-          setStage("done");
+          void setPasscode(entered).then(() => {
+            logEvent("passcode_changed");
+            setStage("done");
+          });
         } else
           helpers.fail(() => {
             setFirst("");
@@ -124,11 +129,6 @@ export function ChangePasscodeScreen() {
         </View>
         <View style={{ flex: 1, minHeight: 24 }} />
         <PinKeypad onKey={press} />
-        {stage === "current" && (
-          <AppText size={11} faint style={{ marginTop: 12 }}>
-            {t("settings.changePin.demoHint")}
-          </AppText>
-        )}
       </View>
     </Screen>
   );

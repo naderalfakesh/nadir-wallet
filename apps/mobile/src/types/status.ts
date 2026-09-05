@@ -23,6 +23,7 @@ export type SecurityEventType =
   | "autolock"
   | "autolock_triggered"
   | "device_check"
+  | "passcode_changed"
   | "liveness_pass"
   | "liveness_fail";
 

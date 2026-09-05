@@ -42,7 +42,6 @@
     "confirmHint": "Enter it once more",
     "incorrect": "Incorrect passcode",
     "mismatch": "Passcodes didn't match",
-    "demoHint": "Demo passcode · 123456",
     "doneTitle": "Passcode updated",
     "doneBody": "Use your new passcode the next time you unlock Nadir."
   },
