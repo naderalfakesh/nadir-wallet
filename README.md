@@ -1,5 +1,7 @@
 # Nadir Wallet
 
+[![CI](https://github.com/naderalfakesh/nadir-wallet/actions/workflows/ci.yml/badge.svg)](https://github.com/naderalfakesh/nadir-wallet/actions/workflows/ci.yml)
+
 A polished, **local-first, non-custodial, testnet-only** crypto wallet showcase.
 It is a senior-level React Native / Expo portfolio project with a typed Hono
 backend, organised as a Turborepo monorepo.
