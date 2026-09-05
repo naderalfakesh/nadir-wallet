@@ -7,5 +7,6 @@ export default defineConfig({
   platform: "node",
   clean: true,
   sourcemap: true,
-  noExternal: [/^@repo\//],
+  // Workspace packages ship raw .ts, so they must be bundled into the dist.
+  noExternal: [/^@nadir-wallet\//],
 });
