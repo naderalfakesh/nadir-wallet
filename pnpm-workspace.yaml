@@ -1,6 +1,12 @@
 packages:
   - "apps/*"
   - "packages/*"
+# React Native / Expo need a flat node_modules so native modules resolve in a monorepo.
+nodeLinker: hoisted
+# viem pins an older ws with a known memory-exhaustion advisory; nothing here
+# opens a websocket, but keep the resolved version clean.
+overrides:
+  ws: ">=8.21.0"
 allowBuilds:
   esbuild: true
   msgpackr-extract: true
