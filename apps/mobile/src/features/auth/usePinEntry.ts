@@ -7,7 +7,7 @@ const SUBMIT_DELAY_MS = 120;
 const ERROR_FLASH_MS = 600;
 
 export interface PinEntryHelpers {
-  /** Clear the entered digits (and any error) immediately — e.g. when advancing a stage. */
+  /** Clear the entered digits (and any error) immediately - e.g. when advancing a stage. */
   clear: () => void;
   /** Flash the dots red, then clear; `after` runs once the flash ends. */
   fail: (after?: () => void) => void;

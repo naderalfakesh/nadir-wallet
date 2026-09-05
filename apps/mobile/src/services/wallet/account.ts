@@ -9,5 +9,5 @@ export function displayAddress(address: string, visible = 6): string {
 }
 
 // Re-exported for the send flow's local risk fallback (used when the backend is
-// unreachable). It takes a public address only — no private material.
+// unreachable). It takes a public address only - no private material.
 export { assessAddressRisk };

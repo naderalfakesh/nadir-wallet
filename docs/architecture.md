@@ -10,7 +10,7 @@ device; the backend is a stateless support service for public data.**
 ┌─────────────────────────── device ───────────────────────────┐
 │  Expo / React Native app                                      │
 │   • BIP39 generate/import, EVM derivation (m/44'/60'/0'/0/0)  │
-│   • SecureStore: mnemonic + app-lock PIN                      │
+│   • SecureStore: mnemonic + hashed app-lock PIN               │
 │   • AsyncStorage: public address + non-secret prefs + events │
 │   • providers: App / Theme / DemoState / WalletData / Sheet  │
 └───────────────┬───────────────────────────────────────────────┘
@@ -26,66 +26,85 @@ device; the backend is a stateless support service for public data.**
 
 ## Shared packages
 
-- **`@nadir-wallet/types`** — the source of truth for API request/response and
+- **`@nadir-wallet/types`**: the source of truth for API request/response and
   domain types, imported by both the app and the API so the contract can't drift.
-- **`@nadir-wallet/crypto-core`** — isomorphic crypto helpers: address validation
-  (`isEvmAddress`, `normalizeAddress`, `shortenAddress`), amount formatting, and
-  the BIP39 wallet module (`generateMnemonic`, `validateMnemonicPhrase`,
-  `mnemonicToEvmAddress`). Built on `viem` + `@scure/bip39`.
-- **`@nadir-wallet/wallet-core`** — pure domain logic shared by the backend:
-  address-risk assessment, transaction simulation, portfolio math.
-- **`@nadir-wallet/config`** — shared tsconfig / eslint / prettier.
-- **`@nadir-wallet/face-liveness`** / **`@nadir-wallet/code-scanner`** — custom
+- **`@nadir-wallet/crypto-core`**: isomorphic crypto helpers. Address validation
+  (`isEvmAddress`, `normalizeAddress`, `shortenAddress`), amount formatting, the
+  BIP39 wallet module (`generateMnemonic`, `validateMnemonicPhrase`,
+  `mnemonicToEvmAddress`), and the passcode hashing record
+  (`hashPasscode`, `verifyPasscode`). Built on `viem`, `@scure/bip39`, and
+  `@noble/hashes`.
+- **`@nadir-wallet/wallet-core`**: pure domain logic shared by the backend.
+  Address-risk assessment, transaction simulation, portfolio math.
+- **`@nadir-wallet/config`**: shared tsconfig / eslint / prettier.
+- **`@nadir-wallet/face-liveness`** / **`@nadir-wallet/code-scanner`**: custom
   native VisionCamera V5 frame-processor plugins (Nitro Modules, Swift/Kotlin)
   wrapping ML Kit Face Detection and Barcode Scanning. Unlike the TS packages
   these ship native code (podspec + Gradle/CMake + committed `nitrogen/`
   output); they autolink into the app and run on the camera worklet thread.
 
-The TypeScript packages export raw `.ts`; Metro is configured (`metro.config.js`)
-to watch the repo root and honour package exports, so there is no per-package
-build step. The two native packages are built by the iOS/Android toolchains via
-autolinking.
+The TypeScript packages export raw `.ts`. Metro is configured
+(`metro.config.js`) to watch the repo root and honour package exports, so there
+is no per-package build step, and the API's tsup config bundles the workspace
+packages into its dist. The two native packages are built by the iOS/Android
+toolchains via autolinking.
+
+### ML Kit on the iOS Simulator
+
+Google's ML Kit pods ship static frameworks without an arm64 simulator slice
+and pin `EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64`. Xcode 26 dropped Rosetta
+simulators, which left the app with no simulator destination at all. The Expo
+config plugin at `apps/mobile/plugins/withMlkitSimulatorFix.js` injects a
+Podfile `post_install` hook that strips that override from the generated
+xcconfigs and runs `mlkit-sim-patch.py` to delete the `LC_BUILD_VERSION` load
+command from the arm64 objects of the frameworks that carry one. Platform-less
+objects link for both device and simulator, which is how Google already ships
+the Barcode and Face Detection frameworks. The patch reruns on every
+`pod install`, so it needs no manual step.
 
 ## Mobile layers (`apps/mobile/src`)
 
-- **`app/`** — expo-router routes only (thin). `_layout` mounts providers and the
-  `react-native-get-random-values` polyfill; `index` gates onboarding → lock →
+- **`app/`**: expo-router routes only (thin). `_layout` mounts providers and the
+  `react-native-get-random-values` polyfill; `index` gates onboarding, lock, and
   home from persisted state.
-- **`providers/`** — React context, loaded once at boot before render:
-  - `AppProvider` — prefs, security event log, and the wallet lifecycle
-    (`createWallet`, `getMnemonic`, `resetWallet`).
+- **`providers/`**: React context, loaded once at boot before render.
+  - `AppProvider`: prefs, security event log, the passcode (hash + verify +
+    persisted lockout), and the wallet lifecycle (`createWallet`,
+    `getMnemonic`, `resetWallet`).
   - `ThemeProvider`, `DemoStateProvider` (live-API toggle + manual state
     overrides), `WalletDataProvider` (the single data source), `SheetProvider`.
-- **`features/`** — screen logic grouped by domain (onboarding, lock, home,
+- **`features/`**: screen logic grouped by domain (onboarding, lock, home,
   send, token, activity, security, settings, sheets, auth, wallet, liveness,
-  scan). Screens follow a consistent split: `Screen.tsx` (composition) +
+  scan). Screens follow a consistent split: `Screen.tsx` (composition) plus
   `.parts.tsx` / `.styles.ts` / `.types.ts` / `.utils.ts` / `use*` hooks.
-- **`components/`** — themed primitives (Text, Button, Card, Row, Icon set,
+- **`components/`**: themed primitives (Text, Button, Card, Row, Icon set,
   Sparkline, QR, BottomSheet, notices, …).
-- **`services/`** — `api` (typed client), `storage` (AsyncStorage + SecureStore),
+- **`services/`**: `api` (typed client), `storage` (AsyncStorage + SecureStore),
   `device` (clipboard/share/explorer), `wallet` (display helpers).
-- **`theme/`** — design tokens (oklch → hex), dark/light, `alpha()` helper.
-- **`i18n/`** — English locale files by domain + a dependency-free `t()`.
+- **`theme/`**: design tokens (oklch to hex), dark/light, `alpha()` helper.
+- **`i18n/`**: English locale files by domain plus a dependency-free `t()`.
 
 ## Backend layers (`apps/api/src`)
 
-- **`app.ts` / `index.ts`** — Hono app + server bootstrap (migrate → seed →
+- **`app.ts` / `index.ts`**: Hono app and server bootstrap (migrate, seed,
   serve) with CORS, logging, and a consistent `ApiErrorResponse` error shape.
-- **`routes/`** — thin route handlers (system, tokens, prices, wallet,
+- **`routes/`**: thin route handlers (system, tokens, prices, wallet,
   transaction, security) that validate with Zod (`parseOrThrow`).
-- **`services/`** — prices, balances, transactions, security; deterministic mock
+- **`services/`**: prices, balances, transactions, security; deterministic mock
   data derived from the address (no randomness), structured to swap in real RPC.
-- **`db/`** — Drizzle schema + libsql client + migrations; tables: `price_cache`,
+- **`db/`**: Drizzle schema, libsql client, migrations, and a separate
+  `migrate-cli.ts` entry for `pnpm db:migrate`; tables: `price_cache`,
   `reported_addresses`, `security_checks`.
-- **`lib/`** — errors, validation, mock helpers.
+- **`lib/`**: errors, validation, mock helpers.
 
 ## Testing
 
 Pure logic is unit-tested with Vitest from the repo root (`pnpm test`): the
-liveness challenge state machine (`reduceLiveness`), BIP39/address helpers
-(`crypto-core`), risk assessment and transaction simulation (`wallet-core`), QR
-address extraction, and the send/security/transaction display helpers. GitHub
-Actions runs lint, typecheck, and the suite on every push.
+liveness challenge state machine (`reduceLiveness`), BIP39/address/passcode
+helpers (`crypto-core`), risk assessment and transaction simulation
+(`wallet-core`), the passcode lockout policy, QR address extraction, and the
+send/security/transaction display helpers. GitHub Actions runs lint, typecheck,
+and the suite on every push.
 
 ## API data flow (app side)
 
@@ -102,20 +121,20 @@ detail / sheets:
    from `useWallet()` and render `BackendNotice` / `PriceFreshness` accordingly.
 
 The send flow calls `/security/check-address` and `/transaction/simulate`
-directly (`features/send/useSendChecks.ts`) when live + the token's network is
+directly (`features/send/useSendChecks.ts`) when live and the token's network is
 API-supported.
 
 ## Fallback behavior when the API is unavailable
 
 Designed so the app never looks broken:
 
-- Any failed live request → `useWallet()` falls back to **bundled demo data** and
-  surfaces `api_unavailable` via `BackendNotice` (with a working Retry).
-- Prices failing → balances still render with `—` values and a "price
+- Any failed live request makes `useWallet()` fall back to **bundled demo data**
+  and surface `api_unavailable` via `BackendNotice` (with a working Retry).
+- If prices fail, balances still render with placeholder values and a "price
   unavailable" indicator.
-- Send risk/simulation failing → the existing "unavailable" UI; local signing
-  (mocked) remains available.
-- A **"Live API data"** toggle (Settings → Demo controls) switches between live
+- If risk/simulation fails, the send flow shows the existing "unavailable" UI;
+  local signing (mocked) remains available.
+- A **"Live API data"** toggle (Settings, Demo controls) switches between live
   data and fully manual demo overrides for backend/price/simulation states.
 
 ## How the derived address flows
@@ -131,13 +150,13 @@ onboarding (create/import)
         └─ Settings / AccountsSheet → displayed address
 ```
 
-`resetWallet` clears the SecureStore mnemonic + PIN and the prefs/events, then
-routes back to onboarding.
+`resetWallet` clears the SecureStore mnemonic and PIN hash, the lockout
+counter, and the prefs/events, then routes back to onboarding.
 
 ## Why a custom backend (not Supabase / Firebase)
 
 - **The trust boundary is the point.** A custom, stateless service makes it
-  explicit and auditable that only public data is ever sent — there is no SDK
+  explicit and auditable that only public data is ever sent; there is no SDK
   doing implicit auth, sync, or storage of anything sensitive.
 - **Typed contract end-to-end.** Sharing `@nadir-wallet/types` between app and API
   guarantees the request/response shapes match; a BaaS would push that contract

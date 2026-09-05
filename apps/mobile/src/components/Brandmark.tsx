@@ -2,7 +2,7 @@ import React from "react";
 import Svg, { Circle, Line } from "react-native-svg";
 import { useTheme } from "@/theme";
 
-// Ring + a single point at its lowest position — the "nadir".
+// Ring + a single point at its lowest position - the "nadir".
 export function Brandmark({ size = 64 }: { size?: number }) {
   const { colors } = useTheme();
   return (

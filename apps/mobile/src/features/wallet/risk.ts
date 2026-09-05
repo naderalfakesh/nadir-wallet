@@ -16,7 +16,7 @@ function findRecipient(address: string) {
   );
 }
 
-// Demo risk service — the on-device equivalent of the backend address check.
+// Demo risk service - the on-device equivalent of the backend address check.
 // It only ever inspects a public address.
 export function assessRecipient(address: string): AddressRisk | null {
   const a = address.trim().toLowerCase();

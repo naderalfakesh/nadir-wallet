@@ -7,7 +7,7 @@ address scanner.
 
 It is the **second** native plugin in this repo (alongside
 [`@nadir-wallet/face-liveness`](../face-liveness)) and deliberately reuses the
-same scaffold — the point is to show the New-Architecture native-integration
+same scaffold - the point is to show the New-Architecture native-integration
 pattern generalizes cleanly to a new ML Kit capability.
 
 ## What it does
@@ -45,7 +45,7 @@ ios/HybridCodeScanner.swift         CMSampleBuffer → MLKitVision → BarcodeSc
 android/…/HybridCodeScanner.kt      ImageProxy → InputImage → BarcodeScanning
 ```
 
-QR codes are orientation-tolerant, so detection needs no coordinate transform —
+QR codes are orientation-tolerant, so detection needs no coordinate transform -
 the plugin just maps VisionCamera's orientation onto the ML Kit image and
 returns raw values.
 

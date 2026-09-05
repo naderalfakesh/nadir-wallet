@@ -4,7 +4,7 @@ A custom **react-native-vision-camera V5 frame-processor plugin**, built as a
 [Nitro Module](https://nitro.margelo.com), wrapping **Google ML Kit Face
 Detection** in hand-written Swift and Kotlin. It powers Nadir Wallet's active
 face-liveness check and exists to demonstrate native-module authorship under
-the React Native New Architecture — it is not an installed wrapper.
+the React Native New Architecture - it is not an installed wrapper.
 
 ## What it does
 
@@ -16,7 +16,7 @@ const liveness = createFaceLiveness(); // create once on the JS thread
 const frameOutput = useFrameOutput({
   pixelFormat: "yuv",
   onFrame(frame) {
-    "worklet"; // runs on the camera thread — zero JS-thread work per frame
+    "worklet"; // runs on the camera thread - zero JS-thread work per frame
     const obs = liveness.detect(frame);
     // obs: { hasFace, yaw, pitch, roll, leftEyeOpen, rightEyeOpen,
     //        x, y, width, height, timestampMs }
@@ -25,12 +25,12 @@ const frameOutput = useFrameOutput({
 });
 ```
 
-`detect()` is a synchronous native call (Nitro HybridObject — no bridge, no
+`detect()` is a synchronous native call (Nitro HybridObject - no bridge, no
 serialization). It runs ML Kit in fast mode with eye-open classification and
 returns the most prominent face with:
 
-- **Head Euler angles** (yaw/pitch/roll, degrees) — drive turn challenges
-- **Eye-open probabilities** (0..1) — drive the blink challenge
+- **Head Euler angles** (yaw/pitch/roll, degrees) - drive turn challenges
+- **Eye-open probabilities** (0..1) - drive the blink challenge
 - **Normalized bounding box** (0..1) in upright, selfie-mirrored display
   space, so the JS overlay can check "face inside the oval" without knowing
   anything about sensor rotation

@@ -6,7 +6,7 @@ export type SendSim = "pass" | "fail";
 export type SendOutcome = "success" | "pending" | "failed";
 
 // Showcase-only switches that let a reviewer exercise every backend/price/send
-// state from the running app — the equivalent of the design's tweak panel.
+// state from the running app - the equivalent of the design's tweak panel.
 // None of this affects the local wallet, which is never "down".
 interface DemoStateValue extends DemoPrefs {
   setLiveApi: (v: boolean) => void;

@@ -17,7 +17,7 @@ export function grantLiveness(target: string): void {
   grantedAt = Date.now();
 }
 
-/** Non-clearing check — true when a fresh pass for this target exists. */
+/** Non-clearing check - true when a fresh pass for this target exists. */
 export function peekLiveness(target: string): boolean {
   return grantedFor === target && Date.now() - grantedAt < TTL_MS;
 }

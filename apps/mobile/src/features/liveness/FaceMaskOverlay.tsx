@@ -12,7 +12,7 @@ import type { FaceFit, LivenessPhase } from "./liveness.types";
 
 const AnimatedEllipse = Animated.createAnimatedComponent(Ellipse);
 
-/** Ramanujan approximation — plenty accurate for a dash ring. */
+/** Ramanujan approximation - plenty accurate for a dash ring. */
 function ellipsePerimeter(rx: number, ry: number): number {
   const h = (rx - ry) ** 2 / (rx + ry) ** 2;
   return Math.PI * (rx + ry) * (1 + (3 * h) / (10 + Math.sqrt(4 - 3 * h)));
@@ -21,7 +21,7 @@ function ellipsePerimeter(rx: number, ry: number): number {
 interface Props {
   fit: FaceFit;
   phase: LivenessPhase;
-  /** 0..1 — completed challenges over total. */
+  /** 0..1 - completed challenges over total. */
   progress: number;
 }
 

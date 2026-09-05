@@ -22,8 +22,8 @@ export function createLivenessMachine(): LivenessMachine {
 
 /**
  * Pure transition: given the current machine and one face observation at time
- * `now`, returns the next machine. Deterministic — the only randomness is the
- * challenge order chosen at creation/reset — so it can be unit-tested directly.
+ * `now`, returns the next machine. Deterministic - the only randomness is the
+ * challenge order chosen at creation/reset - so it can be unit-tested directly.
  */
 export function reduceLiveness(machine: LivenessMachine, obs: FaceObservation, now: number): LivenessMachine {
   const snapshot = machine.snapshot;
@@ -48,7 +48,7 @@ export function reduceLiveness(machine: LivenessMachine, obs: FaceObservation, n
     return { ...machine, alignedSince, snapshot: { ...snapshot, faceFit } };
   }
 
-  // Challenge phase — alignment is enforced live via the looser hold test. A
+  // Challenge phase - alignment is enforced live via the looser hold test. A
   // blink or in-place turn keeps the hold; getting very close, far, or
   // off-center drops it: amber immediately, restart if sustained.
   if (!isFaceHeldInFrame(obs)) {

@@ -6,7 +6,7 @@ export const OVAL = { cx: 0.5, cy: 0.42, rx: 0.33, ry: 0.26 } as const;
 
 export const THRESHOLDS = {
   /**
-   * Minimum face-box width (normalized) — guards against "too far". The upper
+   * Minimum face-box width (normalized) - guards against "too far". The upper
    * bound is enforced implicitly by containment (a too-close face overflows
    * the oval), so there is no separate max.
    */
@@ -15,7 +15,7 @@ export const THRESHOLDS = {
    * How far the face box may spill past the oval's bounding rect and still
    * count as "inside". ML Kit's box runs forehead-to-chin and is a touch wider
    * than the visible face, so a little slack keeps a well-placed face from
-   * flickering to amber — but small enough that a partial/off-center face fails.
+   * flickering to amber - but small enough that a partial/off-center face fails.
    */
   ovalSlack: 0.05,
   /** How long the face must stay aligned before challenges start. */
@@ -25,7 +25,7 @@ export const THRESHOLDS = {
   /**
    * Live "stay aligned" band, enforced *during* challenges. Looser than the
    * start-up containment (a turn shifts the box, and hysteresis avoids
-   * flicker), but a gross move — very close, very far, or off to the side —
+   * flicker), but a gross move - very close, very far, or off to the side -
    * breaks it and, if sustained past the grace window, restarts alignment.
    */
   holdCenterTol: 0.18,
@@ -48,7 +48,7 @@ export const THRESHOLDS = {
   nodDeltaDeg: 12,
   nodReturnDeltaDeg: 6,
   /**
-   * Smiling probability that counts, and how long it must be held — a brief
+   * Smiling probability that counts, and how long it must be held - a brief
    * hold makes the smile deliberate instead of firing on the first blip.
    */
   smileAbove: 0.7,
@@ -58,7 +58,7 @@ export const THRESHOLDS = {
 /**
  * Sign that maps ML Kit's raw Euler-Y onto "+ = user turned to THEIR left".
  * Verified the same (+1) on device for both iOS (iPhone 15) and Android
- * (Pixel 9) — despite the platforms feeding ML Kit mirrored vs unmirrored
+ * (Pixel 9) - despite the platforms feeding ML Kit mirrored vs unmirrored
  * images, the resulting yaw sign matches.
  */
 export const YAW_USER_LEFT_SIGN = 1;

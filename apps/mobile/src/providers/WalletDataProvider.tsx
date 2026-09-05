@@ -43,7 +43,7 @@ export function WalletDataProvider({ children }: { children: React.ReactNode }) 
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
-    if (!address) return; // No wallet yet — fall back to demo data.
+    if (!address) return; // No wallet yet - fall back to demo data.
     setLoading(true);
     const health = await api.health();
     if (!health.ok) {

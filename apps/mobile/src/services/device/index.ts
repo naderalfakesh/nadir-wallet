@@ -10,7 +10,7 @@ export async function shareText(message: string): Promise<void> {
   try {
     await Share.share({ message });
   } catch {
-    // User dismissed the share sheet — nothing to do.
+    // User dismissed the share sheet - nothing to do.
   }
 }
 
