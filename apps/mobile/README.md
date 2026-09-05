@@ -1,56 +1,73 @@
-# Welcome to your Expo app 👋
+# Nadir Wallet mobile app
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+The React Native client of the Nadir Wallet monorepo: Expo SDK 56, React
+Native 0.85, expo-router, TypeScript. The project pitch, security model, and
+architecture live in the [root README](../../README.md) and [`docs/`](../../docs).
 
-## Get started
+## Running it
 
-1. Install dependencies
+Install from the repo root, start the API, then start Metro here:
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```sh
+pnpm install
+pnpm dev:api
+pnpm --filter @nadir-wallet/mobile start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+The app talks to the API at `EXPO_PUBLIC_API_URL` (defaults to
+`http://localhost:8787`). On a physical device set it to your machine's LAN
+address in `apps/mobile/.env`. If the API is unreachable the app falls back to
+bundled demo data.
 
-### Other setup steps
+## Native builds
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+The face-liveness check and the QR scanner run Google ML Kit through two
+hand-written VisionCamera frame-processor plugins, so they need a development
+build rather than Expo Go:
 
-## Learn more
+```sh
+pnpm --filter @nadir-wallet/mobile ios       # simulator
+pnpm --filter @nadir-wallet/mobile ios -- --device
+pnpm --filter @nadir-wallet/mobile android
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Both plugins have been verified on physical iOS and Android devices. Camera
+features need a real camera, so the simulator is only useful for the rest of
+the app.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Simulator builds on Apple Silicon
 
-## Join the community
+Google ships ML Kit without an arm64 simulator slice and pins
+`EXCLUDED_ARCHS = arm64` for the simulator, which leaves Xcode 26 (no Rosetta
+simulators) with no usable destination. `plugins/withMlkitSimulatorFix.js`, a
+config plugin registered in `app.json`, injects a Podfile hook that strips that
+override and rewrites the Mach-O load commands of the affected ML Kit
+frameworks so the same binaries link for both device and simulator. It runs on
+every `pod install`; nothing else is needed.
 
-Join our community of developers creating universal apps.
+Set `APPLE_TEAM_ID` in `.env` for device signing; `app.config.js` picks it up.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Layout
+
+```
+src/
+  app/          expo-router routes (thin)
+  features/     screen logic by domain: onboarding, lock, home, send, token,
+                activity, security, settings, sheets, auth, wallet, liveness, scan
+  components/   themed primitives (text, buttons, cards, icons, bottom sheet)
+  providers/    App, Theme, DemoState, WalletData, Sheet contexts
+  services/     api client, storage (SecureStore + AsyncStorage), device helpers
+  theme/        design tokens, dark and light palettes
+  i18n/         English locale files by domain
+plugins/        Expo config plugins (ML Kit simulator fix)
+```
+
+Screens follow one split: `Screen.tsx` composes `.parts.tsx`, `.styles.ts`,
+`.types.ts`, `.utils.ts`, and `use*` hooks. Pure logic in `features/` has
+Vitest coverage from the repo root (`pnpm test`).
+
+## Demo controls
+
+Settings has a "Demo controls" card that flips the backend, price, simulation,
+and send-outcome states so every UI state can be shown without a real chain.
+Turning "Live API data" off switches the whole app to bundled data.

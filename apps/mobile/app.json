@@ -8,9 +8,7 @@
     "scheme": "nadirwallet",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.nadiralfakesh.nadirwallet",
-      "appleTeamId": "G8DA2W29T2",
       "infoPlist": {
         "NSCameraUsageDescription": "Nadir Wallet uses the camera for the face liveness check."
       }
@@ -21,9 +19,8 @@
         "android.permission.CAMERA"
       ],
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0b0f14",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
@@ -37,11 +34,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "android": {
-            "image": "./assets/images/splash-icon.png",
-            "imageWidth": 76
-          }
+          "backgroundColor": "#0b0f14",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 96
         }
       ],
       "expo-secure-store",
