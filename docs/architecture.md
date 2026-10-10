@@ -53,11 +53,14 @@ toolchains via autolinking.
 
 Google's ML Kit pods ship static frameworks without an arm64 simulator slice
 and pin `EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64`. Xcode 26 dropped Rosetta
-simulators, which left the app with no simulator destination at all. The Expo
-config plugin at `apps/mobile/plugins/withMlkitSimulatorFix.js` injects a
-Podfile `post_install` hook that strips that override from the generated
-xcconfigs and runs `mlkit-sim-patch.py` to delete the `LC_BUILD_VERSION` load
-command from the arm64 objects of the frameworks that carry one. Platform-less
+simulators (Xcode 27 included), which left the app with no simulator destination
+at all. The Expo config plugin at `apps/mobile/plugins/withMlkitSimulatorFix.js`
+injects two Podfile hooks. A `post_integrate` hook strips that override from the
+generated xcconfigs; it must run after integration because CocoaPods writes the
+app's aggregate `Pods-NadirWallet` xcconfigs after `post_install`. A
+`post_install` hook runs `mlkit-sim-patch.py` to delete the `LC_BUILD_VERSION`
+load command from the arm64 objects of the frameworks that carry one, and fails
+the install if the script fails. Platform-less
 objects link for both device and simulator, which is how Google already ships
 the Barcode and Face Detection frameworks. The patch reruns on every
 `pod install`, so it needs no manual step.

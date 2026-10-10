@@ -35,7 +35,7 @@ challenges, the other a **QR address scanner** for the send flow.
 
 | Area    | Choices                                                                                                                                                                     |
 | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mobile  | React Native 0.85 (Expo SDK 56), expo-router, TypeScript, react-native-svg                                                                                                  |
+| Mobile  | React Native 0.86 (Expo SDK 57), expo-router, TypeScript, react-native-svg                                                                                                  |
 | Crypto  | `viem/accounts` (generation/derivation), `@scure/bip39` (validation), `@noble/hashes` (PIN hashing), `react-native-get-random-values`                                       |
 | Storage | `expo-secure-store` (secrets), `@react-native-async-storage/async-storage` (prefs)                                                                                          |
 | Device  | `expo-local-authentication`, `expo-clipboard`, `expo-web-browser`, `react-native-qrcode-svg`                                                                                |
@@ -48,7 +48,7 @@ challenges, the other a **QR address scanner** for the send flow.
 
 ```
 apps/
-  mobile/                # React Native app (Expo SDK 56, expo-router)
+  mobile/                # React Native app (Expo SDK 57, expo-router)
   api/                   # Hono backend API (libsql + Drizzle)
 packages/
   types/                 # @nadir-wallet/types: shared response/domain types
@@ -68,9 +68,9 @@ Mobile follows a feature-based layout under `apps/mobile/src` (`app/` routes,
 
 ## Requirements
 
-- Node.js >= 22.13 (required by Expo SDK 56)
+- Node.js >= 22.13
 - pnpm 11
-- Xcode 26 and/or Android Studio for native builds
+- Xcode 27 and/or Android Studio for native builds
 
 ## Getting started
 
@@ -96,9 +96,11 @@ controls).
 
 The camera features need a development build (`pnpm --filter
 @nadir-wallet/mobile ios` or `android`); everything else also runs in the iOS
-Simulator. ML Kit does not ship an arm64 simulator slice, so a small config
-plugin (`apps/mobile/plugins/withMlkitSimulatorFix.js`) patches the pods after
-each install to keep simulator builds working on Apple Silicon with Xcode 26.
+Simulator (on Xcode 27, Expo CLI opens it in Device Hub). ML Kit does not ship
+an arm64 simulator slice, so a small config plugin
+(`apps/mobile/plugins/withMlkitSimulatorFix.js`) patches the pods after each
+install to keep simulator builds working on Apple Silicon with Xcode 26 and
+later.
 See the [mobile README](apps/mobile/README.md) for details.
 
 ## Environment setup

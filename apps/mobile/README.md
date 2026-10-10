@@ -1,7 +1,7 @@
 # Nadir Wallet mobile app
 
-The React Native client of the Nadir Wallet monorepo: Expo SDK 56, React
-Native 0.85, expo-router, TypeScript. The project pitch, security model, and
+The React Native client of the Nadir Wallet monorepo: Expo SDK 57, React
+Native 0.86, expo-router, TypeScript. The project pitch, security model, and
 architecture live in the [root README](../../README.md) and [`docs/`](../../docs).
 
 ## Running it
@@ -38,12 +38,15 @@ the app.
 ### Simulator builds on Apple Silicon
 
 Google ships ML Kit without an arm64 simulator slice and pins
-`EXCLUDED_ARCHS = arm64` for the simulator, which leaves Xcode 26 (no Rosetta
-simulators) with no usable destination. `plugins/withMlkitSimulatorFix.js`, a
-config plugin registered in `app.json`, injects a Podfile hook that strips that
-override and rewrites the Mach-O load commands of the affected ML Kit
-frameworks so the same binaries link for both device and simulator. It runs on
-every `pod install`; nothing else is needed.
+`EXCLUDED_ARCHS = arm64` for the simulator, which leaves Xcode 26 and later (no
+Rosetta simulators) with no usable destination. `plugins/withMlkitSimulatorFix.js`,
+a config plugin registered in `app.json`, injects two Podfile hooks:
+`post_integrate` strips that override from the generated xcconfigs (it has to
+run after CocoaPods writes the app's aggregate xcconfigs), and `post_install`
+rewrites the Mach-O load commands of the affected ML Kit frameworks so the same
+binaries link for both device and simulator. They run on every `pod install`;
+nothing else is needed. With Xcode 27, `pnpm --filter @nadir-wallet/mobile ios`
+builds for the simulator and opens it in Device Hub.
 
 Set `APPLE_TEAM_ID` in `.env` for device signing; `app.config.js` picks it up.
 

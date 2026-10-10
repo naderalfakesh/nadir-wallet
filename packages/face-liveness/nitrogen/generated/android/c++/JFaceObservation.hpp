@@ -17,7 +17,7 @@ namespace margelo::nitro::faceliveness {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "FaceObservation" and the the Kotlin data class "FaceObservation".
+   * The C++ JNI bridge between the C++ struct "FaceObservation" and the Kotlin data class "FaceObservation".
    */
   struct JFaceObservation final: public jni::JavaClass<JFaceObservation> {
   public:
