@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { beginScan, deliverScan, extractEvmAddress } from "./scanBridge";
+import { beginScan, deliverScan, extractEvmAddress, parseScanPayload } from "./scanBridge";
 
 const ADDRESS = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
+const OTHER = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
+// Sepolia USDC, from the crypto-core token list.
+const TOKEN = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
+const SEPOLIA = 11155111;
+const AMOY = 80002;
 
 describe("extractEvmAddress", () => {
   it("pulls a bare address", () => {
@@ -15,6 +20,159 @@ describe("extractEvmAddress", () => {
   it("returns null when there is no address", () => {
     expect(extractEvmAddress("just some text")).toBeNull();
     expect(extractEvmAddress("0x1234")).toBeNull();
+  });
+
+  it("returns the transfer recipient, not the token contract", () => {
+    expect(
+      extractEvmAddress(`ethereum:${TOKEN}@${SEPOLIA}/transfer?address=${ADDRESS}&uint256=1e6`),
+    ).toBe(ADDRESS);
+  });
+
+  it("does not slice an address out of longer hex or surrounding text", () => {
+    const txHash = "0x9c41a7e2f80b3d6c5a91e4072bd138fae6201c9d44ab7e35f0c2189d6e7a4b30";
+    expect(extractEvmAddress(txHash)).toBeNull();
+    expect(extractEvmAddress(`send to ${ADDRESS} please`)).toBeNull();
+    expect(extractEvmAddress(`https://evil.example/${ADDRESS}`)).toBeNull();
+  });
+});
+
+describe("parseScanPayload — accepted forms", () => {
+  it("accepts a bare address with surrounding whitespace, unscoped to a chain", () => {
+    expect(parseScanPayload(`  ${ADDRESS}\n`)).toEqual({
+      ok: true,
+      recipient: ADDRESS,
+      chainId: null,
+      tokenContract: null,
+    });
+  });
+
+  it("checksums single-case addresses", () => {
+    expect(parseScanPayload(ADDRESS.toLowerCase())).toMatchObject({ ok: true, recipient: ADDRESS });
+    expect(parseScanPayload(`0x${ADDRESS.slice(2).toUpperCase()}`)).toMatchObject({
+      ok: true,
+      recipient: ADDRESS,
+    });
+  });
+
+  it.each([SEPOLIA, AMOY])("accepts a native URI on supported testnet %i", (chainId) => {
+    expect(parseScanPayload(`ethereum:${ADDRESS}@${chainId}`)).toEqual({
+      ok: true,
+      recipient: ADDRESS,
+      chainId,
+      tokenContract: null,
+    });
+  });
+
+  it("accepts the pay- prefix, case-insensitive scheme and native amount/gas params", () => {
+    expect(
+      parseScanPayload(
+        `ETHEREUM:pay-${ADDRESS}@${SEPOLIA}?value=2.014e18&gasLimit=21000&gasPrice=1e9`,
+      ),
+    ).toEqual({
+      ok: true,
+      recipient: ADDRESS,
+      chainId: SEPOLIA,
+      tokenContract: null,
+    });
+  });
+
+  it("accepts a bare chainless ethereum: URI like a raw address", () => {
+    expect(parseScanPayload(`ethereum:${ADDRESS}`)).toEqual({
+      ok: true,
+      recipient: ADDRESS,
+      chainId: null,
+      tokenContract: null,
+    });
+  });
+
+  it.each([SEPOLIA, AMOY])(
+    "splits an ERC-20 transfer into token and recipient on %i",
+    (chainId) => {
+      expect(
+        parseScanPayload(`ethereum:${TOKEN}@${chainId}/transfer?address=${OTHER}&uint256=1000000`),
+      ).toEqual({
+        ok: true,
+        recipient: OTHER,
+        chainId,
+        tokenContract: TOKEN,
+      });
+    },
+  );
+});
+
+describe("parseScanPayload — rejected forms", () => {
+  it.each([
+    ["empty", "   ", "empty"],
+    ["oversized", `ethereum:${ADDRESS}@${SEPOLIA}?value=${"1".repeat(600)}`, "too-long"],
+    ["short hex", "0x1234", "malformed"],
+    ["41 hex chars", `${ADDRESS}a`, "malformed"],
+    ["64-char hash", `0x${"ab".repeat(32)}`, "malformed"],
+    ["non-hex chars", "0x70997970C51812dc3A010C7d01b50e0d17dc79Cg", "malformed"],
+    ["missing 0x", ADDRESS.slice(2), "malformed"],
+    ["uppercase 0X", `0X${ADDRESS.slice(2)}`, "malformed"],
+    ["inner whitespace", `ethereum: ${ADDRESS}@${SEPOLIA}`, "malformed"],
+    ["ENS name", `ethereum:alice.eth@${SEPOLIA}`, "malformed"],
+    ["overlong URI target", `ethereum:${ADDRESS}ff@${SEPOLIA}`, "malformed"],
+    ["other scheme", `bitcoin:${ADDRESS}`, "malformed"],
+    ["unknown prefix", `ethereum:foo-${ADDRESS}@${SEPOLIA}`, "malformed"],
+    ["fragment", `ethereum:${ADDRESS}@${SEPOLIA}#x`, "malformed"],
+    ["bad checksum", "0x70997970c51812DC3A010C7d01b50e0d17dc79C8", "bad-checksum"],
+    ["zero address", `0x${"0".repeat(40)}`, "zero-address"],
+    ["mainnet", `ethereum:${ADDRESS}@1`, "unsupported-chain"],
+    ["polygon mainnet", `ethereum:${ADDRESS}@137`, "unsupported-chain"],
+    ["unconfigured testnet", `ethereum:${ADDRESS}@84532`, "unsupported-chain"],
+    ["leading-zero chain", `ethereum:${ADDRESS}@011155111`, "unsupported-chain"],
+    ["empty chain", `ethereum:${ADDRESS}@`, "malformed"],
+    ["hex chain", `ethereum:${ADDRESS}@0xaa36a7`, "malformed"],
+    ["chainless with amount", `ethereum:${ADDRESS}?value=1`, "missing-chain"],
+    ["chainless transfer", `ethereum:${TOKEN}/transfer?address=${ADDRESS}`, "missing-chain"],
+    ["mainnet transfer", `ethereum:${TOKEN}@1/transfer?address=${ADDRESS}`, "unsupported-chain"],
+    [
+      "approve call",
+      `ethereum:${TOKEN}@${SEPOLIA}/approve?address=${ADDRESS}&uint256=1`,
+      "unsupported-function",
+    ],
+    [
+      "transfer without recipient",
+      `ethereum:${TOKEN}@${SEPOLIA}/transfer?uint256=1`,
+      "malformed-parameter",
+    ],
+    [
+      "transfer with native value",
+      `ethereum:${TOKEN}@${SEPOLIA}/transfer?address=${ADDRESS}&value=1`,
+      "unsupported-parameter",
+    ],
+    [
+      "transfer to the token itself",
+      `ethereum:${TOKEN}@${SEPOLIA}/transfer?address=${TOKEN}`,
+      "recipient-is-token",
+    ],
+    [
+      "transfer to bad recipient",
+      `ethereum:${TOKEN}@${SEPOLIA}/transfer?address=${ADDRESS}ff`,
+      "malformed",
+    ],
+    [
+      "transfer to zero",
+      `ethereum:${TOKEN}@${SEPOLIA}/transfer?address=0x${"0".repeat(40)}`,
+      "zero-address",
+    ],
+    [
+      "duplicate recipient",
+      `ethereum:${TOKEN}@${SEPOLIA}/transfer?address=${ADDRESS}&address=${OTHER}`,
+      "malformed-parameter",
+    ],
+    [
+      "unknown native param",
+      `ethereum:${ADDRESS}@${SEPOLIA}?data=0xdeadbeef`,
+      "unsupported-parameter",
+    ],
+    ["negative value", `ethereum:${ADDRESS}@${SEPOLIA}?value=-1`, "malformed-parameter"],
+    ["hex value", `ethereum:${ADDRESS}@${SEPOLIA}?value=0x10`, "malformed-parameter"],
+    ["empty param", `ethereum:${ADDRESS}@${SEPOLIA}?value=`, "malformed-parameter"],
+    ["dangling ampersand", `ethereum:${ADDRESS}@${SEPOLIA}?value=1&`, "malformed-parameter"],
+  ])("rejects %s", (_label, payload, reason) => {
+    expect(parseScanPayload(payload)).toEqual({ ok: false, reason });
   });
 });
 
