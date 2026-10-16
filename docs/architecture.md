@@ -73,7 +73,8 @@ the Barcode and Face Detection frameworks. The patch reruns on every
 - **`providers/`**: React context, loaded once at boot before render.
   - `AppProvider`: prefs, security event log, the passcode (hash + verify +
     persisted lockout), and the wallet lifecycle (`createWallet`,
-    `getMnemonic`, `resetWallet`).
+    `resetWallet`). The phrase is read back only through
+    `services/storage/mnemonic.ts`, behind an OS authentication prompt.
   - `ThemeProvider`, `DemoStateProvider` (live-API toggle + manual state
     overrides), `WalletDataProvider` (the single data source), `SheetProvider`.
 - **`features/`**: screen logic grouped by domain (onboarding, lock, home,
@@ -83,7 +84,7 @@ the Barcode and Face Detection frameworks. The patch reruns on every
 - **`components/`**: themed primitives (Text, Button, Card, Row, Icon set,
   Sparkline, QR, BottomSheet, notices, …).
 - **`services/`**: `api` (typed client), `storage` (AsyncStorage + SecureStore),
-  `device` (clipboard/share/explorer), `wallet` (display helpers).
+  `device` (clipboard/share), `wallet` (display helpers).
 - **`theme/`**: design tokens (oklch to hex), dark/light, `alpha()` helper.
 - **`i18n/`**: English locale files by domain plus a dependency-free `t()`.
 
@@ -136,7 +137,7 @@ Designed so the app never looks broken:
 - If prices fail, balances still render with placeholder values and a "price
   unavailable" indicator.
 - If risk/simulation fails, the send flow shows the existing "unavailable" UI;
-  local signing (mocked) remains available.
+  the simulated send (nothing is signed) remains available.
 - A **"Live API data"** toggle (Settings, Demo controls) switches between live
   data and fully manual demo overrides for backend/price/simulation states.
 

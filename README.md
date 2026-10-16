@@ -23,13 +23,9 @@ challenges, the other a **QR address scanner** for the send flow.
 
 ## Demo
 
-> The face-liveness and QR features use the camera and require a development
-> build on a physical device, so they are shown here on video.
-
-<!-- images/liveness.gif: hero clip, oval gate then blink / turn / nod / smile then pass -->
-<!-- images/step-up.gif: liveness gate before revealing the recovery phrase -->
-<!-- images/qr-scan.gif: QR scan filling the send recipient -->
-<!-- Stills: images/home.png · images/send-review.png · images/security.png -->
+Screenshots and video are not published yet. The face-liveness and QR features
+use the camera, so they need a development build on a physical device; the iOS
+Simulator has no camera feed.
 
 ## Tech stack
 
@@ -152,8 +148,11 @@ RPC_URL_POLYGON_AMOY=https://polygon-amoy.g.alchemy.com/v2/YOUR_KEY
 
 - On-device **BIP39** wallet generation and import with real word/checksum
   validation; EVM address derived at `m/44'/60'/0'/0/0`.
-- Recovery phrase stored only in the device keychain (SecureStore); revealing it
-  requires the biometric/passcode gate.
+- Recovery phrase stored only in the device keychain (SecureStore); revealing or
+  backing it up requires OS authentication (Face ID / Touch ID, Android
+  biometrics, or the device passcode as the system fallback) and fails closed
+  when none is set up. Simulated sends ask for the same confirmation; passing
+  it does not sign or broadcast anything.
 - Onboarding, biometric/passcode lock with auto-lock on background, and a local
   append-only security event log. The app-lock PIN is stored as a salted
   PBKDF2 hash, and failed attempts trigger an escalating lockout that survives
@@ -161,8 +160,8 @@ RPC_URL_POLYGON_AMOY=https://polygon-amoy.g.alchemy.com/v2/YOUR_KEY
 - Home dashboard, token detail, activity, receive (real QR), send flow with
   backend-backed **address risk check** and **transaction simulation**, security
   center, and settings.
-- Live API wiring with graceful demo-data fallback; clipboard / share / testnet
-  explorer actions.
+- Live API wiring with graceful demo-data fallback; clipboard and share
+  actions.
 - Dark + light themes, persisted preferences, English i18n scaffold.
 - **Active face-liveness check**: randomized blink / turn / nod / smile
   challenges verified in real time by a hand-written native frame-processor
@@ -185,6 +184,8 @@ Unit tests (Vitest) target the logic where a regression would be silent:
 - **address-risk scoring** and **transaction simulation** (`wallet-core`)
 - the **passcode lockout policy**, QR address extraction, and the one-shot scan
   channel
+- the **OS authentication gate** (mocked): the phrase is read only after a
+  successful prompt; cancel, failure, lockout and missing enrolment never read it
 - send input validation, simulation-status mapping, security score tiers, and
   transaction display helpers
 
@@ -194,20 +195,28 @@ pnpm test
 
 GitHub Actions runs lint, typecheck, and the test suite on every push.
 
+These are logic tests with mocked device APIs; there are no component, e2e, or
+native tests. The iOS app builds and launches on an Xcode 27 simulator, but the
+OS authentication prompts, lock and auto-lock, camera screens, and the native
+plugins have not been checked end to end on a simulator or physical device yet.
+
 ## Current limitations
 
 - **Testnet-only** (Ethereum Sepolia, Polygon Amoy); no mainnet.
 - **No real signing or broadcast.** The send flow simulates and shows
-  pending/success/failed outcomes via a demo control; nothing is broadcast.
+  pending/success/failed outcomes via a demo control; nothing is signed or
+  broadcast, and no transaction hash is shown for a simulated send.
 - Balances, prices, and history are **deterministic mock data** from the API (no
-  real RPC/indexer yet).
+  real RPC/indexer yet). History entries carry sample hashes, are labelled as
+  sample data, and have no block-explorer link.
 - Liveness is **active-only** (challenge-response); no passive anti-spoofing.
   This is documented as a threat model, not claimed as production-grade.
 - No WalletConnect, no swaps.
 - SecureStore protects secrets with the OS keychain/Keystore but adds no extra
-  app-level encryption (see `docs/security-model.md`).
+  app-level encryption. The reveal prompt is enforced by the app, not bound to
+  the keychain item (see `docs/security-model.md`).
 - The face-liveness and QR-scanner features need a **development build** and a
-  real camera, so they are demonstrated on a physical device.
+  real camera, so they only run on a physical device.
 
 ## Roadmap
 

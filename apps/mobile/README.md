@@ -31,9 +31,8 @@ pnpm --filter @nadir-wallet/mobile ios -- --device
 pnpm --filter @nadir-wallet/mobile android
 ```
 
-Both plugins have been verified on physical iOS and Android devices. Camera
-features need a real camera, so the simulator is only useful for the rest of
-the app.
+Camera features need a real camera, so the simulator is only useful for the
+rest of the app.
 
 ### Simulator builds on Apple Silicon
 

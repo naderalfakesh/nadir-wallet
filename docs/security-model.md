@@ -37,7 +37,8 @@ The app stores two kinds of data, deliberately separated:
 - **AsyncStorage** holds non-secret preferences and the public address. No secret
   ever goes into AsyncStorage.
 - All storage access goes through one service (`src/services/storage`); screens
-  never call SecureStore directly.
+  never call SecureStore directly. The mnemonic module there exposes no
+  unauthenticated read (see below).
 
 ## BIP39 generation and import
 
@@ -80,12 +81,95 @@ The 6-digit PIN is the fallback for biometrics and the gate for changing itself.
   hash, and appends a `passcode_changed` entry to the security log.
 - Records written by earlier builds that kept the PIN in the clear are hashed in
   place on first load.
+- Setting or changing the PIN only takes effect once the keychain write
+  succeeds. If it fails, the screen says so and the previous PIN (if any) keeps
+  working. Finishing onboarding likewise reports a failed write instead of
+  opening a wallet that would not exist after a relaunch.
 
-## Revealing the recovery phrase
+## Lock session and protected routes
 
-The phrase is read back from SecureStore **only after** the biometric/passcode
-gate (`FaceIDGate`) on the Reveal and Backup screens. It is never loaded into UI
-state before that gate passes.
+Whether the wallet is unlocked is held in memory only, so every cold start
+begins locked. The root layout registers screens in three `Stack.Protected`
+groups (`features/lock/routeAccess.ts`): onboarding (no wallet yet), lock
+(wallet exists, session locked) and wallet (unlocked). Exactly one group is
+open at a time. A closed group's screens are removed from the navigator, so a
+deep link such as `nadirwallet://send` or `nadirwallet://reveal` cannot mount
+them on a cold start or while locked; it lands on the lock screen instead and is
+not resumed after unlock. Unknown links go through the same entry routing.
+
+Locking (auto-lock after the configured time in the background, or "Lock
+wallet" in Settings) or resetting closes the wallet group, which unmounts every
+wallet screen and its in-memory state. Bottom sheets (receive, transaction
+details, accounts) render in a root-level modal outside the route groups, so
+the host is bound to the wallet group's guard: it unmounts with no exit
+animation and drops the open sheet, so it neither covers the lock screen nor
+reopens after the next unlock. The time away is measured from the first
+inactive/background event, and a clock that moved backwards counts as expired.
+Time spent in the OS unlock prompt itself is discarded when the session state
+changes, so a slow unlock doesn't immediately relock.
+
+This is navigation-level enforcement inside the app process, the same trust
+boundary as the rest of the app; it is not a keychain-bound lock.
+
+## OS authentication for reveal, backup and send
+
+Revealing the recovery phrase (Reveal and Backup screens) and confirming a
+simulated send both require OS device-owner authentication through
+`expo-local-authentication` (`src/services/auth/osAuth.ts`):
+
+- **iOS:** `LAPolicyDeviceOwnerAuthentication`, which is Face ID / Touch ID with
+  the system's own fallback to the device passcode.
+- **Android:** `BiometricPrompt` allowing Class 3 (strong) biometrics or the
+  device PIN, pattern or password.
+- **Android 9 and 10 (API 28-29):** AndroidX cannot combine strong biometrics
+  with the device credential there, so the two are offered separately rather
+  than accepting Class 2 (weak) biometrics. A strong biometric, if enrolled, is
+  used on its own, with no credential fallback. A device with only a screen lock
+  gets the credential prompt. A device whose only biometric is Class 2 is
+  refused, with guidance to add a fingerprint or other strong biometric.
+- The app-lock PIN is **not** accepted for these actions, and there is no
+  timer or app-level bypass. These prompts are required whether or not
+  biometric unlock is turned on for the lock screen.
+- **Fails closed.** If the device has no biometric enrolled _and_ no screen
+  lock, if the Face ID usage description is missing, or if the prompt is
+  cancelled, fails, hits a biometric lockout or throws, nothing is revealed
+  and the send does not advance. The screen explains what happened and how to
+  set up a screen lock.
+
+The phrase is read from SecureStore only through `revealMnemonic`
+(`src/services/storage/mnemonic.ts`), which calls the OS prompt first and only
+then touches the keychain. The app has no other read path for it.
+
+Revealed words live only in the Reveal or Backup screen's component state. They
+are dropped when the user leaves the screen, finishes or backs out of the backup
+flow, or the app goes to the background or becomes inactive (for example the
+app switcher), so seeing them again needs a fresh prompt. A keychain read that
+finishes after one of those clears is discarded rather than shown. Background or
+inactive events while the OS prompt itself is up are ignored, because the prompt
+causes them (iOS Face ID, Android device-credential screens); nothing is shown
+until it succeeds. Because JavaScript strings cannot be wiped, a dropped phrase
+may stay in process memory until garbage collection.
+
+**What this does not do.** This is an app-level gate, not a keychain-bound one.
+The keychain item is not created with SecureStore's `requireAuthentication`, so
+the OS does not refuse the read by itself; code running inside the app process
+(for example on a jailbroken or instrumented device) could read it without a
+prompt. Binding the item to biometrics was considered and deferred:
+
+- On iOS, `requireAuthentication` uses `biometryCurrentSet`, so the item becomes
+  permanently unreadable when Face ID or Touch ID enrolment changes, and there is
+  no passcode fallback. For a wallet whose only copy of the phrase may be this
+  keychain item, that risks losing the wallet.
+- On Android it requires Class 3 biometrics only, which excludes devices that
+  have just a PIN, pattern or password.
+- Moving existing phrases would mean rewriting the only copy of the secret.
+
+The send confirmation is a user-presence check only. Passing the real OS prompt
+does not make the send real: nothing is signed, no key is derived and nothing is
+broadcast, so there is no transaction hash or explorer link for a simulated
+send. The pending, success and failed screens after it are a demo-controlled
+outcome. Activity-history entries are sample data; their hashes are labelled as
+such and have no explorer link.
 
 ## What the backend receives
 
@@ -136,6 +220,8 @@ the roadmap lists real testnet signing/broadcast as the next step.
 - On a **simulator** (or a device with no passcode set), keychain protection is
   weaker than on a passcode-protected physical device.
 - A rooted/jailbroken or compromised device can undermine any on-device store.
+- The reveal and send prompts are enforced by the app, not by the keychain
+  item itself (see "OS authentication for reveal, backup and send").
 - This is a **portfolio/testnet** wallet: do not store a real, funded mnemonic
   in it. A production wallet would add an encrypted vault, configurable keychain
   accessibility/biometric binding, and screenshot/secure-flag protections.
@@ -188,10 +274,17 @@ boundary above.
 check can be required as an extra gate before two sensitive actions (toggles in
 the Security Center, off by default):
 
-- **Revealing the recovery phrase.** Runs in front of the existing
-  biometric/passcode gate, so the keychain read still requires the OS gate
-  regardless; liveness is an added check, not a replacement.
-- **Confirming a high-value send** (>= $1,000). Runs before the signing step.
+- **Revealing the recovery phrase.** Runs in front of the OS authentication
+  prompt, so the keychain read still requires OS authentication regardless;
+  liveness is an added check, not a replacement.
+- **Confirming a high-value send** (>= $1,000). Runs before the OS
+  authentication prompt for the simulated send.
+
+If the camera can't run (permission denied, no front camera, the native module
+missing, or a camera or frame-processing error), the check shows why and never
+counts as passed; the protected action stays blocked. The `next` target in a
+`/liveness` link is accepted only for routes that enforce the pass themselves.
 
 This is defense-in-depth for the demo, not a custody guarantee; the real lock on
-the recovery phrase remains the device keychain plus the biometric/passcode gate.
+the recovery phrase remains the device keychain plus the OS authentication
+prompt described above.
