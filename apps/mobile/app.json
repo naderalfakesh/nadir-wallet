@@ -10,7 +10,7 @@
     "ios": {
       "bundleIdentifier": "com.nadiralfakesh.nadirwallet",
       "infoPlist": {
-        "NSCameraUsageDescription": "Nadir Wallet uses the camera for the face liveness check."
+        "NSCameraUsageDescription": "Nadir Wallet uses the camera to scan payment QR codes and for the optional face liveness check. Frames are processed on the device and never stored."
       }
     },
     "android": {
@@ -36,14 +36,15 @@
         {
           "backgroundColor": "#0b0f14",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 96
+          "imageWidth": 128,
+          "resizeMode": "contain"
         }
       ],
       "expo-secure-store",
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Unlock Nadir Wallet and approve transactions with Face ID."
+          "faceIDPermission": "Nadir Wallet uses Face ID to unlock, reveal your recovery phrase and confirm simulated sends."
         }
       ],
       "expo-font",

@@ -1,32 +1,10 @@
 import React from "react";
 import { Pressable, View } from "react-native";
 import { AppText, Button, Icon } from "@/components";
-import { alpha, useTheme } from "@/theme";
+import { alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { livenessStyles as styles } from "./LivenessFlow.styles";
 import type { LivenessMode, LivenessSnapshot } from "./liveness.types";
-
-interface PermissionPanelProps {
-  onRequestPermission: () => void;
-}
-
-export function PermissionPanel({ onRequestPermission }: PermissionPanelProps) {
-  const { colors } = useTheme();
-  const { t } = useTranslation();
-
-  return (
-    <View style={styles.permission}>
-      <Icon name="scan" size={36} color={colors.accent} />
-      <AppText weight="bold" size={18} color="#FFFFFF" style={styles.permissionTitle}>
-        {t("liveness.permissionTitle")}
-      </AppText>
-      <AppText size={13.5} color={alpha("#FFFFFF", 0.7)} style={styles.permissionBody}>
-        {t("liveness.permissionBody")}
-      </AppText>
-      <Button label={t("liveness.grant")} onPress={onRequestPermission} style={styles.permissionButton} />
-    </View>
-  );
-}
 
 interface LivenessHeaderProps {
   topInset: number;
@@ -41,7 +19,13 @@ export function LivenessHeader({ topInset, phase, index, total, onCancel }: Live
 
   return (
     <View style={[styles.header, { top: topInset + 8 }]}>
-      <Pressable onPress={onCancel} style={styles.close} hitSlop={10}>
+      <Pressable
+        onPress={onCancel}
+        style={styles.close}
+        hitSlop={10}
+        accessibilityRole="button"
+        accessibilityLabel={t("common.actions.close")}
+      >
         <Icon name="close" size={20} color="#FFFFFF" />
       </Pressable>
       <View style={styles.stepPill}>

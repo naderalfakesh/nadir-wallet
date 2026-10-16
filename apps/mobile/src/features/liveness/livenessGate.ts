@@ -3,10 +3,19 @@
 // grants a short-lived pass for a target route on success; the target route
 // consumes it once on mount. No valid token → the route bounces to /liveness.
 //
-// This keeps the gate airtight: any entry point that pushes the protected route
-// (Security Center, Settings, a deep link) is gated the same way.
+// Any entry point that pushes the protected route (Security Center, Settings,
+// a deep link) is gated the same way. The pass lives in memory only.
 
 const TTL_MS = 30_000;
+
+// Routes that enforce a liveness pass on themselves. `next` arrives from the
+// URL, so anything else is ignored rather than navigated to.
+const GATED_TARGETS = ["/reveal"] as const;
+export type LivenessTarget = (typeof GATED_TARGETS)[number];
+
+export function parseLivenessTarget(next: unknown): LivenessTarget | null {
+  return GATED_TARGETS.find((target) => target === next) ?? null;
+}
 
 let grantedFor = "";
 let grantedAt = 0;

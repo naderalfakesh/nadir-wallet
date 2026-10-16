@@ -1,8 +1,11 @@
 {
   "title": "Liveness check",
-  "permissionTitle": "Camera access needed",
-  "permissionBody": "Allow camera access to verify a live person is holding this device. Frames are processed on-device and never stored or uploaded.",
-  "grant": "Allow camera",
+  "camera": {
+    "permissionBody": "Allow camera access to verify a live person is holding this device. Frames are processed on-device and never stored or uploaded.",
+    "deniedBody": "Camera access for Nadir Wallet is turned off, so the liveness check can't run. Turn it on in Settings to continue. Nothing was approved.",
+    "noDeviceBody": "This device has no front camera, so the liveness check can't run here. Nothing was approved.",
+    "unavailableBody": "The liveness check couldn't start or stopped unexpectedly. Nothing was approved. Close this and try again."
+  },
   "align": "Fit your whole face inside the oval",
   "alignHold": "Hold still…",
   "noFace": "No face detected",

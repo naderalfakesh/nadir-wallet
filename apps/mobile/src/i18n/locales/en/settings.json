@@ -43,7 +43,8 @@
     "incorrect": "Incorrect passcode",
     "mismatch": "Passcodes didn't match",
     "doneTitle": "Passcode updated",
-    "doneBody": "Use your new passcode the next time you unlock Nadir."
+    "doneBody": "Use your new passcode the next time you unlock Nadir.",
+    "saveFailed": "Couldn't save it. Your old passcode still works."
   },
   "demo": {
     "section": "Demo controls",

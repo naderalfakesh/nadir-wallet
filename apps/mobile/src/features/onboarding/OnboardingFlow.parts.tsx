@@ -81,7 +81,7 @@ export function BiometricStep({ onEnable, onSkip }: { onEnable: () => void; onSk
   );
 }
 
-export function ReadyStep({ onOpen }: { onOpen: () => void }) {
+export function ReadyStep({ onOpen, saving, failed }: { onOpen: () => void; saving: boolean; failed: boolean }) {
   const theme = useTheme();
   const styles = useMemo(() => createOnboardingStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
@@ -97,9 +97,24 @@ export function ReadyStep({ onOpen }: { onOpen: () => void }) {
         <AppText size={14.5} muted style={[styles.heroBody, { maxWidth: 260 }]}>
           {t("onboarding.ready.body")}
         </AppText>
+        {failed ? (
+          <AppText
+            size={13.5}
+            weight="semibold"
+            color={theme.colors.neg}
+            style={[styles.heroBody, { maxWidth: 280 }]}
+            accessibilityLiveRegion="polite"
+          >
+            {t("onboarding.ready.saveFailed")}
+          </AppText>
+        ) : null}
       </View>
       <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.pad }]}>
-        <Button label={t("onboarding.ready.open")} onPress={onOpen} />
+        <Button
+          label={failed ? t("lock.tryAgain") : t("onboarding.ready.open")}
+          onPress={onOpen}
+          disabled={saving}
+        />
       </View>
     </Screen>
   );

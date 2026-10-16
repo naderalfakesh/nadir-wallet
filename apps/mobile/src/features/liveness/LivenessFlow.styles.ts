@@ -5,23 +5,6 @@ export const livenessStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000",
   },
-  permission: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 36,
-  },
-  permissionTitle: {
-    marginTop: 14,
-  },
-  permissionBody: {
-    marginTop: 6,
-    textAlign: "center",
-  },
-  permissionButton: {
-    marginTop: 20,
-    alignSelf: "stretch",
-  },
   header: {
     position: "absolute",
     left: 16,

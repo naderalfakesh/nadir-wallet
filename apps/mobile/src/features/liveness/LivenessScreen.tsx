@@ -2,21 +2,21 @@ import React from "react";
 import { View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LivenessFlow } from "./LivenessFlow";
-import { grantLiveness } from "./livenessGate";
+import { grantLiveness, parseLivenessTarget } from "./livenessGate";
 
 export function LivenessScreen() {
   const router = useRouter();
   const { next } = useLocalSearchParams<{ next?: string }>();
-  const gated = typeof next === "string" && next.length > 0;
+  const target = parseLivenessTarget(next);
 
   return (
     <View style={{ flex: 1 }}>
       <LivenessFlow
-        mode={gated ? "gate" : "standalone"}
+        mode={target ? "gate" : "standalone"}
         onPass={() => {
-          if (gated) {
-            grantLiveness(next);
-            router.replace(next as never);
+          if (target) {
+            grantLiveness(target);
+            router.replace(target);
           } else {
             router.back();
           }

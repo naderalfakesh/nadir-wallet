@@ -17,7 +17,16 @@
     "share": "Share",
     "done": "Done",
     "manage": "Manage",
-    "seeAll": "See all"
+    "seeAll": "See all",
+    "close": "Close"
+  },
+  "camera": {
+    "permissionTitle": "Camera access needed",
+    "allow": "Allow camera",
+    "deniedTitle": "Camera access is off",
+    "openSettings": "Open Settings",
+    "noDeviceTitle": "No camera available",
+    "unavailableTitle": "Camera unavailable"
   },
   "testnet": {
     "badge": "Testnet"

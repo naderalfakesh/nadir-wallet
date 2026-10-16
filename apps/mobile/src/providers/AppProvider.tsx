@@ -5,6 +5,7 @@ import { storage, DEFAULT_PREFS, type Prefs, type PersistedState } from "@/servi
 import { SECURITY_EVENTS } from "@/features/security/data";
 import { makeSecurityEvent } from "@/features/security/events";
 import { EMPTY_LOCKOUT, recordFailure, type LockoutState } from "@/features/auth/lockout";
+import { persistNewWallet, persistPasscode } from "./walletPersistence";
 
 const MAX_EVENTS = 40;
 
@@ -13,7 +14,7 @@ interface AppValue {
   setPref: <K extends keyof Prefs>(key: K, value: Prefs[K]) => void;
   /** True once the user has set an app-lock PIN. */
   hasPasscode: boolean;
-  /** Hashes and stores a new PIN. Resolves once the keychain write is issued. */
+  /** Hashes and stores a new PIN. Rejects, leaving the old PIN in place, if the keychain write fails. */
   setPasscode: (pin: string) => Promise<void>;
   /** Checks a PIN against the stored hash. Always false when none is set. */
   verifyPasscode: (pin: string) => Promise<boolean>;
@@ -23,11 +24,18 @@ interface AppValue {
   clearLockout: () => void;
   events: SecurityEvent[];
   logEvent: (type: SecurityEventType, opts?: { detail?: string; detailVars?: Record<string, string | number> }) => void;
+  /** In memory only: false on every cold start until the lock screen (or onboarding) succeeds. */
+  sessionUnlocked: boolean;
+  unlockSession: () => void;
+  lockSession: () => void;
   // Derives the address, stores the mnemonic in the keychain and marks the
-  // wallet as created/imported. Returns the derived public address.
+  // wallet as created/imported, then unlocks the session. Rejects without
+  // marking onboarding complete if either write fails. Returns the address.
   createWallet: (mnemonic: string, opts: { imported: boolean }) => Promise<string>;
-  getMnemonic: () => Promise<string | null>;
   resetWallet: () => Promise<void>;
+  /** The first-run intro was finished or skipped on this device. */
+  introSeen: boolean;
+  markIntroSeen: () => void;
 }
 
 const AppContext = createContext<AppValue | null>(null);
@@ -40,22 +48,28 @@ export function AppProvider({ initial, children }: { initial: PersistedState; ch
   const [events, setEvents] = useState<SecurityEvent[]>(
     initial.events.length ? initial.events : SECURITY_EVENTS,
   );
+  const [sessionUnlocked, setSessionUnlocked] = useState(false);
+  const [introSeen, setIntroSeen] = useState(initial.introSeen);
   const counter = useRef(0);
+  // Mirror of prefs so createWallet can persist the exact object it commits.
+  const prefsRef = useRef(initial.prefs);
   // Mirror of the lockout state for synchronous reads inside callbacks.
   const lockoutRef = useRef(initial.lockout);
 
   const setPref = useCallback(<K extends keyof Prefs>(key: K, value: Prefs[K]) => {
     setPrefs((prev) => {
       const next = { ...prev, [key]: value };
+      prefsRef.current = next;
       void storage.savePrefs(next);
       return next;
     });
   }, []);
 
   const setPasscode = useCallback(async (pin: string) => {
-    const record = await hashPasscodeAsync(pin);
+    // Only adopt the new hash once it is stored, so a failed write can't leave
+    // the app verifying against a PIN that won't exist after a restart.
+    const record = await persistPasscode(pin, hashPasscodeAsync, storage.savePasscodeHash);
     setPasscodeHash(record);
-    await storage.savePasscodeHash(record);
   }, []);
 
   const verifyPasscode = useCallback(
@@ -94,35 +108,42 @@ export function AppProvider({ initial, children }: { initial: PersistedState; ch
   const createWallet = useCallback<AppValue["createWallet"]>(
     async (mnemonic, opts) => {
       const address = mnemonicToEvmAddress(mnemonic);
-      await storage.saveMnemonic(mnemonic);
-      setPrefs((prev) => {
-        const next: Prefs = {
-          ...prev,
-          onboardingCompleted: true,
-          // Create flow verifies the phrase; import assumes the user has it.
-          backupConfirmed: !opts.imported,
-          walletAddress: address,
-          walletCreatedAt: Date.now(),
-        };
-        void storage.savePrefs(next);
-        return next;
-      });
+      const next = await persistNewWallet(
+        mnemonic,
+        address,
+        prefsRef.current,
+        { imported: opts.imported, now: Date.now() },
+        storage,
+      );
+      prefsRef.current = next;
+      setPrefs(next);
+      setSessionUnlocked(true);
       logEvent(opts.imported ? "imported" : "created");
       return address;
     },
     [logEvent],
   );
 
-  const getMnemonic = useCallback(() => storage.getMnemonic(), []);
-
   const resetWallet = useCallback(async () => {
     await storage.clearWallet();
+    setSessionUnlocked(false);
+    prefsRef.current = DEFAULT_PREFS;
     setPrefs(DEFAULT_PREFS);
     setPasscodeHash(null);
     lockoutRef.current = EMPTY_LOCKOUT;
     setLockout(EMPTY_LOCKOUT);
     setEvents([]);
   }, []);
+
+  // A failed write only means the intro shows once more next launch, so the
+  // user is never held on it.
+  const markIntroSeen = useCallback(() => {
+    setIntroSeen(true);
+    void storage.saveIntroSeen().catch(() => undefined);
+  }, []);
+
+  const unlockSession = useCallback(() => setSessionUnlocked(true), []);
+  const lockSession = useCallback(() => setSessionUnlocked(false), []);
 
   const value = useMemo<AppValue>(
     () => ({
@@ -136,9 +157,13 @@ export function AppProvider({ initial, children }: { initial: PersistedState; ch
       clearLockout,
       events,
       logEvent,
+      sessionUnlocked,
+      unlockSession,
+      lockSession,
       createWallet,
-      getMnemonic,
       resetWallet,
+      introSeen,
+      markIntroSeen,
     }),
     [
       prefs,
@@ -151,9 +176,13 @@ export function AppProvider({ initial, children }: { initial: PersistedState; ch
       clearLockout,
       events,
       logEvent,
+      sessionUnlocked,
+      unlockSession,
+      lockSession,
       createWallet,
-      getMnemonic,
       resetWallet,
+      introSeen,
+      markIntroSeen,
     ],
   );
 

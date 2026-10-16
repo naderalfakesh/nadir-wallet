@@ -17,7 +17,7 @@ export function SettingsScreen() {
   const sheets = useSheets();
   const { scheme } = useThemeControls();
   const { t } = useTranslation();
-  const { prefs, resetWallet } = useApp();
+  const { prefs, resetWallet, lockSession } = useApp();
 
   const confirmReset = () => {
     Alert.alert(t("settings.reset.title"), t("settings.reset.body"), [
@@ -26,7 +26,8 @@ export function SettingsScreen() {
         text: t("settings.reset.confirm"),
         style: "destructive",
         onPress: () => {
-          void resetWallet().then(() => router.replace("/onboarding"));
+          // Resetting closes the wallet route group; index then routes to onboarding.
+          void resetWallet();
         },
       },
     ]);
@@ -104,7 +105,7 @@ export function SettingsScreen() {
           </Card>
 
           <View style={styles.gap} />
-          <Button label={t("settings.lockWallet")} variant="ghost" icon="lock" onPress={() => router.push("/lock")} />
+          <Button label={t("settings.lockWallet")} variant="ghost" icon="lock" onPress={lockSession} />
 
           <View style={styles.footer}>
             <AppText size={12} faint>

@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
-import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as LocalAuthentication from "expo-local-authentication";
 import { Screen, Brandmark, AppText, Button, Icon } from "@/components";
@@ -16,10 +15,9 @@ type BioStatus = "idle" | "authenticating" | "failed" | "cancelled" | "unavailab
 
 export function LockScreen() {
   const theme = useTheme();
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { prefs, verifyPasscode, lockout, recordUnlockFailure, clearLockout, logEvent } = useApp();
+  const { prefs, verifyPasscode, lockout, recordUnlockFailure, clearLockout, logEvent, unlockSession } = useApp();
 
   const [mode, setMode] = useState<"bio" | "passcode">(prefs.biometricEnabled ? "bio" : "passcode");
   const [available, setAvailable] = useState(false);
@@ -31,17 +29,24 @@ export function LockScreen() {
     (methodLabel: string) => {
       clearLockout();
       logEvent("unlock", { detail: methodLabel });
-      router.replace("/home");
+      // Opening the wallet group removes this screen; index then routes to home.
+      unlockSession();
     },
-    [clearLockout, logEvent, router],
+    [clearLockout, logEvent, unlockSession],
   );
 
   const authenticate = useCallback(async () => {
     setStatus("authenticating");
-    const res = await LocalAuthentication.authenticateAsync({
-      promptMessage: translate("lock.unlockFaceId"),
-      disableDeviceFallback: false,
-    });
+    let res: LocalAuthentication.LocalAuthenticationResult;
+    try {
+      res = await LocalAuthentication.authenticateAsync({
+        promptMessage: translate("lock.unlockFaceId"),
+        disableDeviceFallback: false,
+      });
+    } catch {
+      setStatus("failed");
+      return;
+    }
     if (res.success) {
       unlock(translate("security.log.unlockFaceId"));
     } else if (res.error === "user_cancel" || res.error === "app_cancel" || res.error === "system_cancel") {
@@ -56,9 +61,12 @@ export function LockScreen() {
     if (started.current) return;
     started.current = true;
     (async () => {
-      const hasHardware = await LocalAuthentication.hasHardwareAsync();
-      const enrolled = await LocalAuthentication.isEnrolledAsync();
-      const ok = hasHardware && enrolled;
+      let ok = false;
+      try {
+        ok = (await LocalAuthentication.hasHardwareAsync()) && (await LocalAuthentication.isEnrolledAsync());
+      } catch {
+        // Treated as no biometrics: the passcode path still guards the wallet.
+      }
       setAvailable(ok);
       if (prefs.biometricEnabled && ok) {
         authenticate();

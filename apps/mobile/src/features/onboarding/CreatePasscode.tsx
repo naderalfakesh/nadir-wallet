@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { View } from "react-native";
 import { ScreenHeader, AppText, Icon } from "@/components";
 import { useTheme } from "@/theme";
@@ -8,20 +8,42 @@ import { usePinEntry } from "@/features/auth/usePinEntry";
 
 // Two-stage set/confirm entry. Nothing is persisted here: the PIN is handed
 // back so the flow can hash it and store the record in the device keychain.
-export function CreatePasscode({ onDone, onBack }: { onDone: (pin: string) => void; onBack: () => void }) {
+// `onDone` resolves false when that write failed, and entry starts over.
+export function CreatePasscode({
+  onDone,
+  onBack,
+}: {
+  onDone: (pin: string) => Promise<boolean>;
+  onBack: () => void;
+}) {
   const theme = useTheme();
   const { t } = useTranslation();
   const [stage, setStage] = useState<"set" | "confirm">("set");
   const [first, setFirst] = useState("");
+  const [saveFailed, setSaveFailed] = useState(false);
+  // Hashing and the keychain write take a moment; keys pressed meanwhile would
+  // start a second save of a PIN the user is still looking at.
+  const saving = useRef(false);
 
   const { pin, error, shake, press, clear } = usePinEntry({
     onComplete: (entered, helpers) => {
       if (stage === "set") {
         setFirst(entered);
+        setSaveFailed(false);
         helpers.clear();
         setStage("confirm");
       } else if (entered === first) {
-        onDone(entered);
+        if (saving.current) return;
+        saving.current = true;
+        void onDone(entered).then((saved) => {
+          saving.current = false;
+          if (saved) return;
+          setSaveFailed(true);
+          helpers.fail(() => {
+            setFirst("");
+            setStage("set");
+          });
+        });
       } else {
         helpers.fail(() => {
           setFirst("");
@@ -64,16 +86,22 @@ export function CreatePasscode({ onDone, onBack }: { onDone: (pin: string) => vo
           style={{ marginTop: 6, height: 18 }}
         >
           {error
-            ? t("onboarding.passcode.mismatch")
-            : stage === "set"
-              ? t("onboarding.passcode.createHint")
-              : t("onboarding.passcode.confirmHint")}
+            ? t(saveFailed ? "onboarding.passcode.saveFailed" : "onboarding.passcode.mismatch")
+            : saveFailed
+              ? t("onboarding.passcode.saveFailed")
+              : stage === "set"
+                ? t("onboarding.passcode.createHint")
+                : t("onboarding.passcode.confirmHint")}
         </AppText>
         <View style={{ marginTop: 26, marginBottom: 6 }}>
           <PinDots filled={pin.length} error={error} shake={shake} />
         </View>
         <View style={{ flex: 1, minHeight: 24 }} />
-        <PinKeypad onKey={press} />
+        <PinKeypad
+          onKey={(key) => {
+            if (!saving.current) press(key);
+          }}
+        />
       </View>
     </View>
   );

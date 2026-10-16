@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,6 +10,7 @@ import { usePinEntry } from "@/features/auth/usePinEntry";
 import { useApp } from "@/providers/AppProvider";
 
 type Stage = "current" | "new" | "confirm" | "done";
+type EntryError = "incorrect" | "mismatch" | "saveFailed";
 
 export function ChangePasscodeScreen() {
   const theme = useTheme();
@@ -19,6 +20,10 @@ export function ChangePasscodeScreen() {
   const { verifyPasscode, setPasscode, logEvent } = useApp();
   const [stage, setStage] = useState<Stage>("current");
   const [first, setFirst] = useState("");
+  const [entryError, setEntryError] = useState<EntryError>("incorrect");
+  // Hashing and the keychain write take a moment; ignore keys until it settles
+  // so a re-entered PIN can't start a second save or log the change twice.
+  const saving = useRef(false);
 
   const { pin, error, shake, press, clear } = usePinEntry({
     onComplete: (entered, helpers) => {
@@ -27,7 +32,10 @@ export function ChangePasscodeScreen() {
           if (ok) {
             helpers.clear();
             setStage("new");
-          } else helpers.fail();
+          } else {
+            setEntryError("incorrect");
+            helpers.fail();
+          }
         });
       } else if (stage === "new") {
         setFirst(entered);
@@ -35,16 +43,32 @@ export function ChangePasscodeScreen() {
         setStage("confirm");
       } else if (stage === "confirm") {
         if (entered === first) {
-          helpers.clear();
-          void setPasscode(entered).then(() => {
-            logEvent("passcode_changed");
-            setStage("done");
-          });
-        } else
+          if (saving.current) return;
+          saving.current = true;
+          setPasscode(entered).then(
+            () => {
+              saving.current = false;
+              helpers.clear();
+              logEvent("passcode_changed");
+              setStage("done");
+            },
+            // The old PIN stays in place; start the new-PIN entry over.
+            () => {
+              saving.current = false;
+              setEntryError("saveFailed");
+              helpers.fail(() => {
+                setFirst("");
+                setStage("new");
+              });
+            },
+          );
+        } else {
+          setEntryError("mismatch");
           helpers.fail(() => {
             setFirst("");
             setStage("new");
           });
+        }
       }
     },
   });
@@ -94,7 +118,7 @@ export function ChangePasscodeScreen() {
           setStage(stage === "confirm" ? "new" : "current");
         };
 
-  const errorText = stage === "current" ? t("settings.changePin.incorrect") : t("settings.changePin.mismatch");
+  const errorText = t(`settings.changePin.${entryError}`);
 
   return (
     <Screen>
@@ -128,7 +152,11 @@ export function ChangePasscodeScreen() {
           <PinDots filled={pin.length} error={error} shake={shake} />
         </View>
         <View style={{ flex: 1, minHeight: 24 }} />
-        <PinKeypad onKey={press} />
+        <PinKeypad
+          onKey={(key) => {
+            if (!saving.current) press(key);
+          }}
+        />
       </View>
     </Screen>
   );

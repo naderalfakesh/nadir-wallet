@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, Vibration, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Camera, useCameraPermission, useFrameOutput } from "react-native-vision-camera";
+import { Camera, useCameraDevice, useCameraPermission, useFrameOutput } from "react-native-vision-camera";
 import { scheduleOnRN } from "react-native-worklets";
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from "react-native-reanimated";
 import { createFaceLiveness } from "@nadir-wallet/face-liveness";
@@ -9,30 +9,71 @@ import { AppText, Icon } from "@/components";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useApp } from "@/providers/AppProvider";
 import { useTheme } from "@/theme";
+import { CameraErrorBoundary } from "@/features/camera/CameraErrorBoundary";
+import { CameraStatusPanel } from "@/features/camera/CameraStatusPanel";
+import { cameraStatus, tryCreateNative } from "@/features/camera/cameraStatus";
 import { FaceMaskOverlay } from "./FaceMaskOverlay";
 import { useLivenessChallenge } from "./useLivenessChallenge";
 import { FRAME_STRIDE } from "./config";
-import { BottomPromptPanel, LivenessHeader, PermissionPanel, ResultBadge } from "./LivenessFlow.parts";
+import { BottomPromptPanel, LivenessHeader, ResultBadge } from "./LivenessFlow.parts";
 import { livenessStyles as styles } from "./LivenessFlow.styles";
 import { getChallengeProgress, getLivenessPrompt, isCameraActivePhase } from "./liveness.utils";
 import type { LivenessFlowProps } from "./liveness.types";
 
-export function LivenessFlow({ mode, onPass, onCancel }: LivenessFlowProps) {
+/**
+ * Any camera or native failure ends in an error panel and never calls
+ * `onPass`, so a broken camera can't stand in for a passed check.
+ */
+export function LivenessFlow(props: LivenessFlowProps) {
+  return (
+    <CameraErrorBoundary fallback={<LivenessUnavailable onCancel={props.onCancel} />}>
+      <LivenessCamera {...props} />
+    </CameraErrorBoundary>
+  );
+}
+
+function LivenessUnavailable({ onCancel }: { onCancel: () => void }) {
+  const insets = useSafeAreaInsets();
+  return (
+    <View style={styles.root}>
+      <CameraStatusPanel feature="liveness" status="unavailable" onRequestPermission={() => undefined} />
+      <LivenessHeader topInset={insets.top} phase="align" index={0} total={0} onCancel={onCancel} />
+    </View>
+  );
+}
+
+function LivenessCamera({ mode, onPass, onCancel }: LivenessFlowProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { logEvent } = useApp();
-  const { hasPermission, requestPermission } = useCameraPermission();
+  const { hasPermission, canRequestPermission, requestPermission } = useCameraPermission();
+  const device = useCameraDevice("front");
   const { state, process, reset } = useLivenessChallenge();
-  const plugin = useMemo(() => createFaceLiveness(), []);
+  const plugin = useMemo(() => tryCreateNative(createFaceLiveness), []);
+  const [failed, setFailed] = useState(false);
+  const markFailed = useCallback(() => setFailed(true), []);
   const loggedRef = useRef(false);
 
   const badgeScale = useSharedValue(0);
   const shakeX = useSharedValue(0);
 
+  const status = cameraStatus({
+    nativeReady: plugin !== null,
+    failed,
+    hasPermission,
+    canRequestPermission,
+    hasDevice: device != null,
+  });
+
+  const askPermission = useCallback(() => {
+    requestPermission().catch(markFailed);
+  }, [requestPermission, markFailed]);
+
+  // Only a not-yet-asked permission prompts on its own; a denied one waits for the user.
   useEffect(() => {
-    if (!hasPermission) requestPermission();
-  }, [hasPermission, requestPermission]);
+    if (status === "request") askPermission();
+  }, [status, askPermission]);
 
   useEffect(() => {
     if (state.phase === "passed") {
@@ -64,6 +105,7 @@ export function LivenessFlow({ mode, onPass, onCancel }: LivenessFlowProps) {
     onFrame(frame) {
       "worklet";
       try {
+        if (plugin == null) return;
         const globalState = globalThis as Record<string, unknown>;
         const tick = ((globalState.__livenessTick as number) ?? 0) + 1;
         globalState.__livenessTick = tick;
@@ -71,13 +113,17 @@ export function LivenessFlow({ mode, onPass, onCancel }: LivenessFlowProps) {
           const observation = plugin.detect(frame);
           scheduleOnRN(process, observation);
         }
+      } catch {
+        // A frame the detector can't read stops the check instead of being skipped silently.
+        scheduleOnRN(markFailed);
       } finally {
         frame.dispose();
       }
     },
   });
 
-  const isCameraRunning = isCameraActivePhase(state.phase);
+  const ready = status === "ready" && device != null;
+  const isCameraRunning = ready && isCameraActivePhase(state.phase);
   const hasPassed = state.phase === "passed";
   const hasFailed = state.phase === "failed";
   const challengeProgress = getChallengeProgress(state);
@@ -94,18 +140,23 @@ export function LivenessFlow({ mode, onPass, onCancel }: LivenessFlowProps) {
 
   return (
     <View style={styles.root}>
-      {hasPermission ? (
+      {ready ? (
         <Camera
           style={StyleSheet.absoluteFill}
-          device="front"
+          device={device}
           isActive={isCameraRunning}
           outputs={[frameOutput]}
+          onError={markFailed}
         />
       ) : (
-        <PermissionPanel onRequestPermission={requestPermission} />
+        <CameraStatusPanel
+          feature="liveness"
+          status={status === "ready" ? "noDevice" : status}
+          onRequestPermission={askPermission}
+        />
       )}
 
-      {hasPermission && <FaceMaskOverlay fit={state.faceFit} phase={state.phase} progress={challengeProgress} />}
+      {ready && <FaceMaskOverlay fit={state.faceFit} phase={state.phase} progress={challengeProgress} />}
 
       <ResultBadge visible={hasPassed}>
         <Animated.View style={[styles.badge, { backgroundColor: colors.pos }, badgeStyle]}>
@@ -121,7 +172,7 @@ export function LivenessFlow({ mode, onPass, onCancel }: LivenessFlowProps) {
         onCancel={onCancel}
       />
 
-      {hasPermission && (
+      {ready && (
         <BottomPromptPanel
           bottomInset={insets.bottom}
           mode={mode}

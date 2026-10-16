@@ -6,9 +6,10 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
-import { AppProvider } from "@/providers/AppProvider";
+import { AppProvider, useApp } from "@/providers/AppProvider";
 import { WalletDataProvider } from "@/providers/WalletDataProvider";
 import { AutoLock } from "@/features/lock/AutoLock";
+import { groupGuards } from "@/features/lock/routeAccess";
 import { loadPersistedState, type PersistedState } from "@/services/storage";
 import {
   useFonts,
@@ -32,6 +33,41 @@ SplashScreen.preventAutoHideAsync();
 function ThemedStatusBar() {
   const { scheme } = useThemeControls();
   return <StatusBar style={scheme === "light" ? "dark" : "light"} />;
+}
+
+// Each group is registered only while it is open (see routeAccess). A closed
+// group's screens leave the navigator, so a cold-start or warm deep link to
+// one can't mount it, and closing a group (lock, reset) unmounts its screens
+// and falls back to `index`, which redirects to whichever group is open.
+function RootStack() {
+  const { prefs, sessionUnlocked } = useApp();
+  const guard = groupGuards({ onboarded: prefs.onboardingCompleted, unlocked: sessionUnlocked });
+
+  return (
+    <>
+      <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="+not-found" />
+        <Stack.Protected guard={guard.onboarding}>
+          <Stack.Screen name="onboarding" />
+        </Stack.Protected>
+        <Stack.Protected guard={guard.lock}>
+          <Stack.Screen name="lock" options={{ animation: "slide_from_bottom" }} />
+        </Stack.Protected>
+        <Stack.Protected guard={guard.wallet}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="send" options={{ animation: "slide_from_right" }} />
+          <Stack.Screen name="token/[id]" options={{ animation: "slide_from_right" }} />
+          <Stack.Screen name="backup" options={{ animation: "slide_from_right" }} />
+          <Stack.Screen name="reveal" options={{ animation: "slide_from_right" }} />
+          <Stack.Screen name="change-passcode" options={{ animation: "slide_from_right" }} />
+          <Stack.Screen name="liveness" options={{ animation: "slide_from_bottom" }} />
+          <Stack.Screen name="scan" options={{ animation: "slide_from_bottom" }} />
+        </Stack.Protected>
+      </Stack>
+      <SheetHost walletOpen={guard.wallet} />
+    </>
+  );
 }
 
 export default function RootLayout() {
@@ -67,20 +103,7 @@ export default function RootLayout() {
               <WalletDataProvider>
                 <SheetProvider>
                   <ThemedStatusBar />
-                  <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
-                    <Stack.Screen name="index" />
-                    <Stack.Screen name="onboarding" />
-                    <Stack.Screen name="lock" options={{ animation: "slide_from_bottom" }} />
-                    <Stack.Screen name="(tabs)" />
-                    <Stack.Screen name="send" options={{ animation: "slide_from_right" }} />
-                    <Stack.Screen name="token/[id]" options={{ animation: "slide_from_right" }} />
-                    <Stack.Screen name="backup" options={{ animation: "slide_from_right" }} />
-                    <Stack.Screen name="reveal" options={{ animation: "slide_from_right" }} />
-                    <Stack.Screen name="change-passcode" options={{ animation: "slide_from_right" }} />
-                    <Stack.Screen name="liveness" options={{ animation: "slide_from_bottom" }} />
-                    <Stack.Screen name="scan" options={{ animation: "slide_from_bottom" }} />
-                  </Stack>
-                  <SheetHost />
+                  <RootStack />
                   <AutoLock />
                 </SheetProvider>
               </WalletDataProvider>

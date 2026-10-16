@@ -1,34 +1,23 @@
-import React from "react";
-import { Pressable, View, type ViewStyle } from "react-native";
-import { AppText, Button, Icon } from "@/components";
-import { alpha, useTheme } from "@/theme";
+import React, { useEffect } from "react";
+import { AccessibilityInfo, Platform, Pressable, View, type ViewStyle } from "react-native";
+import { AppText, Icon } from "@/components";
+import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { scanStyles as styles } from "./ScanScreen.styles";
-
-export function PermissionPanel({ onRequestPermission }: { onRequestPermission: () => void }) {
-  const { colors } = useTheme();
-  const { t } = useTranslation();
-
-  return (
-    <View style={styles.permission}>
-      <Icon name="scan" size={36} color={colors.accent} />
-      <AppText weight="bold" size={18} color="#FFFFFF" style={styles.permissionTitle}>
-        {t("scan.permissionTitle")}
-      </AppText>
-      <AppText size={13.5} color={alpha("#FFFFFF", 0.7)} style={styles.permissionBody}>
-        {t("scan.permissionBody")}
-      </AppText>
-      <Button label={t("scan.grant")} onPress={onRequestPermission} style={styles.permissionButton} />
-    </View>
-  );
-}
+import type { ScanFeedback } from "./scanBridge";
 
 export function ScanHeader({ topInset, onCancel }: { topInset: number; onCancel: () => void }) {
   const { t } = useTranslation();
 
   return (
     <View style={[styles.header, { top: topInset + 8 }]}>
-      <Pressable onPress={onCancel} style={styles.close} hitSlop={10}>
+      <Pressable
+        onPress={onCancel}
+        style={styles.close}
+        hitSlop={10}
+        accessibilityRole="button"
+        accessibilityLabel={t("common.actions.close")}
+      >
         <Icon name="close" size={20} color="#FFFFFF" />
       </Pressable>
       <View style={styles.pill}>
@@ -70,13 +59,37 @@ export function ScanReticle({ found }: { found: boolean }) {
   );
 }
 
-export function ScanHint({ bottomInset, found }: { bottomInset: number; found: boolean }) {
+export function ScanHint({
+  bottomInset,
+  found,
+  rejection,
+}: {
+  bottomInset: number;
+  found: boolean;
+  rejection: ScanFeedback | null;
+}) {
+  const { colors } = useTheme();
   const { t } = useTranslation();
+  const showRejection = !found && rejection !== null;
+  const rejectionText = showRejection ? t(`scan.reject.${rejection}`) : null;
+
+  // `accessibilityLiveRegion` is Android-only; VoiceOver needs an explicit announcement.
+  useEffect(() => {
+    if (Platform.OS === "ios" && rejectionText) {
+      AccessibilityInfo.announceForAccessibility(rejectionText);
+    }
+  }, [rejectionText]);
 
   return (
     <View style={[styles.bottom, { paddingBottom: bottomInset + 24 }]}>
-      <AppText weight="semibold" size={15} color="#FFFFFF" style={styles.hint}>
-        {found ? t("scan.found") : t("scan.hint")}
+      <AppText
+        weight="semibold"
+        size={15}
+        color={showRejection ? colors.warn : "#FFFFFF"}
+        style={styles.hint}
+        accessibilityLiveRegion="polite"
+      >
+        {found ? t("scan.found") : (rejectionText ?? t("scan.hint"))}
       </AppText>
     </View>
   );
