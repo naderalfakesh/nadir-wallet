@@ -37,7 +37,7 @@
     "total": "Total",
     "totalValue": "{{amount}} + fee",
     "riskUnavailable": "Risk check unavailable — verify the recipient manually before sending.",
-    "trustNote": "Only the public recipient address is checked by the backend. Your private keys are used to sign locally and never leave this device."
+    "trustNote": "Only the public recipient address is checked by the backend. This demo never signs or broadcasts, and your recovery phrase stays on this device."
   },
   "mismatch": {
     "title": "Network mismatch",
@@ -49,7 +49,7 @@
     "failed": "Failed",
     "unavailable": "Unavailable",
     "failedBody": "Simulation reverted — the transaction is likely to fail (insufficient gas). Adjust the amount or try again when the testnet RPC is responsive.",
-    "unavailableBody": "Couldn't simulate — wallet services are offline. You can still sign locally, but the outcome can't be previewed.",
+    "unavailableBody": "Couldn't simulate — wallet services are offline. You can still continue the simulated send, but the outcome can't be previewed.",
     "estFee": "Estimated fee",
     "balanceAfter": "Balance after",
     "network": "Network",
@@ -58,24 +58,25 @@
     "note": "Simulation runs against testnet and does not move funds."
   },
   "confirm": {
-    "cta": "Confirm with Face ID",
+    "cta": "Confirm simulated send",
     "blocked": "Blocked — high risk",
-    "simFailed": "Simulation failed"
+    "simFailed": "Simulation failed",
+    "scanMismatch": "Token doesn't match the scanned network"
   },
   "overlay": {
-    "signing": "Confirm with Face ID",
-    "signingSub": "Signing locally on your device…",
-    "submitted": "Transaction submitted",
-    "submittedBody": "Broadcast to {{network}}. Waiting for confirmation…",
-    "hash": "Hash",
-    "viewOn": "View on {{explorer}}",
+    "confirmTitle": "Confirm it's you",
+    "confirmSub": "Simulated send — nothing is signed or broadcast.",
+    "prompt": "Confirm simulated send",
+    "backToReview": "Back to review",
+    "submitted": "Simulated send pending",
+    "submittedBody": "Demo only: nothing was signed or broadcast to {{network}}, so there is no transaction hash.",
     "backToWallet": "Back to wallet",
-    "failedTitle": "Transaction failed",
-    "failedBody": "The transaction reverted on-chain — it ran out of gas before completing. No funds were moved.",
+    "failedTitle": "Simulated send failed",
+    "failedBody": "Demo outcome: this simulates a transaction that runs out of gas. Nothing was signed or broadcast and no funds moved.",
     "retry": "Retry",
-    "details": "Details",
-    "sentTitle": "Sent",
+    "sentTitle": "Sent (simulated)",
     "sentTo": "to {{addr}}",
+    "sentBody": "Demo only: nothing was signed or broadcast to {{network}}, so there is no transaction hash.",
     "done": "Done"
   }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -6,18 +6,22 @@ import { Screen, ScreenHeader } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useApp } from "@/providers/AppProvider";
-import { FaceIDGate } from "@/features/auth/FaceIDGate";
+import { DeviceAuthGate, type GateOutcome } from "@/features/auth/DeviceAuthGate";
+import { useSensitiveReveal } from "@/features/auth/useSensitiveReveal";
+import { revealMnemonic } from "@/services/storage/mnemonic";
 import { SeedReveal } from "@/features/onboarding/SeedComponents";
 import { consumeLiveness, peekLiveness } from "@/features/liveness/livenessGate";
+import { revealWhileCurrent } from "./revealPhrase";
 
 export function RevealScreen() {
   const theme = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { getMnemonic, prefs } = useApp();
-  // The phrase is only read from the keychain after the biometric/passcode gate.
+  const { prefs } = useApp();
   const [words, setWords] = useState<string[] | null>(null);
+  const hide = useCallback(() => setWords(null), []);
+  const guard = useSensitiveReveal(hide);
 
   // Enforce the optional liveness step-up here, on the route itself, so every
   // entry point (Security Center, Settings, a deep link) is gated identically.
@@ -31,10 +35,11 @@ export function RevealScreen() {
     else router.replace("/liveness?next=/reveal");
   }, [allowed, router]);
 
-  const unlock = async () => {
-    const mnemonic = await getMnemonic();
-    setWords(mnemonic ? mnemonic.split(" ") : []);
-  };
+  const unlock = useCallback(
+    (): Promise<GateOutcome> =>
+      revealWhileCurrent(guard, () => revealMnemonic(t("onboarding.backup.revealPrompt")), setWords),
+    [guard, t],
+  );
 
   // Render nothing while bouncing to the liveness gate.
   if (!allowed) return null;
@@ -43,10 +48,10 @@ export function RevealScreen() {
     <Screen>
       <ScreenHeader title={t("onboarding.backup.revealTitle")} onBack={() => router.back()} />
       {words === null ? (
-        <FaceIDGate
+        <DeviceAuthGate
           title={t("onboarding.backup.verifyIt")}
           subtitle={t("onboarding.backup.revealGate")}
-          onDone={() => void unlock()}
+          authenticate={unlock}
         />
       ) : (
         <ScrollView contentContainerStyle={{ paddingHorizontal: theme.spacing.pad, paddingBottom: insets.bottom + theme.spacing.pad }}>

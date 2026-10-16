@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { View } from "react-native";
-import { SheetHeader, AppText, Button, Card, Row, Icon, TxIcon, StatusPill } from "@/components";
+import { SheetHeader, AppText, Card, Row, Icon, TxIcon, StatusPill } from "@/components";
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useWallet } from "@/providers/WalletDataProvider";
-import { copyText, openExplorer } from "@/services/device";
+import { copyText } from "@/services/device";
 import { fmtUSD, shortAddr } from "@/utils/format";
 import { CHAINS } from "@/features/wallet/data";
 import { getTransactionAmount, getTransactionVerbs } from "@/features/wallet/transactions";
@@ -91,13 +91,9 @@ export function TxDetailSheet({ params, close }: SheetBodyProps<"txDetail">) {
         />
       </Card>
 
-      <Button
-        label={t("tx.viewOn", { explorer: chain.explorerName })}
-        icon="external"
-        variant="ghost"
-        style={{ marginTop: 14 }}
-        onPress={() => void openExplorer(chain.explorerHost, `tx/${tx.hash}`)}
-      />
+      <AppText size={12.5} faint style={{ marginTop: 12, textAlign: "center" }}>
+        {t("tx.demoNote")}
+      </AppText>
     </View>
   );
 }

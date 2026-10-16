@@ -12,8 +12,8 @@
     "title": "Security model",
     "keysTitle": "Keys stay on this device",
     "keysBody": "Your recovery phrase and private keys are generated and stored only on this device — never uploaded.",
-    "signTitle": "Signing happens locally",
-    "signBody": "Transactions are signed on-device after biometric approval. Nothing to sign ever leaves the phone.",
+    "signTitle": "No signing in this demo",
+    "signBody": "Sends are simulated: nothing is signed or broadcast. Confirming one still asks for Face ID, fingerprint or your device passcode.",
     "backendTitle": "Backend sees public data only",
     "backendBody": "Only your public address is shared — for cached prices, address risk checks and transaction simulation."
   },
@@ -28,8 +28,8 @@
     "pinSub": "6-digit code",
     "autolock": "Auto-lock",
     "autolockSub": "After {{min}} min",
-    "signing": "Transaction signing",
-    "signingSub": "Biometric required",
+    "signing": "Send confirmation",
+    "signingSub": "Device authentication · simulated sends",
     "on": "On",
     "off": "Off"
   },
@@ -47,14 +47,14 @@
   "txProtection": {
     "title": "Transaction protection",
     "heading": "Suspicious activity protection",
-    "sub": "Screens recipients & contracts before you sign",
+    "sub": "Screens recipients & contracts before you send",
     "riskLevels": "RISK LEVELS",
     "low": "Low",
     "lowBody": "Known address, verified contract — safe to proceed.",
     "caution": "Caution",
     "cautionBody": "New address or unverified contract — review carefully.",
     "high": "High",
-    "highBody": "Flagged for scams or drains — signing is blocked."
+    "highBody": "Flagged for scams or drains — sending is blocked."
   },
   "events": {
     "title": "Recent security activity"
@@ -93,7 +93,7 @@
   "advanced": {
     "title": "Advanced",
     "reveal": "Reveal recovery phrase",
-    "revealSub": "Requires Face ID",
+    "revealSub": "Requires Face ID or device passcode",
     "connected": "Connected apps",
     "connectedSub": "2 dApps connected",
     "changePin": "Change passcode",

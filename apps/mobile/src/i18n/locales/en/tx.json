@@ -8,5 +8,5 @@
   "fee": "Network fee",
   "confirmations": "Confirmations",
   "hash": "Transaction hash",
-  "viewOn": "View on {{explorer}}"
+  "demoNote": "Demo history: this entry and its hash are sample data, not an on-chain transaction."
 }

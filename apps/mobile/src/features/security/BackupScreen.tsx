@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -6,8 +6,11 @@ import { Screen, ScreenHeader, AppText, Button, Card, Icon } from "@/components"
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useApp } from "@/providers/AppProvider";
-import { FaceIDGate } from "@/features/auth/FaceIDGate";
+import { DeviceAuthGate, type GateOutcome } from "@/features/auth/DeviceAuthGate";
+import { useSensitiveReveal } from "@/features/auth/useSensitiveReveal";
+import { revealMnemonic } from "@/services/storage/mnemonic";
 import { SeedReveal, SeedVerify } from "@/features/onboarding/SeedComponents";
+import { revealWhileCurrent } from "./revealPhrase";
 
 type Step = "intro" | "auth" | "reveal" | "verify" | "done";
 
@@ -16,21 +19,40 @@ export function BackupScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { setPref, logEvent, getMnemonic } = useApp();
+  const { setPref, logEvent } = useApp();
   const [step, setStep] = useState<Step>("intro");
   const [words, setWords] = useState<string[]>([]);
   const pad = theme.spacing.pad;
 
-  // Read the stored phrase only after passing the auth gate.
-  const unlock = async () => {
-    const mnemonic = await getMnemonic();
-    setWords(mnemonic ? mnemonic.split(" ") : []);
-    setStep("reveal");
+  // Leaving the reveal/verify steps (back, background, done) drops the words,
+  // so seeing them again needs a fresh OS prompt.
+  const clear = useCallback(() => {
+    setWords([]);
+    setStep((prev) => (prev === "done" ? prev : "intro"));
+  }, []);
+  const guard = useSensitiveReveal(clear);
+  const restart = () => {
+    guard.invalidate();
+    clear();
   };
+
+  const unlock = useCallback(
+    (): Promise<GateOutcome> =>
+      revealWhileCurrent(
+        guard,
+        () => revealMnemonic(t("onboarding.backup.revealPrompt")),
+        (revealed) => {
+          setWords(revealed);
+          setStep("reveal");
+        },
+      ),
+    [guard, t],
+  );
 
   const confirmBackup = () => {
     setPref("backupConfirmed", true);
     logEvent("backup");
+    setWords([]);
     setStep("done");
   };
 
@@ -76,11 +98,11 @@ export function BackupScreen() {
   if (step === "auth") {
     return (
       <Screen>
-        <ScreenHeader title={t("onboarding.backup.revealTitle")} onBack={() => setStep("intro")} />
-        <FaceIDGate
+        <ScreenHeader title={t("onboarding.backup.revealTitle")} onBack={restart} />
+        <DeviceAuthGate
           title={t("onboarding.backup.verifyIt")}
           subtitle={t("onboarding.backup.revealGate")}
-          onDone={() => void unlock()}
+          authenticate={unlock}
         />
       </Screen>
     );
@@ -89,7 +111,7 @@ export function BackupScreen() {
   if (step === "reveal") {
     return (
       <Screen>
-        <ScreenHeader title={t("onboarding.reveal.title")} subtitle={t("onboarding.reveal.step")} onBack={() => setStep("intro")} />
+        <ScreenHeader title={t("onboarding.reveal.title")} subtitle={t("onboarding.reveal.step")} onBack={restart} />
         <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: insets.bottom + pad }}>
           <SeedReveal words={words} onContinue={() => setStep("verify")} ctaLabel={t("onboarding.reveal.cta")} />
         </ScrollView>
