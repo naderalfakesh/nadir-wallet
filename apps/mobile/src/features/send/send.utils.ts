@@ -1,5 +1,7 @@
-import type { DemoToken } from "@/features/wallet/data";
+import { getNetwork } from "@nadir-wallet/crypto-core";
+import { chainToNetworkId, type DemoToken } from "@/features/wallet/data";
 import type { AddressRisk } from "@/features/wallet/risk";
+import type { ScanRejectReason, ScanTarget } from "@/features/scan/scanBridge";
 import type { SimulationStatus, RecipientValidation, RiskCopy, RiskTranslator } from "./send.types";
 
 const EVM_ADDRESS_PATTERN = /^0x[0-9a-fA-F]{6,}$/;
@@ -13,6 +15,26 @@ export function getRecipientValidation(to: string): RecipientValidation {
   const toError = trimmedTo.length > 3 && !toValid;
 
   return { trimmedTo, looksAddr, looksEns, toValid, toError };
+}
+
+/**
+ * Whether a scanned target can be sent with the selected token. A chain-less
+ * address keeps the current network (EIP-681). A chain-qualified code must
+ * name the selected token's network, and that token must be its native asset.
+ * ERC-20 requests are refused: demo tokens carry no contract to match against.
+ */
+export function checkScanForToken(
+  target: Pick<ScanTarget, "chainId" | "tokenContract">,
+  token: DemoToken,
+): ScanRejectReason | null {
+  if (target.tokenContract !== null) return "token-request";
+  if (target.chainId === null) return null;
+  const networkId = chainToNetworkId(token.chain);
+  const network = networkId ? getNetwork(networkId) : undefined;
+  if (network?.chainId !== target.chainId || network.nativeCurrency.symbol !== token.symbol) {
+    return "asset-mismatch";
+  }
+  return null;
 }
 
 export function getRiskCopy(risk: AddressRisk, t: RiskTranslator): RiskCopy {

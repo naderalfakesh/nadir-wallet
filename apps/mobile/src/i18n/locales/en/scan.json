@@ -2,7 +2,18 @@
   "title": "Scan address",
   "hint": "Point at a wallet QR code",
   "found": "Address found",
-  "permissionTitle": "Camera access needed",
-  "permissionBody": "Allow camera access to scan a recipient's QR code. Frames are processed on-device and never stored.",
-  "grant": "Allow camera"
+  "reject": {
+    "unsupported": "Not a supported wallet address. Scan a testnet address QR.",
+    "checksum": "This address failed its checksum. Ask the recipient for a new code.",
+    "unsupportedNetwork": "This code is for a network the wallet doesn't support. Only Sepolia and Amoy testnets work.",
+    "missingNetwork": "This payment request doesn't say which network it's for.",
+    "tokenRequest": "Token payment requests aren't supported yet. Scan a plain address instead.",
+    "assetMismatch": "This code is for a different network or asset than the one you're sending."
+  },
+  "camera": {
+    "permissionBody": "Allow camera access to scan a recipient's QR code. Frames are processed on-device and never stored.",
+    "deniedBody": "Camera access for Nadir Wallet is turned off. Turn it on in Settings to scan a QR code, or close this and enter the address instead.",
+    "noDeviceBody": "This device has no back camera. Close this and enter the address instead.",
+    "unavailableBody": "The scanner couldn't start on this device. Close this and enter the address instead."
+  }
 }

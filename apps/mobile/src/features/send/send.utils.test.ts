@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { DemoToken } from "@/features/wallet/data";
+import { TOKENS, tokenById, type DemoToken } from "@/features/wallet/data";
 import {
+  checkScanForToken,
   getInitialToken,
   getLiveSimulationStatus,
   getLocalSimulationStatus,
@@ -70,5 +71,46 @@ describe("getInitialToken", () => {
   it("falls back to the first token, then the provided fallback", () => {
     expect(getInitialToken(tokens, "missing", token("fallback")).id).toBe("eth");
     expect(getInitialToken([], undefined, token("fallback")).id).toBe("fallback");
+  });
+});
+
+describe("checkScanForToken", () => {
+  const SEPOLIA = 11155111;
+  const AMOY = 80002;
+  const TOKEN = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
+  const native = (chainId: number | null) => ({ chainId, tokenContract: null });
+
+  it("accepts a chain-less address for any selected token", () => {
+    for (const t of TOKENS) expect(checkScanForToken(native(null), t)).toBeNull();
+  });
+
+  it("accepts a chain-qualified code only for that network's native token", () => {
+    expect(checkScanForToken(native(SEPOLIA), tokenById("eth"))).toBeNull();
+    expect(checkScanForToken(native(AMOY), tokenById("pol"))).toBeNull();
+  });
+
+  it("rejects a code for another supported network", () => {
+    expect(checkScanForToken(native(AMOY), tokenById("eth"))).toBe("asset-mismatch");
+    expect(checkScanForToken(native(SEPOLIA), tokenById("pol"))).toBe("asset-mismatch");
+  });
+
+  it("rejects a Sepolia code when the token is on a network without API support", () => {
+    for (const id of ["usdc", "arb", "op"]) {
+      expect(checkScanForToken(native(SEPOLIA), tokenById(id))).toBe("asset-mismatch");
+    }
+  });
+
+  it("rejects a non-native token on the scanned network", () => {
+    expect(checkScanForToken(native(SEPOLIA), { ...tokenById("eth"), symbol: "USDC" })).toBe("asset-mismatch");
+  });
+
+  it("rejects mainnet chain ids even if they slipped past the parser", () => {
+    expect(checkScanForToken(native(1), tokenById("eth"))).toBe("asset-mismatch");
+    expect(checkScanForToken(native(137), tokenById("pol"))).toBe("asset-mismatch");
+  });
+
+  it("refuses ERC-20 transfer requests regardless of network", () => {
+    expect(checkScanForToken({ chainId: SEPOLIA, tokenContract: TOKEN }, tokenById("eth"))).toBe("token-request");
+    expect(checkScanForToken({ chainId: AMOY, tokenContract: TOKEN }, tokenById("pol"))).toBe("token-request");
   });
 });

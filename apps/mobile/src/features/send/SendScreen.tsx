@@ -20,6 +20,7 @@ import { createSendStyles } from "./SendScreen.styles";
 import { FooterButton } from "./SendScreen.parts";
 import { AmountStep, ReviewStep, ToStep } from "./SendScreen.steps";
 import {
+  checkScanForToken,
   getInitialToken,
   getLiveSimulationStatus,
   getLocalSimulationStatus,
@@ -42,6 +43,8 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
   const [step, setStep] = useState<SendStep>("to");
   const [token, setToken] = useState<DemoToken>(() => getInitialToken(tokens, tokenId, tokenById("eth")));
   const [to, setTo] = useState("");
+  // Network the recipient was scanned for; the token can still change on the amount step.
+  const [scanChainId, setScanChainId] = useState<number | null>(null);
   const [amt, setAmt] = useState("0");
   const [phase, setPhase] = useState<SendPhase | null>(null);
 
@@ -78,6 +81,8 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
   const blocked = Boolean(risk?.blocked);
   const recipientNet = recipientNetwork(trimmedTo);
   const netMismatch = Boolean(recipientNet && recipientNet !== token.chain);
+  const scanMismatch =
+    scanChainId !== null && checkScanForToken({ chainId: scanChainId, tokenContract: null }, token) !== null;
   const simStatus: SimulationStatus = liveMode
     ? getLiveSimulationStatus(liveSim.status)
     : getLocalSimulationStatus({ checksAvailable, sendSim });
@@ -112,10 +117,19 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
     setPhase(null);
     setStep("review");
   };
+  const editTo = (value: string) => {
+    setScanChainId(null);
+    setTo(value);
+  };
   const openScanner = () => {
-    beginScan((addr) => {
-      if (addr) setTo(addr);
-    });
+    beginScan(
+      (target) => {
+        if (!target) return;
+        setTo(target.recipient);
+        setScanChainId(target.chainId);
+      },
+      (target) => checkScanForToken(target, token),
+    );
     router.push("/scan");
   };
   const continueFromTo = () => {
@@ -171,10 +185,10 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
             risk={risk}
             checksAvailable={checksAvailable}
             bottomInset={insets.bottom}
-            onChangeTo={setTo}
-            onPaste={() => setTo(DEMO_PASTE_ADDRESS)}
+            onChangeTo={editTo}
+            onPaste={() => editTo(DEMO_PASTE_ADDRESS)}
             onScan={openScanner}
-            onPickRecipient={setTo}
+            onPickRecipient={editTo}
           />
           <FooterButton bottomInset={insets.bottom}>
             <Button
@@ -220,9 +234,17 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
           />
           <FooterButton bottomInset={insets.bottom}>
             <Button
-              label={blocked ? t("send.confirm.blocked") : simStatus === "failed" ? t("send.confirm.simFailed") : t("send.confirm.cta")}
+              label={
+                blocked
+                  ? t("send.confirm.blocked")
+                  : scanMismatch
+                    ? t("send.confirm.scanMismatch")
+                    : simStatus === "failed"
+                      ? t("send.confirm.simFailed")
+                      : t("send.confirm.cta")
+              }
               icon="faceid"
-              disabled={blocked || simStatus === "failed"}
+              disabled={blocked || scanMismatch || simStatus === "failed"}
               onPress={() => setPhase(prefs.requireLivenessSend && fiat >= HIGH_VALUE_USD ? "liveness" : "auth")}
             />
           </FooterButton>
