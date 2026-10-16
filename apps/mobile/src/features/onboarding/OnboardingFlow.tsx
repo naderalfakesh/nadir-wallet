@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { ScrollView } from "react-native";
-import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen, ScreenHeader } from "@/components";
 import { useTheme } from "@/theme";
@@ -8,30 +7,50 @@ import { useTranslation } from "@/i18n/useTranslation";
 import { useApp } from "@/providers/AppProvider";
 import { generateMnemonic } from "@nadir-wallet/crypto-core";
 import { WelcomeScreen } from "./WelcomeScreen";
+import { IntroScreen } from "./IntroScreen";
+import { initialOnboardingStep } from "./firstRun";
 import { ImportScreen } from "./ImportScreen";
 import { CreatePasscode } from "./CreatePasscode";
 import { SeedReveal, SeedVerify } from "./SeedComponents";
 import { BiometricStep, ExplainStep, ReadyStep } from "./OnboardingFlow.parts";
 
-type Step = "welcome" | "explain" | "reveal" | "verify" | "import" | "passcode" | "biometric" | "ready";
+type Step = "intro" | "welcome" | "explain" | "reveal" | "verify" | "import" | "passcode" | "biometric" | "ready";
 
 export function OnboardingFlow() {
   const theme = useTheme();
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { setPref, setPasscode, logEvent, createWallet } = useApp();
-  const [step, setStep] = useState<Step>("welcome");
+  const { setPref, setPasscode, logEvent, createWallet, introSeen, markIntroSeen } = useApp();
+  const [step, setStep] = useState<Step>(() => initialOnboardingStep(introSeen));
   const [viaImport, setViaImport] = useState(false);
   // The fresh/imported phrase lives only in memory until the user confirms.
   const [mnemonic, setMnemonic] = useState("");
   const words = mnemonic ? mnemonic.split(" ") : [];
+  const [finishState, setFinishState] = useState<"idle" | "saving" | "failed">("idle");
 
+  // createWallet unlocks the session, which closes this route group; index then
+  // routes to home. On failure the wallet stays un-onboarded and can retry.
   const finish = async () => {
-    await createWallet(mnemonic, { imported: viaImport });
-    router.replace("/home");
+    if (finishState === "saving") return;
+    setFinishState("saving");
+    try {
+      await createWallet(mnemonic, { imported: viaImport });
+    } catch {
+      setFinishState("failed");
+    }
   };
   const pad = theme.spacing.pad;
+
+  if (step === "intro") {
+    return (
+      <IntroScreen
+        onDone={() => {
+          markIntroSeen();
+          setStep("welcome");
+        }}
+      />
+    );
+  }
 
   if (step === "welcome") {
     return (
@@ -93,9 +112,14 @@ export function OnboardingFlow() {
     return (
       <Screen>
         <CreatePasscode
-          onDone={(pin) => {
-            void setPasscode(pin);
+          onDone={async (pin) => {
+            try {
+              await setPasscode(pin);
+            } catch {
+              return false;
+            }
             setStep("biometric");
+            return true;
           }}
           onBack={() => setStep("welcome")}
         />
@@ -119,5 +143,11 @@ export function OnboardingFlow() {
     );
   }
 
-  return <ReadyStep onOpen={() => void finish()} />;
+  return (
+    <ReadyStep
+      onOpen={() => void finish()}
+      saving={finishState === "saving"}
+      failed={finishState === "failed"}
+    />
+  );
 }

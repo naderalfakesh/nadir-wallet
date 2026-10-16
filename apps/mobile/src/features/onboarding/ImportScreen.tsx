@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Pressable, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from "react-native";
 import { ScreenHeader, AppText, Button, Icon } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -22,15 +22,25 @@ export function ImportScreen({ onBack, onDone }: { onBack: () => void; onDone: (
 
   const normalized = value.trim().toLowerCase().split(/\s+/).filter(Boolean).join(" ");
 
+  // The field autofocuses, so without this the keyboard covers the Import
+  // button. Android resizes the window itself; iOS needs the padding.
   return (
-    <View style={{ flex: 1 }}>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <ScreenHeader title={t("onboarding.import.title")} subtitle={t("onboarding.import.sub")} onBack={onBack} />
-      <View style={{ flex: 1, paddingHorizontal: theme.spacing.pad, paddingBottom: theme.spacing.pad }}>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        contentContainerStyle={{ flexGrow: 1, paddingHorizontal: theme.spacing.pad, paddingBottom: theme.spacing.pad }}
+      >
         <TextInput
           value={value}
           onChangeText={setValue}
           autoFocus
           multiline
+          // Words are space-separated, so Return closes the keyboard instead of
+          // adding a newline. No onSubmitEditing: import stays an explicit press.
+          submitBehavior="blurAndSubmit"
+          returnKeyType="done"
           autoCapitalize="none"
           autoCorrect={false}
           placeholder={t("onboarding.import.placeholder")}
@@ -93,7 +103,7 @@ export function ImportScreen({ onBack, onDone }: { onBack: () => void; onDone: (
 
         <View style={{ flex: 1 }} />
         <Button label={t("onboarding.import.cta")} disabled={!result.valid} onPress={() => onDone(normalized)} />
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

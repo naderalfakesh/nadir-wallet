@@ -61,5 +61,49 @@ export function createOnboardingStyles(theme: Theme) {
     spacer: {
       flex: 1,
     },
+    introTopBar: {
+      minHeight: 48,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: spacing.pad,
+    },
+    introDots: {
+      flexDirection: "row",
+      gap: 6,
+      paddingVertical: 8,
+    },
+    introDot: {
+      width: 7,
+      height: 7,
+      borderRadius: 4,
+      backgroundColor: colors.surface3,
+    },
+    introDotActive: {
+      width: 22,
+      backgroundColor: colors.accent,
+    },
+    introSkip: {
+      minHeight: 44,
+      minWidth: 44,
+      justifyContent: "center",
+      alignItems: "flex-end",
+    },
+    // flexGrow (not flex) so large text scrolls instead of clipping.
+    introBody: {
+      flexGrow: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      padding: spacing.pad,
+    },
+    introText: {
+      marginTop: 12,
+      lineHeight: 23,
+      textAlign: "center",
+      maxWidth: 320,
+    },
+    introBadge: {
+      marginTop: 20,
+    },
   });
 }

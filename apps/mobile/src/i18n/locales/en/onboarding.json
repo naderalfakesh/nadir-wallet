@@ -1,4 +1,23 @@
 {
+  "intro": {
+    "skip": "Skip",
+    "skipHint": "Skips the introduction and goes to wallet setup",
+    "next": "Continue",
+    "start": "Get started",
+    "progress": "Step {{n}} of {{total}}",
+    "nadir": {
+      "title": "Nadir",
+      "body": "A self-custody wallet for testnet practice. Learn how keys, backups and sends work without risking real money."
+    },
+    "keys": {
+      "title": "Your keys stay here",
+      "body": "Your recovery phrase is created and kept on this device. A passcode, and Face ID if you want it, locks the app."
+    },
+    "practice": {
+      "title": "Practice, not payments",
+      "body": "Nadir is testnet-only, and sends are simulated: nothing is signed or broadcast. The camera is only used when you scan a code or run a face check."
+    }
+  },
   "welcome": {
     "tagline": "Self-custody for multi-chain assets. Your keys, your crypto — secured by design.",
     "badge": "Testnet demo · no real funds",
@@ -11,7 +30,7 @@
     "title": "Self-custody",
     "sub": "What that means",
     "keysTitle": "You hold the keys",
-    "keysBody": "Your funds live on-chain and only your device can move them. No accounts, no bank, no middleman.",
+    "keysBody": "Your recovery phrase is created on this device and never leaves it. No accounts, no bank, no middleman.",
     "phraseTitle": "A recovery phrase is your backup",
     "phraseBody": "Twelve words are the master key to your wallet. Write them down and keep them offline.",
     "recoverTitle": "Only you can recover it",
@@ -22,7 +41,7 @@
     "title": "Recovery phrase",
     "step": "Step 1 of 3",
     "warning": "Write these 12 words down in order and store them offline. Never share them. Don't screenshot.",
-    "demoNote": "Demo phrase — this wallet is testnet-only and creates no real keys.",
+    "demoNote": "This is a real recovery phrase. Nadir is testnet-only and simulates sends, but keep the phrase private anyway.",
     "tapToReveal": "Tap to reveal",
     "copy": "Copy to clipboard",
     "copied": "Copied to clipboard",
@@ -42,18 +61,20 @@
     "confirm": "Confirm passcode",
     "createHint": "6 digits to unlock your wallet",
     "confirmHint": "Enter it once more to confirm",
-    "mismatch": "Passcodes didn't match — try again"
+    "mismatch": "Passcodes didn't match — try again",
+    "saveFailed": "Couldn't save the passcode. Try again."
   },
   "biometric": {
     "title": "Enable Face ID",
-    "body": "Use Face ID to unlock your wallet and approve transactions instantly.",
+    "body": "Use Face ID to unlock your wallet instead of typing your passcode.",
     "enable": "Enable Face ID",
     "later": "Set up later"
   },
   "ready": {
     "title": "You're all set",
     "body": "Your wallet is ready and secured. Welcome to self-custody.",
-    "open": "Open wallet"
+    "open": "Open wallet",
+    "saveFailed": "Couldn't save your wallet on this device, so it isn't set up yet. Try again."
   },
   "import": {
     "title": "Import wallet",
@@ -75,7 +96,8 @@
     "doneTitle": "Wallet backed up",
     "doneBody": "Your recovery phrase is verified. Your security score just went up.",
     "revealTitle": "Recovery phrase",
-    "revealGate": "Reveal requires Face ID",
-    "verifyIt": "Verify it's you"
+    "revealGate": "Requires Face ID, fingerprint or your device passcode",
+    "verifyIt": "Verify it's you",
+    "revealPrompt": "Reveal your recovery phrase"
   }
 }
