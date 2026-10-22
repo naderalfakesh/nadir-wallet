@@ -53,7 +53,12 @@
       "expo-web-browser",
       [
         "expo-build-properties",
-        {}
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "extraProguardRules": "-keep class * implements com.google.firebase.components.ComponentRegistrar { void <init>(); }"
+          }
+        }
       ],
       "./plugins/withMlkitSimulatorFix"
     ],
