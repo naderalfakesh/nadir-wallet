@@ -56,7 +56,7 @@
         {
           "android": {
             "enableMinifyInReleaseBuilds": true,
-            "extraProguardRules": "-keep class * implements com.google.firebase.components.ComponentRegistrar { void <init>(); }"
+            "extraProguardRules": "-keep class * implements com.google.firebase.components.ComponentRegistrar { void <init>(); }\n-keep,allowshrinking interface com.google.firebase.components.ComponentRegistrar"
           }
         }
       ],
