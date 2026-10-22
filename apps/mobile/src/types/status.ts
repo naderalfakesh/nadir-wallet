@@ -35,5 +35,8 @@ export interface SecurityEvent {
   severity: SecurityEventSeverity;
   title: string;
   detail: string;
+  /** Label saved with the event; shown only for events stored before `at` existed. */
   when: string;
+  /** When it happened, epoch ms. The shown label is derived from it at render time. */
+  at?: number;
 }

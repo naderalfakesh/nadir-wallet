@@ -17,6 +17,7 @@ import { useTranslation } from "@/i18n/useTranslation";
 import { useSheets } from "@/providers/SheetProvider";
 import { useApp } from "@/providers/AppProvider";
 import { useSecurityChecklist } from "./useSecurityChecklist";
+import { eventWhen } from "./events";
 import { createSecurityStyles } from "./SecurityScreen.styles";
 import { DeviceSecurityCard, ScoreCard, SecurityModelCard, TxProtectionCard } from "./SecurityScreen.parts";
 
@@ -27,6 +28,7 @@ export function SecurityScreen() {
   const router = useRouter();
   const sheets = useSheets();
   const { prefs, setPref, events } = useApp();
+  const now = new Date();
   const [txProtection, setTxProtection] = useState(true);
   const styles = useMemo(() => createSecurityStyles(theme), [theme]);
 
@@ -114,7 +116,11 @@ export function SecurityScreen() {
           <SectionLabel>{t("security.events.title")}</SectionLabel>
           <Card padding={0} style={{ paddingHorizontal: 16 }}>
             {events.map((ev, i) => (
-              <SecurityEventRow key={ev.id} event={ev} last={i === events.length - 1} />
+              <SecurityEventRow
+                key={ev.id}
+                event={{ ...ev, when: eventWhen(ev, now) }}
+                last={i === events.length - 1}
+              />
             ))}
           </Card>
         </View>

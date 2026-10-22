@@ -1,4 +1,6 @@
+import { t } from "@/i18n";
 import type { SecurityEvent } from "@/types/status";
+import { makeSecurityEvent } from "./events";
 
 export interface SecurityState {
   backedUp: boolean;
@@ -27,11 +29,35 @@ export const DEVICE_CHECK_KEYS = [
   "secureEnclave",
 ] as const;
 
-export const SECURITY_EVENTS: SecurityEvent[] = [
-  { id: "e1", type: "unlock", severity: "info", title: "Wallet unlocked", detail: "This device", when: "Today · 2:14 PM" },
-  { id: "e2", type: "risk_block", severity: "critical", title: "High-risk recipient blocked", detail: "Send to a reported address prevented", when: "Today · 1:58 PM" },
-  { id: "e3", type: "sim_fail", severity: "warning", title: "Transaction simulation failed", detail: "Insufficient gas — not submitted", when: "Yesterday · 6:30 PM" },
-  { id: "e4", type: "risk_check", severity: "success", title: "Address risk check completed", detail: "demo.eth — low risk", when: "Yesterday · 6:28 PM" },
-  { id: "e5", type: "backup", severity: "success", title: "Recovery phrase backup confirmed", detail: "Verified on-device", when: "May 28 · 4:00 PM" },
-  { id: "e6", type: "autolock", severity: "info", title: "Auto-lock enabled", detail: "Locks after 1 minute", when: "May 27 · 9:12 AM" },
-];
+const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+
+/** Demo history for a fresh install, dated in the recent past relative to `now`. */
+export function demoSecurityEvents(now: Date): SecurityEvent[] {
+  const ago = (ms: number) => new Date(now.getTime() - ms);
+  return [
+    makeSecurityEvent("demo-1", "unlock", ago(18 * MINUTE), {
+      detail: t("security.log.unlockBiometric"),
+    }),
+    makeSecurityEvent("demo-2", "risk_block", ago(34 * MINUTE)),
+    makeSecurityEvent("demo-3", "sim_fail", ago(DAY + 2 * HOUR)),
+    makeSecurityEvent("demo-4", "risk_check", ago(DAY + 2 * HOUR + 2 * MINUTE), {
+      detail: "demo.eth — low risk",
+    }),
+    makeSecurityEvent("demo-5", "backup", ago(3 * DAY + 5 * HOUR)),
+    makeSecurityEvent("demo-6", "autolock", ago(4 * DAY + 9 * HOUR), { detailVars: { min: 1 } }),
+  ];
+}
+
+// The old fixed-label demo entries ("Today · 2:14 PM" whatever the time).
+const LEGACY_DEMO_IDS = new Set(["e1", "e2", "e3", "e4", "e5", "e6"]);
+
+/**
+ * The log to start with: stored events minus the old fixed-label demo entries,
+ * or fresh demo history when nothing real is left.
+ */
+export function initialSecurityEvents(stored: SecurityEvent[], now: Date): SecurityEvent[] {
+  const real = stored.filter((event) => !(LEGACY_DEMO_IDS.has(event.id) && event.at === undefined));
+  return real.length ? real : demoSecurityEvents(now);
+}

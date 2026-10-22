@@ -83,6 +83,7 @@
     "autolockTriggeredTitle": "Wallet auto-locked",
     "autolockTriggeredDetail": "Locked after inactivity",
     "today": "Today",
+    "yesterday": "Yesterday",
     "livenessPassTitle": "Liveness check passed",
     "livenessPassDetail": "Live presence confirmed on-device",
     "livenessFailTitle": "Liveness check not completed",

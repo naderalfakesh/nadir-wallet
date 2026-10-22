@@ -19,12 +19,32 @@ const META: Record<SecurityEventType, { sev: SecurityEventSeverity; titleKey: st
   liveness_fail: { sev: "warning", titleKey: "security.log.livenessFailTitle", detailKey: "security.log.livenessFailDetail" },
 };
 
-function formatWhen(at: Date): string {
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function startOfDay(date: Date): number {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
+/** "Today · 2:14 PM", "Yesterday · 6:30 PM" or "May 28 · 4:00 PM", relative to `now`. */
+export function formatEventWhen(at: Date, now: Date): string {
   let h = at.getHours();
   const m = at.getMinutes();
   const ampm = h >= 12 ? "PM" : "AM";
   h = h % 12 || 12;
-  return `${t("security.log.today")} · ${h}:${String(m).padStart(2, "0")} ${ampm}`;
+  const time = `${h}:${String(m).padStart(2, "0")} ${ampm}`;
+  const days = Math.round((startOfDay(now) - startOfDay(at)) / 86_400_000);
+  const day =
+    days === 0
+      ? t("security.log.today")
+      : days === 1
+        ? t("security.log.yesterday")
+        : `${MONTHS[at.getMonth()]} ${at.getDate()}`;
+  return `${day} · ${time}`;
+}
+
+/** The label to show for an event now. */
+export function eventWhen(event: SecurityEvent, now: Date): string {
+  return event.at === undefined ? event.when : formatEventWhen(new Date(event.at), now);
 }
 
 export function makeSecurityEvent(
@@ -42,6 +62,7 @@ export function makeSecurityEvent(
     severity: meta.sev,
     title: t(meta.titleKey),
     detail,
-    when: formatWhen(at),
+    when: formatEventWhen(at, at),
+    at: at.getTime(),
   };
 }

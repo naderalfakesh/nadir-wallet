@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useMemo, useRef, useStat
 import { hashPasscodeAsync, mnemonicToEvmAddress, verifyPasscodeAsync } from "@nadir-wallet/crypto-core";
 import type { SecurityEvent, SecurityEventType } from "@/types/status";
 import { storage, DEFAULT_PREFS, type Prefs, type PersistedState } from "@/services/storage";
-import { SECURITY_EVENTS } from "@/features/security/data";
+import { initialSecurityEvents } from "@/features/security/data";
 import { makeSecurityEvent } from "@/features/security/events";
 import { EMPTY_LOCKOUT, recordFailure, type LockoutState } from "@/features/auth/lockout";
 import { persistNewWallet, persistPasscode } from "./walletPersistence";
@@ -45,8 +45,8 @@ export function AppProvider({ initial, children }: { initial: PersistedState; ch
   const [passcodeHash, setPasscodeHash] = useState(initial.passcodeHash);
   const [lockout, setLockout] = useState<LockoutState>(initial.lockout);
   // Seed the log with demo history on first launch so the screen isn't empty.
-  const [events, setEvents] = useState<SecurityEvent[]>(
-    initial.events.length ? initial.events : SECURITY_EVENTS,
+  const [events, setEvents] = useState<SecurityEvent[]>(() =>
+    initialSecurityEvents(initial.events, new Date()),
   );
   const [sessionUnlocked, setSessionUnlocked] = useState(false);
   const [introSeen, setIntroSeen] = useState(initial.introSeen);
