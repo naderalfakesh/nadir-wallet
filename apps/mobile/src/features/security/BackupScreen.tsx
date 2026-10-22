@@ -11,6 +11,7 @@ import { useSensitiveReveal } from "@/features/auth/useSensitiveReveal";
 import { revealMnemonic } from "@/services/storage/mnemonic";
 import { SeedReveal, SeedVerify } from "@/features/onboarding/SeedComponents";
 import { revealWhileCurrent } from "./revealPhrase";
+import { useBlockScreenCapture } from "./useBlockScreenCapture";
 
 type Step = "intro" | "auth" | "reveal" | "verify" | "done";
 
@@ -31,6 +32,7 @@ export function BackupScreen() {
     setStep((prev) => (prev === "done" ? prev : "intro"));
   }, []);
   const guard = useSensitiveReveal(clear);
+  useBlockScreenCapture();
   const restart = () => {
     guard.invalidate();
     clear();

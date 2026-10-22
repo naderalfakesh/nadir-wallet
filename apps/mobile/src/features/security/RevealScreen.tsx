@@ -12,6 +12,7 @@ import { revealMnemonic } from "@/services/storage/mnemonic";
 import { SeedReveal } from "@/features/onboarding/SeedComponents";
 import { consumeLiveness, peekLiveness } from "@/features/liveness/livenessGate";
 import { revealWhileCurrent } from "./revealPhrase";
+import { useBlockScreenCapture } from "./useBlockScreenCapture";
 
 export function RevealScreen() {
   const theme = useTheme();
@@ -22,6 +23,7 @@ export function RevealScreen() {
   const [words, setWords] = useState<string[] | null>(null);
   const hide = useCallback(() => setWords(null), []);
   const guard = useSensitiveReveal(hide);
+  useBlockScreenCapture();
 
   // Enforce the optional liveness step-up here, on the route itself, so every
   // entry point (Security Center, Settings, a deep link) is gated identically.
