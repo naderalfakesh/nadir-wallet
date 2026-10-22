@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { type ComponentRef, useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, findNodeHandle, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen, Brandmark, AppText, Button, Icon, TestnetBadge } from "@/components";
@@ -15,7 +15,7 @@ export function IntroScreen({ onDone }: { onDone: () => void }) {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [index, setIndex] = useState(0);
-  const titleRef = useRef<View>(null);
+  const titleRef = useRef<ComponentRef<typeof View>>(null);
   const step = INTRO_STEPS[index];
   const next = nextIntroIndex(index);
 
