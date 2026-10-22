@@ -11,6 +11,7 @@ import { WalletDataProvider } from "@/providers/WalletDataProvider";
 import { AutoLock } from "@/features/lock/AutoLock";
 import { groupGuards } from "@/features/lock/routeAccess";
 import { loadPersistedState, type PersistedState } from "@/services/storage";
+import { loadBiometryKind } from "@/services/auth/biometry";
 import {
   useFonts,
   PlusJakartaSans_400Regular,
@@ -83,7 +84,8 @@ export default function RootLayout() {
   const [boot, setBoot] = useState<PersistedState | null>(null);
 
   useEffect(() => {
-    loadPersistedState().then(setBoot);
+    // Resolve the biometry name before the first screen renders its strings.
+    Promise.all([loadPersistedState(), loadBiometryKind()]).then(([state]) => setBoot(state));
   }, []);
 
   const ready = loaded && boot != null;

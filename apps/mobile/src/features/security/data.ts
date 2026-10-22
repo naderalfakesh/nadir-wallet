@@ -28,7 +28,7 @@ export const DEVICE_CHECK_KEYS = [
 ] as const;
 
 export const SECURITY_EVENTS: SecurityEvent[] = [
-  { id: "e1", type: "unlock", severity: "info", title: "Unlocked with Face ID", detail: "This device", when: "Today · 2:14 PM" },
+  { id: "e1", type: "unlock", severity: "info", title: "Wallet unlocked", detail: "This device", when: "Today · 2:14 PM" },
   { id: "e2", type: "risk_block", severity: "critical", title: "High-risk recipient blocked", detail: "Send to a reported address prevented", when: "Today · 1:58 PM" },
   { id: "e3", type: "sim_fail", severity: "warning", title: "Transaction simulation failed", detail: "Insufficient gas — not submitted", when: "Yesterday · 6:30 PM" },
   { id: "e4", type: "risk_check", severity: "success", title: "Address risk check completed", detail: "demo.eth — low risk", when: "Yesterday · 6:28 PM" },

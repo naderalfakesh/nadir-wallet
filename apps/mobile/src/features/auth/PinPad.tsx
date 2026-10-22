@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Animated, Pressable, View } from "react-native";
 import { useTheme } from "@/theme";
+import { t } from "@/i18n";
 import { AppText, Icon } from "@/components";
 
 export function PinDots({
@@ -71,7 +72,7 @@ export function PinKeypad({
             <Pressable
               onPress={() => (k === "bio" ? onBiometric?.() : onKey(k))}
               accessibilityRole="button"
-              accessibilityLabel={k === "del" ? "Delete" : k === "bio" ? "Use Face ID" : k}
+              accessibilityLabel={k === "del" ? "Delete" : k === "bio" ? t("lock.useBiometric") : k}
               style={({ pressed }) => ({
                 height: 64,
                 borderRadius: 20,

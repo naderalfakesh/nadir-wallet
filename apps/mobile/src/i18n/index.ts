@@ -36,7 +36,15 @@ const resources = {
 
 type Vars = Record<string, string | number>;
 
-export function t(key: string, vars?: Vars): string {
+// Values every string may use without the caller passing them (the device's
+// biometry name, set once at boot).
+let defaultVars: Vars = {};
+
+export function setDefaultVars(vars: Vars): void {
+  defaultVars = { ...defaultVars, ...vars };
+}
+
+export function t(key: string, callerVars?: Vars): string {
   const [namespace, ...path] = key.split(".");
   let node: unknown = (resources as Record<string, unknown>)[namespace];
   for (const segment of path) {
@@ -47,7 +55,7 @@ export function t(key: string, vars?: Vars): string {
     }
   }
   if (typeof node !== "string") return key;
-  if (!vars) return node;
+  const vars = { ...defaultVars, ...callerVars };
   return node.replace(/\{\{(\w+)\}\}/g, (_, name: string) =>
     name in vars ? String(vars[name]) : `{{${name}}}`,
   );

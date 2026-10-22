@@ -40,7 +40,7 @@ export function LockScreen() {
     let res: LocalAuthentication.LocalAuthenticationResult;
     try {
       res = await LocalAuthentication.authenticateAsync({
-        promptMessage: translate("lock.unlockFaceId"),
+        promptMessage: translate("lock.unlockBiometric"),
         disableDeviceFallback: false,
       });
     } catch {
@@ -48,7 +48,7 @@ export function LockScreen() {
       return;
     }
     if (res.success) {
-      unlock(translate("security.log.unlockFaceId"));
+      unlock(translate("security.log.unlockBiometric"));
     } else if (res.error === "user_cancel" || res.error === "app_cancel" || res.error === "system_cancel") {
       setStatus("cancelled");
     } else {
@@ -105,7 +105,7 @@ export function LockScreen() {
           ? t("lock.biometricCancelled")
           : status === "unavailable"
             ? t("lock.biometricUnavailable")
-            : t("lock.unlockFaceId");
+            : t("lock.unlockBiometric");
 
   return (
     <Screen>
@@ -132,7 +132,7 @@ export function LockScreen() {
           </AppText>
           {status !== "authenticating" && (
             <Button
-              label={t("lock.useFaceId")}
+              label={t("lock.useBiometric")}
               icon="faceid"
               variant="soft"
               onPress={authenticate}

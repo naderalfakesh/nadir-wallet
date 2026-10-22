@@ -109,7 +109,7 @@ export function PasscodeUnlock({
         >
           <Icon name="faceid" size={18} color={theme.colors.textMuted} />
           <AppText size={13.5} muted>
-            {t("lock.useFaceIdInstead")}
+            {t("lock.useBiometricInstead")}
           </AppText>
         </Pressable>
       )}

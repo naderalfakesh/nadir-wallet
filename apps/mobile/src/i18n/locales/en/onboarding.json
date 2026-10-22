@@ -11,7 +11,7 @@
     },
     "keys": {
       "title": "Your keys stay here",
-      "body": "Your recovery phrase is created and kept on this device. A passcode, and Face ID if you want it, locks the app."
+      "body": "Your recovery phrase is created and kept on this device. A passcode, and {{biometry}} if you want it, locks the app."
     },
     "practice": {
       "title": "Practice, not payments",
@@ -65,9 +65,9 @@
     "saveFailed": "Couldn't save the passcode. Try again."
   },
   "biometric": {
-    "title": "Enable Face ID",
-    "body": "Use Face ID to unlock your wallet instead of typing your passcode.",
-    "enable": "Enable Face ID",
+    "title": "Enable {{biometry}}",
+    "body": "Use {{biometry}} to unlock your wallet instead of typing your passcode.",
+    "enable": "Enable {{biometry}}",
     "later": "Set up later"
   },
   "ready": {
@@ -96,7 +96,7 @@
     "doneTitle": "Wallet backed up",
     "doneBody": "Your recovery phrase is verified. Your security score just went up.",
     "revealTitle": "Recovery phrase",
-    "revealGate": "Requires Face ID, fingerprint or your device passcode",
+    "revealGate": "Requires {{biometry}} or your device passcode",
     "verifyIt": "Verify it's you",
     "revealPrompt": "Reveal your recovery phrase"
   }
