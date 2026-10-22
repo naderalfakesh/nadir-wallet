@@ -4,11 +4,7 @@ import { TabBar } from "@/navigation/TabBar";
 
 export default function TabsLayout() {
   return (
-    <Tabs
-      initialRouteName="home"
-      screenOptions={{ headerShown: false }}
-      tabBar={(props) => <TabBar {...props} />}
-    >
+    <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <TabBar {...props} />}>
       <Tabs.Screen name="home" />
       <Tabs.Screen name="activity" />
       <Tabs.Screen name="security" />

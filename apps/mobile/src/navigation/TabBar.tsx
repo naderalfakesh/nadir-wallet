@@ -19,7 +19,7 @@ const TAB_META: Record<string, { icon: IconName; labelKey: string }> = {
   settings: { icon: "settings", labelKey: "common.nav.settings" },
 };
 
-export function TabBar({ state, navigation }: TabBarProps) {
+export function TabBar({ state, emitter, navigateToTab }: TabBarProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { prefs } = useApp();
@@ -46,8 +46,8 @@ export function TabBar({ state, navigation }: TabBarProps) {
         const color = focused ? theme.colors.accent : theme.colors.textFaint;
 
         const onPress = () => {
-          const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
-          if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
+          const event = emitter.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
+          if (!focused && !event.defaultPrevented) navigateToTab(route.key);
         };
 
         return (
