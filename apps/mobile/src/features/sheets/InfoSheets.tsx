@@ -6,47 +6,6 @@ import { useTranslation } from "@/i18n/useTranslation";
 import type { ColorScheme } from "@/theme";
 import type { SheetBodyProps, SheetCloseProps } from "./types";
 
-export function ScanSheet({ close }: SheetCloseProps) {
-  const theme = useTheme();
-  const { t } = useTranslation();
-  return (
-    <View>
-      <SheetHeader title={t("sheets.scan.title")} onClose={close} />
-      <View
-        style={{
-          aspectRatio: 1,
-          borderRadius: 22,
-          backgroundColor: theme.colors.bgGrad2,
-          borderWidth: 1,
-          borderColor: theme.colors.hairline,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <View style={{ width: "62%", aspectRatio: 1 }}>
-          <View style={{ position: "absolute", top: 0, left: 0, width: 36, height: 36, borderTopWidth: 3, borderLeftWidth: 3, borderColor: theme.colors.accent, borderTopLeftRadius: 12 }} />
-          <View style={{ position: "absolute", top: 0, right: 0, width: 36, height: 36, borderTopWidth: 3, borderRightWidth: 3, borderColor: theme.colors.accent, borderTopRightRadius: 12 }} />
-          <View style={{ position: "absolute", bottom: 0, left: 0, width: 36, height: 36, borderBottomWidth: 3, borderLeftWidth: 3, borderColor: theme.colors.accent, borderBottomLeftRadius: 12 }} />
-          <View style={{ position: "absolute", bottom: 0, right: 0, width: 36, height: 36, borderBottomWidth: 3, borderRightWidth: 3, borderColor: theme.colors.accent, borderBottomRightRadius: 12 }} />
-          <View
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: "50%",
-              height: 2,
-              backgroundColor: theme.colors.accent,
-            }}
-          />
-        </View>
-      </View>
-      <AppText size={13.5} muted style={{ textAlign: "center", marginTop: 16 }}>
-        {t("sheets.scan.hint")}
-      </AppText>
-    </View>
-  );
-}
-
 export function SoonSheet({ params, close }: SheetBodyProps<"soon">) {
   const theme = useTheme();
   const { t } = useTranslation();

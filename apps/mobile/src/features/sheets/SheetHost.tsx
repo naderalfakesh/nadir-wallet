@@ -4,7 +4,7 @@ import { useSheets, type SheetRequest } from "@/providers/SheetProvider";
 import { ReceiveSheet } from "./ReceiveSheet";
 import { TxDetailSheet } from "./TxDetailSheet";
 import { AccountsSheet, PickTokenSheet } from "./WalletSheets";
-import { ScanSheet, SoonSheet, HowItWorksSheet, ThemeSheet } from "./InfoSheets";
+import { SoonSheet, HowItWorksSheet, ThemeSheet } from "./InfoSheets";
 import { gateSheet } from "./sheetGate";
 
 function SheetBody({ request, close }: { request: SheetRequest; close: () => void }) {
@@ -17,8 +17,6 @@ function SheetBody({ request, close }: { request: SheetRequest; close: () => voi
       return <AccountsSheet close={close} />;
     case "pickToken":
       return <PickTokenSheet params={request.params} close={close} />;
-    case "scan":
-      return <ScanSheet close={close} />;
     case "soon":
       return <SoonSheet params={request.params} close={close} />;
     case "howItWorks":

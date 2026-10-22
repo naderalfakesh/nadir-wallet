@@ -25,7 +25,9 @@ import {
   getLiveSimulationStatus,
   getLocalSimulationStatus,
   getRecipientValidation,
+  pickTokenForScan,
 } from "./send.utils";
+import { takeScanHandoff } from "./sendHandoff";
 import type { SendStep, SimulationStatus } from "./send.types";
 
 export function SendScreen({ tokenId }: { tokenId?: string }) {
@@ -40,11 +42,17 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
   const { tokens } = useWallet();
   const logged = useRef<Set<string>>(new Set());
 
+  // A code scanned from Home arrives here with its recipient and network.
+  const [handoff] = useState(takeScanHandoff);
   const [step, setStep] = useState<SendStep>("to");
-  const [token, setToken] = useState<DemoToken>(() => getInitialToken(tokens, tokenId, tokenById("eth")));
-  const [to, setTo] = useState("");
+  const [token, setToken] = useState<DemoToken>(() => {
+    const fallback = tokenById("eth");
+    const picked = handoff ? pickTokenForScan(handoff, tokens, fallback) : null;
+    return picked?.ok ? picked.token : getInitialToken(tokens, tokenId, fallback);
+  });
+  const [to, setTo] = useState(handoff?.recipient ?? "");
   // Network the recipient was scanned for; the token can still change on the amount step.
-  const [scanChainId, setScanChainId] = useState<number | null>(null);
+  const [scanChainId, setScanChainId] = useState<number | null>(handoff?.chainId ?? null);
   const [amt, setAmt] = useState("0");
   const [phase, setPhase] = useState<SendPhase | null>(null);
 

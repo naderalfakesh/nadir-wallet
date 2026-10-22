@@ -7,10 +7,6 @@
     "title": "Select asset",
     "selected": "Selected"
   },
-  "scan": {
-    "title": "Scan QR code",
-    "hint": "Point your camera at a wallet QR code"
-  },
   "soon": {
     "fallback": "Coming soon",
     "heading": "Placeholder screen",

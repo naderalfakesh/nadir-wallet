@@ -8,7 +8,6 @@ export interface SheetParams {
   pickToken: { current?: string; onPick?: (token: DemoToken) => void } | undefined;
   howItWorks: undefined;
   theme: undefined;
-  scan: undefined;
   soon: { title?: string } | undefined;
 }
 

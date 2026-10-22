@@ -1,12 +1,15 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { ScrollView } from "react-native";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { Screen } from "@/components";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useSheets } from "@/providers/SheetProvider";
 import { useApp } from "@/providers/AppProvider";
 import { useWallet } from "@/providers/WalletDataProvider";
-import type { Range } from "@/features/wallet/data";
+import { tokenById, type Range } from "@/features/wallet/data";
+import { beginScan, type ScanTarget } from "@/features/scan/scanBridge";
+import { pickTokenForScan } from "@/features/send/send.utils";
+import { handOffScanToSend } from "@/features/send/sendHandoff";
 import { createHomeStyles } from "./HomeScreen.styles";
 import {
   AccountBar,
@@ -34,6 +37,32 @@ export function HomeScreen() {
   const recent = transactions.slice(0, 3);
   const priceUnavailable = isPriceUnavailable(price);
 
+  // The scanner pops itself after a hit; Send opens once Home has focus again,
+  // so that pop can't close it.
+  const scanned = useRef<ScanTarget | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      const target = scanned.current;
+      if (!target) return;
+      scanned.current = null;
+      handOffScanToSend(target);
+      router.push("/send");
+    }, [router]),
+  );
+  const openScanner = () => {
+    scanned.current = null;
+    beginScan(
+      (target) => {
+        scanned.current = target;
+      },
+      (target) => {
+        const pick = pickTokenForScan(target, tokens, tokenById("eth"));
+        return pick.ok ? null : pick.reason;
+      },
+    );
+    router.push("/scan");
+  };
+
   const quickActions: HomeQuickAction[] = [
     { icon: "receive", label: t("common.actions.receive"), onPress: () => sheets.open("receive") },
     { icon: "send", label: t("common.actions.send"), primary: true, onPress: () => router.push("/send") },
@@ -48,7 +77,7 @@ export function HomeScreen() {
           hidden={hidden}
           onToggleBalances={() => setPref("hideBalances", !hidden)}
           onOpenAccounts={() => sheets.open("accounts")}
-          onOpenScan={() => sheets.open("scan")}
+          onOpenScan={openScanner}
         />
 
         <BackendStatusNotice status={backend} onRetry={refresh} />

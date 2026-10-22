@@ -37,6 +37,24 @@ export function checkScanForToken(
   return null;
 }
 
+export type ScanTokenPick = { ok: true; token: DemoToken } | { ok: false; reason: ScanRejectReason };
+
+/**
+ * For a scan started outside Send, where no token is selected yet: the wallet
+ * token a scanned target pays with. A chain-less address keeps the default
+ * token; a chain-qualified code picks that network's native token.
+ */
+export function pickTokenForScan(
+  target: Pick<ScanTarget, "chainId" | "tokenContract">,
+  tokens: DemoToken[],
+  fallback: DemoToken,
+): ScanTokenPick {
+  if (target.tokenContract !== null) return { ok: false, reason: "token-request" };
+  if (target.chainId === null) return { ok: true, token: getInitialToken(tokens, undefined, fallback) };
+  const match = tokens.find((token) => checkScanForToken(target, token) === null);
+  return match ? { ok: true, token: match } : { ok: false, reason: "unsupported-chain" };
+}
+
 export function getRiskCopy(risk: AddressRisk, t: RiskTranslator): RiskCopy {
   const message = {
     reported: { title: t("send.risk.reportedTitle"), detail: t("send.risk.reportedDetail") },

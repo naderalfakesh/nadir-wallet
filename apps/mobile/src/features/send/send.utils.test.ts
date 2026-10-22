@@ -7,6 +7,7 @@ import {
   getLocalSimulationStatus,
   getRecipientValidation,
   getRiskCopy,
+  pickTokenForScan,
 } from "./send.utils";
 
 const t = (key: string) => key;
@@ -112,5 +113,42 @@ describe("checkScanForToken", () => {
   it("refuses ERC-20 transfer requests regardless of network", () => {
     expect(checkScanForToken({ chainId: SEPOLIA, tokenContract: TOKEN }, tokenById("eth"))).toBe("token-request");
     expect(checkScanForToken({ chainId: AMOY, tokenContract: TOKEN }, tokenById("pol"))).toBe("token-request");
+  });
+});
+
+describe("pickTokenForScan", () => {
+  const SEPOLIA = 11155111;
+  const AMOY = 80002;
+  const TOKEN = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
+  const eth = tokenById("eth");
+
+  it("picks the native token of the scanned network", () => {
+    expect(pickTokenForScan({ chainId: SEPOLIA, tokenContract: null }, TOKENS, eth)).toEqual({ ok: true, token: eth });
+    expect(pickTokenForScan({ chainId: AMOY, tokenContract: null }, TOKENS, eth)).toEqual({
+      ok: true,
+      token: tokenById("pol"),
+    });
+  });
+
+  it("keeps the default token for a chain-less address", () => {
+    expect(pickTokenForScan({ chainId: null, tokenContract: null }, TOKENS, eth)).toEqual({
+      ok: true,
+      token: TOKENS[0],
+    });
+    expect(pickTokenForScan({ chainId: null, tokenContract: null }, [], eth)).toEqual({ ok: true, token: eth });
+  });
+
+  it("refuses token payment requests", () => {
+    expect(pickTokenForScan({ chainId: SEPOLIA, tokenContract: TOKEN }, TOKENS, eth)).toEqual({
+      ok: false,
+      reason: "token-request",
+    });
+  });
+
+  it("refuses a network the wallet holds no native token for", () => {
+    expect(pickTokenForScan({ chainId: AMOY, tokenContract: null }, [eth], eth)).toEqual({
+      ok: false,
+      reason: "unsupported-chain",
+    });
   });
 });
