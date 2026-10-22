@@ -27,8 +27,9 @@ their React and React Native dev dependencies moved to match.
 Expo 58.0.17 and some of its dependencies were less than a day old at
 install time, so pnpm's `minimumReleaseAge` check rejected them. pnpm added
 them by exact version to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml`.
-They all pass the default one-day age after 2026-10-22 19:20 UTC, and the
-list can be removed after that.
+They all passed the default one-day age after 2026-10-22 19:20 UTC, so the
+list was removed again, and `pnpm install --frozen-lockfile` passes the
+supply-chain check without it.
 
 ## Code changes
 
