@@ -40,7 +40,7 @@ list can be removed after that.
   stricter React Native 0.88 ref types.
 - `expo-build-properties` `ios.enableSceneSupport` removed. It does nothing on
   SDK 58, and the generated iOS app already uses `SceneDelegate`.
-- Android release builds keep R8 on, with one added keep rule (below).
+- Android release builds keep R8 on, with added keep rules (below).
 
 Checked and unchanged:
 
@@ -53,26 +53,39 @@ Checked and unchanged:
   already catch the error. Behaviour is the same as before: a refused delete is
   ignored.
 
-## R8 keep rule
+## R8 keep rules
 
-ML Kit reads its `ComponentRegistrar` class names from the manifest and creates
-each one through its no-argument constructor. ML Kit pulls in
-`firebase-components` 16.1.0, whose rule keeps those classes but not their
-constructors. Under R8 the constructors were stripped, and an earlier R8-on build
-logged `NoSuchMethodException ... CommonComponentRegistrar.<init> []` for all
-four registrars. `apps/mobile/app.json` sets:
+Two things in the camera plugins are only reached by name, so R8 can't see that
+they are used.
 
-```json
-"android": {
-  "enableMinifyInReleaseBuilds": true,
-  "extraProguardRules": "-keep class * implements com.google.firebase.components.ComponentRegistrar { void <init>(); }"
-}
+**Nitro hybrid objects.** The generated C++ `OnLoad` creates
+`com.margelo.nitro.codescanner.HybridCodeScanner` and
+`com.margelo.nitro.faceliveness.HybridFaceLiveness` by JNI name, through their
+no-argument constructors. Nothing in Kotlin references them, so the first R8
+build removed both classes. `createHybridObject` would then fail, and the scanner
+and liveness screens would show "unavailable". Both classes and their
+`scan`/`detect` overrides now carry `@Keep` and `@DoNotStrip`. Each package also
+ships `android/consumer-rules.pro` (wired through `consumerProguardFiles`), so
+any app using the package keeps the class. The generated `*Spec`, `*Spec$CxxPart`
+and `FaceObservation` classes, the other JNI lookups, already carry
+`@Keep`/`@DoNotStrip` from nitrogen.
+
+**ML Kit registrars.** ML Kit reads its `ComponentRegistrar` class names from the
+manifest and creates each one through its no-argument constructor. ML Kit pulls
+in `firebase-components` 16.1.0, whose rule keeps those classes but not their
+constructors. An earlier R8-on build logged
+`NoSuchMethodException ... CommonComponentRegistrar.<init> []` for all four
+registrars. Both consumer files and `apps/mobile/app.json`
+(`android.extraProguardRules`, which `expo prebuild --clean` writes into
+`android/app/proguard-rules.pro`) add the two lines `firebase-components` 19.0.0
+ships:
+
+```
+-keep class * implements com.google.firebase.components.ComponentRegistrar { void <init>(); }
+-keep,allowshrinking interface com.google.firebase.components.ComponentRegistrar
 ```
 
-This is the rule that `firebase-components` 19.0.0 ships, and it is the narrowest
-one that covers the failure. A blanket `-keep class com.google.mlkit.** { *; }`
-is not needed. `expo prebuild --clean` writes it into
-`android/app/proguard-rules.pro` between the `expo-build-properties` markers.
+A blanket `-keep class com.google.mlkit.** { *; }` is not needed.
 
 ## Machine checks
 
@@ -92,18 +105,38 @@ These are the checks CI runs too. On `main`, `prettier --check` already
 reported files that need formatting before this change, so it is not part of the
 gate.
 
-R8 evidence from the release build:
+R8 evidence from the release build (APK sha256 `60beea37…9614a`):
 
 - `:app:minifyReleaseWithR8` ran. The mapping header reads `compiler: R8`,
-  `compiler_version: 9.2.14`.
-- `outputs/mapping/release/configuration.txt` contains the added rule next to
-  `firebase-components`' constructor-less rule.
-- The merged manifest lists four registrars: `CommonComponentRegistrar`,
-  `BarcodeRegistrar`, `VisionCommonRegistrar` and `FaceRegistrar`. `seeds.txt` keeps
-  each class and its constructor. `mapping.txt` maps each to its original name
-  with `void <init>()` kept. R8 removed only an unused static field from them.
+  `compiler_version: 9.2.14`. `configuration.txt` contains the app rules and
+  both consumer files.
+- `seeds.txt` keeps `HybridCodeScanner` and `HybridFaceLiveness`, their
+  constructors, `scan`/`detect`/`dispose`, both `*Spec` classes, and
+  `*Spec$CxxPart.initHybrid()`.
+- `dexdump` finds these classes under their original names:
+  - `Lcom/margelo/nitro/codescanner/HybridCodeScanner;` with `<init>`, `scan`
+    and `dispose`.
+  - `Lcom/margelo/nitro/faceliveness/HybridFaceLiveness;` with `<init>`,
+    `detect` and `dispose`.
+  - Both `*Spec` and `*Spec$CxxPart` classes, with the `initHybrid` native, and
+    `FaceObservation`.
+- The four ML Kit registrars in the merged manifest (`CommonComponentRegistrar`,
+  `BarcodeRegistrar`, `VisionCommonRegistrar`, `FaceRegistrar`) keep their names
+  and `void <init>()`.
+- The dynamite entry points `ThickBarcodeScannerCreator` and
+  `ThickFaceDetectorCreator` and both `ModuleDescriptor`s are kept by ML Kit's
+  own rules.
+- The static facades `BarcodeScanning` and `FaceDetection` are inlined into the
+  hybrid constructors (the mapping shows their `getClient` and builder calls
+  folded into `<init>`). Nothing looks them up by name.
 
 No simulator, emulator or device was booted or addressed for these checks.
+
+The R8 fixes touch only Android files, so the iOS build above was not repeated.
+
+`545a93e` (the dependency bump) does not typecheck on its own. The tab bar fix
+that it needs lands in `449bbdb`. The branch was left as it is, with no history
+rewrite.
 
 ## Native QA (pending)
 
