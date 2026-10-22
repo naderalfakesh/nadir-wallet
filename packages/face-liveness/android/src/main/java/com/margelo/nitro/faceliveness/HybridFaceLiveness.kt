@@ -1,7 +1,9 @@
 package com.margelo.nitro.faceliveness
 
+import androidx.annotation.Keep
 import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
+import com.facebook.proguard.annotations.DoNotStrip
 import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
@@ -10,6 +12,9 @@ import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.margelo.nitro.camera.HybridFrameSpec
 import com.margelo.nitro.camera.public.NativeFrame
 
+// Nitro's C++ OnLoad creates this class by its JNI name, so R8 must keep it.
+@DoNotStrip
+@Keep
 class HybridFaceLiveness : HybridFaceLivenessSpec() {
   private val detector = FaceDetection.getClient(
     FaceDetectorOptions.Builder()
@@ -21,6 +26,8 @@ class HybridFaceLiveness : HybridFaceLivenessSpec() {
       .build()
   )
 
+  @DoNotStrip
+  @Keep
   @OptIn(ExperimentalGetImage::class)
   override fun detect(frame: HybridFrameSpec): FaceObservation {
     val nativeFrame = frame as? NativeFrame
