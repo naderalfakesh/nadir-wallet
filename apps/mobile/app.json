@@ -53,11 +53,7 @@
       "expo-web-browser",
       [
         "expo-build-properties",
-        {
-          "ios": {
-            "enableSceneSupport": true
-          }
-        }
+        {}
       ],
       "./plugins/withMlkitSimulatorFix"
     ],
