@@ -31,7 +31,7 @@ Simulator has no camera feed.
 
 | Area    | Choices                                                                                                                                                                     |
 | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mobile  | React Native 0.86 (Expo SDK 57), expo-router, TypeScript, react-native-svg                                                                                                  |
+| Mobile  | React Native 0.88 (Expo SDK 58), expo-router, TypeScript, react-native-svg                                                                                                  |
 | Crypto  | `viem/accounts` (generation/derivation), `@scure/bip39` (validation), `@noble/hashes` (PIN hashing), `react-native-get-random-values`                                       |
 | Storage | `expo-secure-store` (secrets), `@react-native-async-storage/async-storage` (prefs)                                                                                          |
 | Device  | `expo-local-authentication`, `expo-clipboard`, `expo-web-browser`, `react-native-qrcode-svg`                                                                                |
@@ -44,7 +44,7 @@ Simulator has no camera feed.
 
 ```
 apps/
-  mobile/                # React Native app (Expo SDK 57, expo-router)
+  mobile/                # React Native app (Expo SDK 58, expo-router)
   api/                   # Hono backend API (libsql + Drizzle)
 packages/
   types/                 # @nadir-wallet/types: shared response/domain types

@@ -1,7 +1,7 @@
 # Nadir Wallet mobile app
 
-The React Native client of the Nadir Wallet monorepo: Expo SDK 57, React
-Native 0.86, expo-router, TypeScript. The project pitch, security model, and
+The React Native client of the Nadir Wallet monorepo: Expo SDK 58, React
+Native 0.88, expo-router, TypeScript. The project pitch, security model, and
 architecture live in the [root README](../../README.md) and [`docs/`](../../docs).
 
 ## Running it
@@ -48,6 +48,24 @@ nothing else is needed. With Xcode 27, `pnpm --filter @nadir-wallet/mobile ios`
 builds for the simulator and opens it in Device Hub.
 
 Set `APPLE_TEAM_ID` in `.env` for device signing; `app.config.js` picks it up.
+
+### R8 keep rule for ML Kit
+
+Android release builds run R8 (`enableMinifyInReleaseBuilds` in the
+`expo-build-properties` entry of `app.json`). ML Kit finds its components by
+reflection: it reads each `ComponentRegistrar` class name from the manifest and
+calls its no-argument constructor. The rule shipped with the
+`firebase-components` version ML Kit pulls in keeps those classes but not their
+constructors, so R8 strips `<init>()` and the scanner and liveness detector fail
+to start in release builds. `app.json` adds the missing rule through
+`android.extraProguardRules`, so it survives `expo prebuild --clean`:
+
+```
+-keep class * implements com.google.firebase.components.ComponentRegistrar { void <init>(); }
+```
+
+It is the same rule newer `firebase-components` releases ship, so it can go once
+ML Kit depends on one of them.
 
 ## Layout
 
