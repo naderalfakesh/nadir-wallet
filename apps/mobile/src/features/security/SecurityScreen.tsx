@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import {
   Screen,
   ScreenHeader,
@@ -28,7 +28,9 @@ export function SecurityScreen() {
   const router = useRouter();
   const sheets = useSheets();
   const { prefs, setPref, events } = useApp();
-  const now = new Date();
+  // Re-read the clock whenever the tab gains focus so "Today" rolls over.
+  const [now, setNow] = useState(() => new Date());
+  useFocusEffect(useCallback(() => setNow(new Date()), []));
   const [txProtection, setTxProtection] = useState(true);
   const styles = useMemo(() => createSecurityStyles(theme), [theme]);
 
