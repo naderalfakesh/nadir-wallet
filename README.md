@@ -199,6 +199,8 @@ These are logic tests with mocked device APIs; there are no component, e2e, or
 native tests. The iOS app builds and launches on an Xcode 27 simulator, but the
 OS authentication prompts, lock and auto-lock, camera screens, and the native
 plugins have not been checked end to end on a simulator or physical device yet.
+The Android release APK has since passed a device run on a Pixel 9
+([notes](docs/verification/device-pixel9-android.md)); iOS devices are still to do.
 
 ## Current limitations
 
