@@ -29,6 +29,7 @@ import {
 } from "./send.utils";
 import { takeScanHandoff } from "./sendHandoff";
 import type { SendStep, SimulationStatus } from "./send.types";
+import { biometryIcon } from "@/services/auth/biometry";
 
 export function SendScreen({ tokenId }: { tokenId?: string }) {
   const theme = useTheme();
@@ -251,7 +252,7 @@ export function SendScreen({ tokenId }: { tokenId?: string }) {
                       ? t("send.confirm.simFailed")
                       : t("send.confirm.cta")
               }
-              icon="faceid"
+              icon={biometryIcon()}
               disabled={blocked || scanMismatch || simStatus === "failed"}
               onPress={() => setPhase(prefs.requireLivenessSend && fiat >= HIGH_VALUE_USD ? "liveness" : "auth")}
             />

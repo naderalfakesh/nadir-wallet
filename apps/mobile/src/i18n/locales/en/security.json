@@ -13,7 +13,7 @@
     "keysTitle": "Keys stay on this device",
     "keysBody": "Your recovery phrase and private keys are generated and stored only on this device — never uploaded.",
     "signTitle": "No signing in this demo",
-    "signBody": "Sends are simulated: nothing is signed or broadcast. Confirming one still asks for {{biometry}} or your device passcode.",
+    "signBody": "Sends are simulated: nothing is signed or broadcast. Confirming one still asks for your biometrics or device passcode.",
     "backendTitle": "Backend sees public data only",
     "backendBody": "Only your public address is shared — for cached prices, address risk checks and transaction simulation."
   },
@@ -94,7 +94,7 @@
   "advanced": {
     "title": "Advanced",
     "reveal": "Reveal recovery phrase",
-    "revealSub": "Requires {{biometry}} or device passcode",
+    "revealSub": "Requires your biometrics or device passcode",
     "connected": "Connected apps",
     "connectedSub": "2 dApps connected",
     "changePin": "Change passcode",

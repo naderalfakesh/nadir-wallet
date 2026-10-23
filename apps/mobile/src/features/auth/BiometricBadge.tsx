@@ -2,6 +2,7 @@ import React from "react";
 import { Animated, View } from "react-native";
 import { Icon } from "@/components";
 import { useTheme } from "@/theme";
+import { biometryIcon } from "@/services/auth/biometry";
 
 interface BiometricBadgeProps {
   pulse: Animated.Value;
@@ -38,7 +39,7 @@ export function BiometricBadge({ pulse, active, ringSize = 96 }: BiometricBadgeP
           justifyContent: "center",
         }}
       >
-        <Icon name="faceid" size={50} stroke={1.8} color={theme.colors.accent} />
+        <Icon name={biometryIcon()} size={50} stroke={1.8} color={theme.colors.accent} />
       </View>
     </View>
   );

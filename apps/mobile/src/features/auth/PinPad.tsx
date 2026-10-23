@@ -3,6 +3,7 @@ import { Animated, Pressable, View } from "react-native";
 import { useTheme } from "@/theme";
 import { t } from "@/i18n";
 import { AppText, Icon } from "@/components";
+import { biometryIcon } from "@/services/auth/biometry";
 
 export function PinDots({
   count = 6,
@@ -87,7 +88,7 @@ export function PinKeypad({
               {k === "del" ? (
                 <Icon name="chevronL" size={26} />
               ) : k === "bio" ? (
-                <Icon name="faceid" size={28} color={theme.colors.accent} />
+                <Icon name={biometryIcon()} size={28} color={theme.colors.accent} />
               ) : (
                 <AppText weight="semibold" size={26}>
                   {k}

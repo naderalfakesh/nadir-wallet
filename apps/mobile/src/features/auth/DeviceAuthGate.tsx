@@ -6,6 +6,7 @@ import { useTranslation } from "@/i18n/useTranslation";
 import type { OsAuthFailure } from "@/services/auth/osAuth";
 import { BiometricBadge } from "./BiometricBadge";
 import { usePulse } from "./usePulse";
+import { biometryIcon } from "@/services/auth/biometry";
 
 export type GateFailure = OsAuthFailure | "missing";
 export type GateOutcome = { ok: true } | { ok: false; reason: GateFailure };
@@ -83,7 +84,7 @@ export function DeviceAuthGate({
       {status !== "authenticating" && (
         <Button
           label={failed ? t("lock.tryAgain") : t("lock.osAuth.authenticate")}
-          icon="faceid"
+          icon={biometryIcon()}
           variant="soft"
           onPress={() => void go()}
           height={48}

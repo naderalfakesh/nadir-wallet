@@ -10,7 +10,8 @@ vi.mock("expo-local-authentication", () => ({
   AuthenticationType: { FINGERPRINT: 1, FACIAL_RECOGNITION: 2, IRIS: 3 },
 }));
 
-const { biometryKindFor, biometryVars, loadBiometryKind } = await import("./biometry");
+const { biometryIcon, biometryKindFor, biometryVars, loadBiometryKind } =
+  await import("./biometry");
 
 const FINGERPRINT = 1;
 const FACE = 2;
@@ -22,8 +23,9 @@ beforeEach(() => {
 });
 
 describe("biometryKindFor", () => {
-  it("keeps Face ID on iOS unless the device only has Touch ID", () => {
-    expect(biometryKindFor("ios", null)).toBe("faceId");
+  it("says Face ID or Touch ID on iOS, and stays neutral when iOS reports neither", () => {
+    expect(biometryKindFor("ios", null)).toBe("generic");
+    expect(biometryKindFor("ios", [])).toBe("generic");
     expect(biometryKindFor("ios", [FACE])).toBe("faceId");
     expect(biometryKindFor("ios", [FINGERPRINT])).toBe("touchId");
   });
@@ -35,7 +37,7 @@ describe("biometryKindFor", () => {
   });
 
   it("uses neutral wording on Android with several sensors or none known", () => {
-    expect(biometryKindFor("android", [FINGERPRINT, FACE])).toBe("generic");
+    expect(biometryKindFor("android", [FINGERPRINT, FACE])).toBe("multiple");
     expect(biometryKindFor("android", [])).toBe("generic");
     expect(biometryKindFor("android", null)).toBe("generic");
   });
@@ -54,10 +56,9 @@ describe("biometric strings", () => {
 
   it("never say Face ID on an Android device with fingerprint and face", async () => {
     la.supportedAuthenticationTypesAsync.mockResolvedValue([FINGERPRINT, FACE]);
-    await expect(loadBiometryKind()).resolves.toBe("generic");
+    await expect(loadBiometryKind()).resolves.toBe("multiple");
     expect(t("lock.unlockBiometric")).toBe("Unlock with fingerprint or face");
     expect(t("lock.useBiometricInstead")).toBe("Use fingerprint or face instead");
-    expect(t("lock.biometricFailed")).toMatch(/^Fingerprint or face didn't match/);
     expect(t("security.protection.biometricSub")).toBe("Fingerprint or face");
     expect(t("security.log.unlockBiometric")).toBe("Fingerprint or face");
     expect(t("security.log.biometricOnDetail")).toBe("Fingerprint or face turned on");
@@ -90,8 +91,42 @@ describe("biometric strings", () => {
     await expect(loadBiometryKind()).resolves.toBe("generic");
   });
 
+  it("stays neutral on an iOS device that reports no biometry", async () => {
+    platform.OS = "ios";
+    la.supportedAuthenticationTypesAsync.mockResolvedValue([]);
+    await expect(loadBiometryKind()).resolves.toBe("generic");
+    expect(t("lock.unlockBiometric")).toBe("Unlock with biometrics");
+    expect(t("security.log.biometricOnDetail")).toBe("Biometrics turned on");
+  });
+
+  it('never splices a name into a sentence that already has an "or"', () => {
+    for (const key of [
+      "lock.biometricUnavailable",
+      "lock.biometricFailed",
+      "lock.biometricCancelled",
+      "lock.osAuth.authenticate",
+      "lock.osAuth.unavailable",
+      "onboarding.intro.keys.body",
+      "onboarding.backup.revealGate",
+      "security.advanced.revealSub",
+      "security.model.signBody",
+      "sheets.howItWorks.signBody",
+    ]) {
+      expect(t(key)).not.toBe(key);
+      expect(t(key)).toBe(t(key, { biometry: "X", Biometry: "X" }));
+    }
+  });
+
+  it("uses the face icon only for face unlock", () => {
+    expect(biometryIcon("faceId")).toBe("faceid");
+    expect(biometryIcon("face")).toBe("faceid");
+    for (const kind of ["touchId", "fingerprint", "iris", "multiple", "generic"] as const) {
+      expect(biometryIcon(kind)).toBe("fingerprint");
+    }
+  });
+
   it("capitalises the name for the start of a sentence", () => {
-    expect(biometryVars("generic")).toEqual({
+    expect(biometryVars("multiple")).toEqual({
       biometry: "fingerprint or face",
       Biometry: "Fingerprint or face",
     });

@@ -8,6 +8,7 @@ import { DEVICE_CHECK_KEYS } from "./data";
 import { RING_CIRCUMFERENCE, RING_RADIUS, RING_SIZE, RING_STROKE } from "./security.constants";
 import { createSecurityStyles } from "./SecurityScreen.styles";
 import type { SecurityTier } from "./security.types";
+import { biometryIcon } from "@/services/auth/biometry";
 
 const RING_CENTER = RING_SIZE / 2;
 
@@ -84,7 +85,7 @@ export function SecurityModelCard() {
 
   const rows: { icon: IconName; title: string; body: string }[] = [
     { icon: "key", title: t("security.model.keysTitle"), body: t("security.model.keysBody") },
-    { icon: "faceid", title: t("security.model.signTitle"), body: t("security.model.signBody") },
+    { icon: biometryIcon(), title: t("security.model.signTitle"), body: t("security.model.signBody") },
     { icon: "globe", title: t("security.model.backendTitle"), body: t("security.model.backendBody") },
   ];
 

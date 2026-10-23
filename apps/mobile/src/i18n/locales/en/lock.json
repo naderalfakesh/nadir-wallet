@@ -12,23 +12,24 @@
   "unlockWallet": "Unlock your wallet",
   "incorrect": "Incorrect passcode · {{count}} left",
   "lockout": "Too many attempts · try again in {{seconds}}s",
-  "biometricUnavailable": "{{Biometry}} isn't set up on this device — use your passcode.",
-  "biometricFailed": "{{Biometry}} didn't match. Try again or use your passcode.",
-  "biometricCancelled": "{{Biometry}} cancelled. Try again or use your passcode.",
+  "biometricUnavailable": "Biometric unlock isn't set up on this device. Use your passcode.",
+  "biometricFailed": "Not recognized. Try again or use your passcode.",
+  "biometricCancelled": "Unlock cancelled. Try again or use your passcode.",
   "biometry": {
     "faceId": "Face ID",
     "touchId": "Touch ID",
     "fingerprint": "fingerprint",
     "face": "face unlock",
     "iris": "iris unlock",
-    "generic": "fingerprint or face"
+    "multiple": "fingerprint or face",
+    "generic": "biometrics"
   },
   "osAuth": {
-    "authenticate": "Verify with {{biometry}} or passcode",
+    "authenticate": "Verify it's you",
     "cancelled": "Authentication cancelled. Nothing was shown.",
     "failed": "Authentication failed. Nothing was shown. Try again.",
     "lockout": "Biometrics are locked after too many attempts. Unlock your device with its passcode, then try again.",
-    "unavailable": "This device has no {{biometry}} or screen lock set up. Add one in system Settings to continue. Nothing was shown.",
+    "unavailable": "This device has no screen lock or biometrics set up. Add one in system Settings to continue. Nothing was shown.",
     "needsStrongBiometric": "On this Android version, this needs a fingerprint or another strong biometric. Add one in system Settings, then try again. Nothing was shown.",
     "missing": "No recovery phrase is stored on this device.",
     "cancel": "Cancel"

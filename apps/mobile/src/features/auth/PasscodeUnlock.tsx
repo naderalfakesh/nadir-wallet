@@ -6,6 +6,7 @@ import { useTranslation } from "@/i18n/useTranslation";
 import { PinDots, PinKeypad } from "./PinPad";
 import { usePinEntry } from "./usePinEntry";
 import { attemptsLeft, lockRemainingMs, type LockoutState } from "./lockout";
+import { biometryIcon } from "@/services/auth/biometry";
 
 interface PasscodeUnlockProps {
   /** Resolves true when the entered PIN matches the stored hash. */
@@ -107,7 +108,7 @@ export function PasscodeUnlock({
           onPress={onUseBiometric}
           style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 18 }}
         >
-          <Icon name="faceid" size={18} color={theme.colors.textMuted} />
+          <Icon name={biometryIcon()} size={18} color={theme.colors.textMuted} />
           <AppText size={13.5} muted>
             {t("lock.useBiometricInstead")}
           </AppText>

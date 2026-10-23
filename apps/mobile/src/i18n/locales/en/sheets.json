@@ -20,7 +20,7 @@
     "localTitle": "Local-first & non-custodial",
     "localBody": "Your recovery phrase and private keys are created and stored on this device only. They are never uploaded or backed up to a server.",
     "signTitle": "No signing in this demo",
-    "signBody": "Sends are simulated and nothing is signed or broadcast. Confirming one asks for {{biometry}} or your device passcode.",
+    "signBody": "Sends are simulated and nothing is signed or broadcast. Confirming one asks for your biometrics or device passcode.",
     "backendTitle": "Public-address-only backend",
     "backendBody": "The backend receives just your public address — to fetch cached prices, run address risk checks and simulate transactions. It cannot move your funds.",
     "testnetTitle": "Testnet-only",

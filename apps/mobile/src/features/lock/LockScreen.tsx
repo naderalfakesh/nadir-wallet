@@ -10,6 +10,7 @@ import { useApp } from "@/providers/AppProvider";
 import { PasscodeUnlock } from "@/features/auth/PasscodeUnlock";
 import { BiometricBadge } from "@/features/auth/BiometricBadge";
 import { usePulse } from "@/features/auth/usePulse";
+import { biometryIcon } from "@/services/auth/biometry";
 
 type BioStatus = "idle" | "authenticating" | "failed" | "cancelled" | "unavailable";
 
@@ -133,7 +134,7 @@ export function LockScreen() {
           {status !== "authenticating" && (
             <Button
               label={t("lock.useBiometric")}
-              icon="faceid"
+              icon={biometryIcon()}
               variant="soft"
               onPress={authenticate}
               height={48}

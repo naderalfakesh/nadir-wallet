@@ -5,6 +5,7 @@ import { Screen, ScreenHeader, AppText, Button, Card, Icon, type IconName } from
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { createOnboardingStyles } from "./OnboardingFlow.styles";
+import { biometryIcon } from "@/services/auth/biometry";
 
 function StepBadge({ icon, radius, stroke }: { icon: IconName; radius: number; stroke: number }) {
   const theme = useTheme();
@@ -65,7 +66,7 @@ export function BiometricStep({ onEnable, onSkip }: { onEnable: () => void; onSk
   return (
     <Screen>
       <View style={styles.centerStep}>
-        <StepBadge icon="faceid" radius={30} stroke={1.7} />
+        <StepBadge icon={biometryIcon()} radius={30} stroke={1.7} />
         <AppText weight="bold" size={26} style={styles.heroTitle}>
           {t("onboarding.biometric.title")}
         </AppText>
@@ -74,7 +75,7 @@ export function BiometricStep({ onEnable, onSkip }: { onEnable: () => void; onSk
         </AppText>
       </View>
       <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.pad }]}>
-        <Button label={t("onboarding.biometric.enable")} icon="faceid" onPress={onEnable} />
+        <Button label={t("onboarding.biometric.enable")} icon={biometryIcon()} onPress={onEnable} />
         <Button label={t("onboarding.biometric.later")} variant="ghost" onPress={onSkip} height={50} />
       </View>
     </Screen>

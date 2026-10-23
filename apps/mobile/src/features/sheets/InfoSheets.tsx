@@ -5,6 +5,7 @@ import { useTheme, useThemeControls } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import type { ColorScheme } from "@/theme";
 import type { SheetBodyProps, SheetCloseProps } from "./types";
+import { biometryIcon } from "@/services/auth/biometry";
 
 export function SoonSheet({ params, close }: SheetBodyProps<"soon">) {
   const theme = useTheme();
@@ -43,7 +44,7 @@ export function HowItWorksSheet({ close }: SheetCloseProps) {
   const { t } = useTranslation();
   const points: { icon: IconName; title: string; body: string }[] = [
     { icon: "key", title: t("sheets.howItWorks.localTitle"), body: t("sheets.howItWorks.localBody") },
-    { icon: "faceid", title: t("sheets.howItWorks.signTitle"), body: t("sheets.howItWorks.signBody") },
+    { icon: biometryIcon(), title: t("sheets.howItWorks.signTitle"), body: t("sheets.howItWorks.signBody") },
     { icon: "globe", title: t("sheets.howItWorks.backendTitle"), body: t("sheets.howItWorks.backendBody") },
     { icon: "info", title: t("sheets.howItWorks.testnetTitle"), body: t("sheets.howItWorks.testnetBody") },
   ];
