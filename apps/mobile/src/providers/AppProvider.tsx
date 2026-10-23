@@ -6,6 +6,7 @@ import { initialSecurityEvents } from "@/features/security/data";
 import { makeSecurityEvent } from "@/features/security/events";
 import { EMPTY_LOCKOUT, recordFailure, type LockoutState } from "@/features/auth/lockout";
 import { persistNewWallet, persistPasscode } from "./walletPersistence";
+import { clearScanHandoff } from "@/features/send/sendHandoff";
 
 const MAX_EVENTS = 40;
 
@@ -126,6 +127,7 @@ export function AppProvider({ initial, children }: { initial: PersistedState; ch
 
   const resetWallet = useCallback(async () => {
     await storage.clearWallet();
+    clearScanHandoff();
     setSessionUnlocked(false);
     prefsRef.current = DEFAULT_PREFS;
     setPrefs(DEFAULT_PREFS);
@@ -143,7 +145,11 @@ export function AppProvider({ initial, children }: { initial: PersistedState; ch
   }, []);
 
   const unlockSession = useCallback(() => setSessionUnlocked(true), []);
-  const lockSession = useCallback(() => setSessionUnlocked(false), []);
+  // A scan waiting for Send must not survive a lock and fill Send after unlock.
+  const lockSession = useCallback(() => {
+    clearScanHandoff();
+    setSessionUnlocked(false);
+  }, []);
 
   const value = useMemo<AppValue>(
     () => ({

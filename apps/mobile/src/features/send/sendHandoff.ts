@@ -16,3 +16,8 @@ export function takeScanHandoff(): ScanTarget | null {
   pending = null;
   return target;
 }
+
+/** Drops a pending target; called whenever the session locks or the wallet resets. */
+export function clearScanHandoff(): void {
+  pending = null;
+}

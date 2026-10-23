@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { handOffScanToSend, takeScanHandoff } from "./sendHandoff";
+import { readFileSync } from "node:fs";
+import { clearScanHandoff, handOffScanToSend, takeScanHandoff } from "./sendHandoff";
 
 const target = {
   recipient: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
@@ -22,5 +23,17 @@ describe("sendHandoff", () => {
     handOffScanToSend({ ...target, chainId: 80002 });
     handOffScanToSend(target);
     expect(takeScanHandoff()).toEqual(target);
+  });
+
+  it("drops a pending target when cleared", () => {
+    handOffScanToSend(target);
+    clearScanHandoff();
+    expect(takeScanHandoff()).toBeNull();
+  });
+
+  it("is cleared when the session locks or the wallet resets", () => {
+    const source = readFileSync(new URL("../../providers/AppProvider.tsx", import.meta.url), "utf8");
+    expect(source).toMatch(/const lockSession = useCallback\(\(\) => \{\s*clearScanHandoff\(\);/);
+    expect(source).toMatch(/clearWallet\(\);\s*clearScanHandoff\(\);/);
   });
 });
