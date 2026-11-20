@@ -1,28 +1,28 @@
 import React from "react";
-import Svg, { Circle, Line } from "react-native-svg";
+import Svg, { Path } from "react-native-svg";
 import { useTheme } from "@/theme";
 
-// Ring + a plumb line down to a point resting at its lowest position - the
-// "nadir". Same geometry as the app icon and splash: heavy strokes and no faint
-// details so it stays legible small. The halo matches the backdrop so the point
-// reads as separate from the ring.
+// A rounded hexagon (a block) with the initial N cut out of it. Same geometry
+// as the app icon and splash. The N is drawn in the backdrop colour, so pass
+// `backdrop` when the mark sits on something other than the screen background.
 export function Brandmark({ size = 64, backdrop }: { size?: number; backdrop?: string }) {
   const { colors } = useTheme();
   return (
-    <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-      <Circle cx={32} cy={30} r={19} stroke={colors.accent} strokeWidth={5} />
-      <Line
-        x1={32}
-        y1={18}
-        x2={32}
-        y2={46}
+    <Svg width={size} height={size} viewBox="0 0 100 100" fill="none">
+      <Path
+        d="M50 22.29L74 36.14V63.86L50 77.71L26 63.86V36.14Z"
+        fill={colors.accent}
         stroke={colors.accent}
-        strokeWidth={3.5}
-        strokeLinecap="round"
-        strokeOpacity={0.55}
+        strokeWidth={13}
+        strokeLinejoin="round"
       />
-      <Circle cx={32} cy={49} r={9.5} fill={backdrop ?? colors.bg} />
-      <Circle cx={32} cy={49} r={7} fill={colors.accent} />
+      <Path
+        d="M39 63V37L61 63V37"
+        stroke={backdrop ?? colors.bg}
+        strokeWidth={7.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </Svg>
   );
 }
