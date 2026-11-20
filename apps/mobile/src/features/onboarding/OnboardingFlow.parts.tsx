@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
 import { View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen, ScreenHeader, AppText, Button, Card, Icon, type IconName } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -20,7 +19,6 @@ function StepBadge({ icon, radius, stroke }: { icon: IconName; radius: number; s
 export function ExplainStep({ onBack, onContinue }: { onBack: () => void; onContinue: () => void }) {
   const theme = useTheme();
   const styles = useMemo(() => createOnboardingStyles(theme), [theme]);
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
 
   const points: { icon: IconName; title: string; body: string }[] = [
@@ -32,7 +30,7 @@ export function ExplainStep({ onBack, onContinue }: { onBack: () => void; onCont
   return (
     <Screen>
       <ScreenHeader title={t("onboarding.explain.title")} subtitle={t("onboarding.explain.sub")} onBack={onBack} />
-      <View style={[styles.explainList, { paddingBottom: insets.bottom + theme.spacing.pad }]}>
+      <View style={[styles.explainList, { paddingBottom: theme.spacing.pad }]}>
         {points.map((p) => (
           <Card key={p.title} padding={16}>
             <View style={styles.explainRow}>
@@ -60,7 +58,6 @@ export function ExplainStep({ onBack, onContinue }: { onBack: () => void; onCont
 export function BiometricStep({ onEnable, onSkip }: { onEnable: () => void; onSkip: () => void }) {
   const theme = useTheme();
   const styles = useMemo(() => createOnboardingStyles(theme), [theme]);
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
 
   return (
@@ -74,7 +71,7 @@ export function BiometricStep({ onEnable, onSkip }: { onEnable: () => void; onSk
           {t("onboarding.biometric.body")}
         </AppText>
       </View>
-      <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.pad }]}>
+      <View style={styles.footer}>
         <Button label={t("onboarding.biometric.enable")} icon={biometryIcon()} onPress={onEnable} />
         <Button label={t("onboarding.biometric.later")} variant="ghost" onPress={onSkip} height={50} />
       </View>
@@ -85,7 +82,6 @@ export function BiometricStep({ onEnable, onSkip }: { onEnable: () => void; onSk
 export function ReadyStep({ onOpen, saving, failed }: { onOpen: () => void; saving: boolean; failed: boolean }) {
   const theme = useTheme();
   const styles = useMemo(() => createOnboardingStyles(theme), [theme]);
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
 
   return (
@@ -110,7 +106,7 @@ export function ReadyStep({ onOpen, saving, failed }: { onOpen: () => void; savi
           </AppText>
         ) : null}
       </View>
-      <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.pad }]}>
+      <View style={styles.footer}>
         <Button
           label={failed ? t("lock.tryAgain") : t("onboarding.ready.open")}
           onPress={onOpen}

@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen, ScreenHeader } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -17,7 +16,6 @@ import { useBlockScreenCapture } from "./useBlockScreenCapture";
 export function RevealScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { prefs } = useApp();
   const [words, setWords] = useState<string[] | null>(null);
@@ -56,7 +54,7 @@ export function RevealScreen() {
           authenticate={unlock}
         />
       ) : (
-        <ScrollView contentContainerStyle={{ paddingHorizontal: theme.spacing.pad, paddingBottom: insets.bottom + theme.spacing.pad }}>
+        <ScrollView contentContainerStyle={{ paddingHorizontal: theme.spacing.pad, paddingBottom: theme.spacing.pad }}>
           <SeedReveal words={words} onContinue={() => router.back()} ctaLabel={t("common.actions.done")} />
         </ScrollView>
       )}

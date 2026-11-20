@@ -1,18 +1,23 @@
+import { haptics } from "@/services/device/haptics";
 import React from "react";
 import { Pressable, View } from "react-native";
 import { useTheme } from "@/theme";
 
 interface ToggleProps {
+  label?: string;
+  testID?: string;
   on: boolean;
   onChange: () => void;
 }
 
-export function Toggle({ on, onChange }: ToggleProps) {
+export function Toggle({ label, on, onChange, testID }: ToggleProps) {
   const theme = useTheme();
   return (
     <Pressable
-      onPress={onChange}
+      onPress={() => { haptics.selection(); onChange(); }}
       accessibilityRole="switch"
+      accessibilityLabel={label}
+      testID={testID}
       accessibilityState={{ checked: on }}
       style={{
         width: 50,

@@ -5,21 +5,19 @@ import { useTranslation } from "@/i18n/useTranslation";
 import { alpha, useTheme } from "@/theme";
 import { fmtToken } from "@/utils/format";
 import type { DemoToken } from "@/features/wallet/data";
-import { FEE_NATIVE } from "./send.constants";
 import { createSendStyles } from "./SendScreen.styles";
 import type { SimulationStatus } from "./send.types";
 
 interface FooterButtonProps {
   children: React.ReactNode;
-  bottomInset: number;
 }
 
-export function FooterButton({ children, bottomInset }: FooterButtonProps) {
+export function FooterButton({ children }: FooterButtonProps) {
   const theme = useTheme();
   const styles = useMemo(() => createSendStyles(theme), [theme]);
 
   return (
-    <View style={[styles.footer, { paddingBottom: bottomInset + theme.spacing.pad }]}>
+    <View style={styles.footer}>
       {children}
     </View>
   );
@@ -60,16 +58,18 @@ interface SimulationCardProps {
   status: SimulationStatus;
   token: DemoToken;
   balanceAfter: number;
-  gasSym: string;
-  chainName: string;
+  fee: string | null;
+  loading: boolean;
+  warnings?: string[];
 }
 
 export function SimulationCard({
   status,
   token,
   balanceAfter,
-  gasSym,
-  chainName,
+  fee,
+  loading,
+  warnings = [],
 }: SimulationCardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createSendStyles(theme), [theme]);
@@ -77,13 +77,12 @@ export function SimulationCard({
   const tone =
     status === "failed" ? theme.colors.neg : status === "unavailable" ? theme.colors.textFaint : theme.colors.pos;
   const pill =
-    status === "failed" ? t("send.sim.failed") : status === "unavailable" ? t("send.sim.unavailable") : t("send.sim.passed");
-  const icon = status === "failed" ? "alert" : status === "unavailable" ? "wifiOff" : "checkCircle";
+    loading ? t("send.sim.loading") : status === "failed" ? t("send.sim.failed") : status === "unavailable" ? t("send.sim.unavailable") : t("send.sim.passed");
+  const icon = loading ? "refresh" : status === "failed" ? "alert" : status === "unavailable" ? "wifiOff" : "checkCircle";
 
   const rows: [string, string][] = [
-    [t("send.sim.estFee"), `${FEE_NATIVE} ${gasSym}`],
+    [t("send.sim.estFee"), fee ?? t("send.sim.unavailable")],
     [t("send.sim.balanceAfter"), fmtToken(balanceAfter, token.symbol)],
-    [t("send.sim.network"), chainName],
     [t("send.sim.contract"), t("send.sim.contractNone")],
   ];
 
@@ -100,7 +99,7 @@ export function SimulationCard({
           </AppText>
         </View>
       </View>
-      {status === "failed" ? (
+      {loading ? null : status === "failed" ? (
         <AppText size={12.5} muted style={styles.simulationBody}>
           {t("send.sim.failedBody")}
         </AppText>
@@ -122,6 +121,11 @@ export function SimulationCard({
           ))}
         </View>
       )}
+      {warnings.map((warning, index) => (
+        <AppText key={`${index}-${warning}`} size={12.5} muted style={styles.simulationBody}>
+          {warning}
+        </AppText>
+      ))}
       <View style={styles.simulationNote}>
         <AppText faint size={11} style={styles.simulationNoteText}>
           {t("send.sim.note")}

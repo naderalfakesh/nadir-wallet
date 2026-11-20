@@ -1,3 +1,4 @@
+import { haptics } from "@/services/device/haptics";
 import React from "react";
 import { Pressable, View } from "react-native";
 import { useTheme } from "@/theme";
@@ -32,7 +33,13 @@ export function Segmented<T extends string>({
         return (
           <Pressable
             key={opt}
-            onPress={() => onChange(opt)}
+            accessibilityRole="button"
+            accessibilityState={{ selected: on }}
+            onPress={() => {
+              if (on) return;
+              haptics.selection();
+              onChange(opt);
+            }}
             style={{
               flex: 1,
               height: small ? 30 : 36,

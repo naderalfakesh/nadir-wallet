@@ -1,3 +1,4 @@
+import { haptics } from "@/services/device/haptics";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const PIN_LENGTH = 6;
@@ -42,6 +43,7 @@ export function usePinEntry({ length = PIN_LENGTH, onComplete }: UsePinEntryOpti
 
   const fail = useCallback(
     (after?: () => void) => {
+      haptics.error();
       setError(true);
       setShake(true);
       schedule(() => {

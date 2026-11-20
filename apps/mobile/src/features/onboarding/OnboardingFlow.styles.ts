@@ -32,6 +32,7 @@ export function createOnboardingStyles(theme: Theme) {
     },
     footer: {
       paddingHorizontal: spacing.pad,
+      paddingBottom: spacing.pad,
       gap: 11,
     },
     explainList: {

@@ -27,6 +27,7 @@ export function ScreenHeader({ title, subtitle, onBack, trailing }: ScreenHeader
       }}
     >
       {onBack ? (
+        <View style={{ flex: 1, minWidth: 40, alignItems: "flex-start" }}>
         <Pressable
           onPress={onBack}
           hitSlop={8}
@@ -43,10 +44,11 @@ export function ScreenHeader({ title, subtitle, onBack, trailing }: ScreenHeader
         >
           <Icon name="chevronL" size={22} />
         </Pressable>
+        </View>
       ) : (
         <View style={{ width: 4 }} />
       )}
-      <View style={{ flex: 1, minWidth: 0 }}>
+      <View style={centered ? { flexShrink: 1, maxWidth: "56%" } : { flex: 1, minWidth: 0 }}>
         <AppText weight="bold" size={19} style={{ textAlign: centered ? "center" : "left" }}>
           {title}
         </AppText>
@@ -56,7 +58,9 @@ export function ScreenHeader({ title, subtitle, onBack, trailing }: ScreenHeader
           </AppText>
         )}
       </View>
-      <View style={{ width: centered ? 40 : undefined, alignItems: "flex-end" }}>{trailing}</View>
+      <View style={centered ? { flex: 1, minWidth: 40, alignItems: "flex-end" } : { alignItems: "flex-end" }}>
+        {trailing}
+      </View>
     </View>
   );
 }

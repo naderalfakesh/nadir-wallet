@@ -78,7 +78,7 @@ export function DemoControls() {
             {liveApi ? t("settings.demo.liveOn") : t("settings.demo.liveOff")}
           </AppText>
         </View>
-        <Toggle on={liveApi} onChange={() => setLiveApi(!liveApi)} />
+        <Toggle testID="live-api-data" label={t("settings.demo.liveApi")} on={liveApi} onChange={() => setLiveApi(!liveApi)} />
       </View>
 
       {liveApi ? (

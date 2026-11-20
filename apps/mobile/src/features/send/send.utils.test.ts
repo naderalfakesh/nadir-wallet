@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { TOKENS, tokenById, type DemoToken } from "@/features/wallet/data";
+import { RECIPIENTS, TOKENS, tokenById, type DemoToken } from "@/features/wallet/data";
 import {
   checkScanForToken,
+  getBalanceAfter,
   getInitialToken,
   getLiveSimulationStatus,
   getLocalSimulationStatus,
   getRecipientValidation,
   getRiskCopy,
+  getSendTotal,
   pickTokenForScan,
 } from "./send.utils";
 
@@ -23,6 +25,14 @@ describe("getRecipientValidation", () => {
     expect(result.looksAddr).toBe(true);
     expect(result.toValid).toBe(true);
     expect(result.toError).toBe(false);
+  });
+
+  it("rejects incomplete and overlong hex addresses", () => {
+    expect(getRecipientValidation("0x123456").toValid).toBe(false);
+    expect(getRecipientValidation(`0x${"a".repeat(41)}`).toValid).toBe(false);
+    for (const recipient of RECIPIENTS) {
+      expect(getRecipientValidation(recipient.addr).looksAddr).toBe(true);
+    }
   });
 
   it("accepts ENS-style names", () => {
@@ -150,5 +160,24 @@ describe("pickTokenForScan", () => {
       ok: false,
       reason: "unsupported-chain",
     });
+  });
+});
+
+describe("send totals", () => {
+  const fee = { amount: 0.00042, symbol: "ETH" };
+
+  it("adds the fee into the total when it is paid in the sent token", () => {
+    expect(getSendTotal(0.25, "ETH", fee)).toBe("0.25042 ETH");
+    expect(getBalanceAfter(0.842, 0.25, "ETH", fee)).toBeCloseTo(0.59158, 8);
+  });
+
+  it("lists the fee separately when it is paid in another token", () => {
+    expect(getSendTotal(120, "USDC", fee)).toBe("120 USDC + 0.00042 ETH");
+    expect(getBalanceAfter(612.4, 120, "USDC", fee)).toBeCloseTo(492.4, 8);
+  });
+
+  it("shows the amount alone when no fee estimate is available", () => {
+    expect(getSendTotal(0.25, "ETH", null)).toBe("0.25 ETH");
+    expect(getBalanceAfter(0.1, 0.25, "ETH", null)).toBe(0);
   });
 });

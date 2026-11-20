@@ -23,7 +23,6 @@ interface AppValue {
   /** Records a failed passcode entry and returns the new lockout state. */
   recordUnlockFailure: () => LockoutState;
   clearLockout: () => void;
-  events: SecurityEvent[];
   logEvent: (type: SecurityEventType, opts?: { detail?: string; detailVars?: Record<string, string | number> }) => void;
   /** In memory only: false on every cold start until the lock screen (or onboarding) succeeds. */
   sessionUnlocked: boolean;
@@ -40,6 +39,7 @@ interface AppValue {
 }
 
 const AppContext = createContext<AppValue | null>(null);
+const SecurityEventsContext = createContext<SecurityEvent[] | null>(null);
 
 export function AppProvider({ initial, children }: { initial: PersistedState; children: React.ReactNode }) {
   const [prefs, setPrefs] = useState<Prefs>(initial.prefs);
@@ -161,7 +161,6 @@ export function AppProvider({ initial, children }: { initial: PersistedState; ch
       lockout,
       recordUnlockFailure,
       clearLockout,
-      events,
       logEvent,
       sessionUnlocked,
       unlockSession,
@@ -180,7 +179,6 @@ export function AppProvider({ initial, children }: { initial: PersistedState; ch
       lockout,
       recordUnlockFailure,
       clearLockout,
-      events,
       logEvent,
       sessionUnlocked,
       unlockSession,
@@ -192,11 +190,21 @@ export function AppProvider({ initial, children }: { initial: PersistedState; ch
     ],
   );
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={value}>
+      <SecurityEventsContext.Provider value={events}>{children}</SecurityEventsContext.Provider>
+    </AppContext.Provider>
+  );
 }
 
 export function useApp(): AppValue {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error("useApp must be used within AppProvider");
   return ctx;
+}
+
+export function useSecurityEvents(): SecurityEvent[] {
+  const events = useContext(SecurityEventsContext);
+  if (!events) throw new Error("useSecurityEvents must be used within AppProvider");
+  return events;
 }

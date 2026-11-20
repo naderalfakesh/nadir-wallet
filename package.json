@@ -10,10 +10,13 @@
     "typecheck": "turbo run typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
-    "format": "prettier --write \"**/*.{ts,tsx,md,json}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "test:e2e": "e2e run"
   },
   "devDependencies": {
+    "@e2e-dev/mobile": "0.12.7",
     "@nadir-wallet/config": "workspace:*",
+    "e2e": "0.23.1",
     "prettier": "^3.7.4",
     "turbo": "^2.9.16",
     "typescript": "5.9.2",

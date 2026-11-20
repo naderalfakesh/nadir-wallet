@@ -1,9 +1,12 @@
-import React, { useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { AppState, Pressable, ScrollView, TextInput, View } from "react-native";
 import { ScreenHeader, AppText, Button, Icon } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
-import { generateMnemonic, validateMnemonicPhrase } from "@nadir-wallet/crypto-core";
+import { generateMnemonic, suggestBip39Words, validateMnemonicPhrase } from "@nadir-wallet/crypto-core";
+
+import { readClipboardText } from "@/services/device";
+import { createStaleGuard } from "@/features/auth/staleGuard";
 
 // Real BIP39 validation. On success the phrase is handed up and the wallet is
 // derived; the phrase never leaves the device.
@@ -11,8 +14,38 @@ export function ImportScreen({ onBack, onDone }: { onBack: () => void; onDone: (
   const theme = useTheme();
   const { t } = useTranslation();
   const [value, setValue] = useState("");
+  const [clipboardEmpty, setClipboardEmpty] = useState(false);
+  const [pasteGuard] = useState(createStaleGuard);
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "background") {
+        pasteGuard.invalidate();
+        setValue("");
+        setClipboardEmpty(false);
+      }
+    });
+    return () => {
+      subscription.remove();
+      pasteGuard.invalidate();
+    };
+  }, [pasteGuard]);
+
+  const editValue = (text: string) => {
+    pasteGuard.invalidate();
+    setClipboardEmpty(false);
+    setValue(text);
+  };
+  const paste = async () => {
+    pasteGuard.invalidate();
+    const { current, value: text } = await pasteGuard.run(readClipboardText);
+    if (!current) return;
+    if (text) editValue(text);
+    else setClipboardEmpty(true);
+  };
 
   const result = validateMnemonicPhrase(value);
+  const prefix = value.match(/(?:^|\s)([a-z]+)$/i)?.[1] ?? "";
+  const suggestions = result.valid ? [] : suggestBip39Words(prefix);
   const error =
     result.invalidWord != null
       ? t("onboarding.import.invalidWord", { word: result.invalidWord })
@@ -22,10 +55,8 @@ export function ImportScreen({ onBack, onDone }: { onBack: () => void; onDone: (
 
   const normalized = value.trim().toLowerCase().split(/\s+/).filter(Boolean).join(" ");
 
-  // The field autofocuses, so without this the keyboard covers the Import
-  // button. Android resizes the window itself; iOS needs the padding.
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <>
       <ScreenHeader title={t("onboarding.import.title")} subtitle={t("onboarding.import.sub")} onBack={onBack} />
       <ScrollView
         keyboardShouldPersistTaps="handled"
@@ -34,7 +65,8 @@ export function ImportScreen({ onBack, onDone }: { onBack: () => void; onDone: (
       >
         <TextInput
           value={value}
-          onChangeText={setValue}
+          onChangeText={editValue}
+          spellCheck={false}
           autoFocus
           multiline
           // Words are space-separated, so Return closes the keyboard instead of
@@ -62,7 +94,8 @@ export function ImportScreen({ onBack, onDone }: { onBack: () => void; onDone: (
 
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
           <Pressable
-            onPress={() => setValue(generateMnemonic())}
+            accessibilityRole="button"
+            onPress={() => void paste()}
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -80,10 +113,36 @@ export function ImportScreen({ onBack, onDone }: { onBack: () => void; onDone: (
               {t("onboarding.import.paste")}
             </AppText>
           </Pressable>
+          <Pressable accessibilityRole="button" onPress={() => editValue(generateMnemonic())} style={{ paddingVertical: 10 }}>
+            <AppText weight="semibold" size={13} color={theme.colors.accent}>
+              {t("onboarding.import.sample")}
+            </AppText>
+          </Pressable>
           <AppText weight="semibold" size={13} tnum color={result.wordCountValid ? theme.colors.pos : theme.colors.textFaint}>
             {t("onboarding.import.words", { count: result.wordCount })}
           </AppText>
         </View>
+
+        {suggestions.length > 0 && (
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
+            {suggestions.map((word) => (
+              <Pressable
+                key={word}
+                accessibilityRole="button"
+                onPress={() => editValue(value.slice(0, -prefix.length) + word + " ")}
+                style={{ backgroundColor: theme.colors.surface2, borderRadius: theme.radius.chip, padding: 10 }}
+              >
+                <AppText mono size={13}>{word}</AppText>
+              </Pressable>
+            ))}
+          </View>
+        )}
+
+        {clipboardEmpty && (
+          <AppText size={12.5} muted accessibilityLiveRegion="polite" style={{ marginTop: 8 }}>
+            {t("common.actions.clipboardEmpty")}
+          </AppText>
+        )}
 
         {error && (
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 12 }}>
@@ -102,8 +161,8 @@ export function ImportScreen({ onBack, onDone }: { onBack: () => void; onDone: (
         </View>
 
         <View style={{ flex: 1 }} />
-        <Button label={t("onboarding.import.cta")} disabled={!result.valid} onPress={() => onDone(normalized)} />
+        <Button testID="import-wallet" label={t("onboarding.import.cta")} disabled={!result.valid} onPress={() => onDone(normalized)} />
       </ScrollView>
-    </KeyboardAvoidingView>
+    </>
   );
 }

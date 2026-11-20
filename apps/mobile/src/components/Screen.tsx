@@ -1,26 +1,37 @@
 import React from "react";
-import { View, type ViewStyle, type StyleProp } from "react-native";
+import { KeyboardAvoidingView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/theme";
 
 interface ScreenProps {
   children: React.ReactNode;
-  // Apply the top safe-area inset (screens without a native header want this).
-  topInset?: boolean;
-  style?: StyleProp<ViewStyle>;
+  /** Tab screens sit above a tab bar that already handles the bottom inset. */
+  bottomInset?: boolean;
+  avoidKeyboard?: boolean;
 }
 
-export function Screen({ children, topInset = true, style }: ScreenProps) {
+export function Screen({ children, bottomInset = true, avoidKeyboard = false }: ScreenProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  return (
+
+  const content = (
     <View
-      style={[
-        { flex: 1, backgroundColor: theme.colors.bg, paddingTop: topInset ? insets.top : 0 },
-        style,
-      ]}
+      style={{
+        flex: 1,
+        backgroundColor: theme.colors.bg,
+        paddingTop: insets.top,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
+        paddingBottom: bottomInset ? insets.bottom : 0,
+      }}
     >
       {children}
     </View>
   );
+
+  return avoidKeyboard ? (
+    <KeyboardAvoidingView behavior="padding" style={{ flex: 1, backgroundColor: theme.colors.bg }}>
+      {content}
+    </KeyboardAvoidingView>
+  ) : content;
 }

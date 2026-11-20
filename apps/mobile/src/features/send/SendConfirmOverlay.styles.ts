@@ -27,6 +27,7 @@ export function createOverlayStyles(theme: Theme) {
     },
     footer: {
       paddingHorizontal: spacing.pad,
+      paddingBottom: spacing.pad,
       gap: 10,
     },
   });

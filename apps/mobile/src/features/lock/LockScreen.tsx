@@ -1,6 +1,6 @@
+import { haptics } from "@/services/device/haptics";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as LocalAuthentication from "expo-local-authentication";
 import { Screen, Brandmark, AppText, Button, Icon } from "@/components";
 import { useTheme } from "@/theme";
@@ -16,7 +16,6 @@ type BioStatus = "idle" | "authenticating" | "failed" | "cancelled" | "unavailab
 
 export function LockScreen() {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { prefs, verifyPasscode, lockout, recordUnlockFailure, clearLockout, logEvent, unlockSession } = useApp();
 
@@ -28,6 +27,7 @@ export function LockScreen() {
 
   const unlock = useCallback(
     (methodLabel: string) => {
+      haptics.success();
       clearLockout();
       logEvent("unlock", { detail: methodLabel });
       // Opening the wallet group removes this screen; index then routes to home.
@@ -110,7 +110,7 @@ export function LockScreen() {
 
   return (
     <Screen>
-      <View style={{ flex: 1, alignItems: "center", paddingTop: insets.top + 72 }}>
+      <View style={{ flex: 1, alignItems: "center", paddingTop: 72 }}>
         <Brandmark size={58} />
         <AppText weight="bold" size={22} style={{ marginTop: 18, letterSpacing: -0.4 }}>
           {t("common.appName")}
@@ -146,7 +146,7 @@ export function LockScreen() {
         <Pressable
           onPress={() => setMode("passcode")}
           style={{
-            paddingBottom: insets.bottom + 24,
+            paddingBottom: 24,
             flexDirection: "row",
             alignItems: "center",
             gap: 8,

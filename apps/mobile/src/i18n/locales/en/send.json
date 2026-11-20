@@ -8,8 +8,10 @@
   "to": {
     "placeholder": "Address or ENS name",
     "invalid": "Not a valid wallet address or ENS name.",
-    "recent": "Recent",
-    "riskUnavailable": "Risk check unavailable — services offline. Verify the recipient manually.",
+    "samples": "Sample recipients",
+    "paste": "Paste address",
+    "clipboardInvalid": "The clipboard does not contain a recipient address or name.",
+    "riskUnavailable": "Risk check unavailable. Verify the recipient manually.",
     "continue": "Continue",
     "blocked": "Sending blocked — high risk"
   },
@@ -35,9 +37,8 @@
     "network": "Network",
     "fee": "Network fee",
     "total": "Total",
-    "totalValue": "{{amount}} + fee",
     "riskUnavailable": "Risk check unavailable — verify the recipient manually before sending.",
-    "trustNote": "Only the public recipient address is checked by the backend. This demo never signs or broadcasts, and your recovery phrase stays on this device."
+    "trustNote": "The API checks public addresses and unsigned drafts. Your recovery phrase stays on this device."
   },
   "mismatch": {
     "title": "Network mismatch",
@@ -46,16 +47,16 @@
   "sim": {
     "title": "Transaction simulation",
     "passed": "Passed",
+    "loading": "Checking…",
     "failed": "Failed",
     "unavailable": "Unavailable",
-    "failedBody": "Simulation reverted — the transaction is likely to fail (insufficient gas). Adjust the amount or try again when the testnet RPC is responsive.",
-    "unavailableBody": "Couldn't simulate — wallet services are offline. You can still continue the simulated send, but the outcome can't be previewed.",
+    "failedBody": "The simulation rejected this draft. Review the transaction details before trying again.",
+    "unavailableBody": "No simulation preview is available for this draft.",
     "estFee": "Estimated fee",
     "balanceAfter": "Balance after",
-    "network": "Network",
     "contract": "Contract interaction",
     "contractNone": "None detected",
-    "note": "Simulation runs against testnet and does not move funds."
+    "note": "Fees and outcomes are estimates. No funds move."
   },
   "confirm": {
     "cta": "Confirm simulated send",
@@ -67,6 +68,11 @@
     "confirmTitle": "Confirm it's you",
     "confirmSub": "Simulated send — nothing is signed or broadcast.",
     "prompt": "Confirm simulated send",
+    "noDeviceLock": "This device has no screen lock or biometrics set up, so your app passcode confirms this simulated send instead.",
+    "usePasscode": "Use app passcode",
+    "authCancelled": "Authentication cancelled. Nothing was sent.",
+    "authFailed": "Authentication failed. Nothing was sent. Try again.",
+    "authNeedsStrongBiometric": "On this Android version, this needs a fingerprint or another strong biometric. Add one in system Settings, then try again. Nothing was sent.",
     "backToReview": "Back to review",
     "submitted": "Simulated send pending",
     "submittedBody": "Demo only: nothing was signed or broadcast to {{network}}, so there is no transaction hash.",

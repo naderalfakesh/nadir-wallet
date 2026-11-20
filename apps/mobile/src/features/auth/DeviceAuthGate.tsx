@@ -18,6 +18,10 @@ interface DeviceAuthGateProps {
   authenticate: () => Promise<GateOutcome>;
   /** Prompt as soon as the gate mounts. */
   auto?: boolean;
+  /** Wording for failures where the default ("Nothing was shown") doesn't fit the action. */
+  failureCopy?: Partial<Record<GateFailure, string>>;
+  /** Another way through, offered only when the device has no credential the OS can check. */
+  unavailableFallback?: { message: string; label: string; onPress: () => void };
 }
 
 export function DeviceAuthGate({
@@ -25,6 +29,8 @@ export function DeviceAuthGate({
   subtitle,
   authenticate,
   auto = false,
+  failureCopy,
+  unavailableFallback,
 }: DeviceAuthGateProps) {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -59,7 +65,11 @@ export function DeviceAuthGate({
   }, [auto, go]);
 
   const failed = status !== "idle" && status !== "authenticating";
-  const message = status === "idle" ? subtitle : t(`lock.osAuth.${status}`);
+  const fallback = status === "unavailable" ? unavailableFallback : undefined;
+  const message =
+    status === "idle"
+      ? subtitle
+      : (fallback?.message ?? (status !== "authenticating" ? failureCopy?.[status] : undefined) ?? t(`lock.osAuth.${status}`));
 
   return (
     <View
@@ -81,7 +91,16 @@ export function DeviceAuthGate({
       >
         {message}
       </AppText>
-      {status !== "authenticating" && (
+      {fallback ? (
+        <Button
+          label={fallback.label}
+          icon="lock"
+          variant="soft"
+          onPress={fallback.onPress}
+          height={48}
+          style={{ marginTop: 26, paddingHorizontal: 26 }}
+        />
+      ) : status !== "authenticating" && (
         <Button
           label={failed ? t("lock.tryAgain") : t("lock.osAuth.authenticate")}
           icon={biometryIcon()}

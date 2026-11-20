@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, TextInput, View } from "react-native";
 import {
   AppText,
@@ -17,10 +17,11 @@ import { useTranslation } from "@/i18n/useTranslation";
 import { fmtUSD, fmtToken, shortAddr } from "@/utils/format";
 import { CHAINS, RECIPIENTS, chainBadgeColor, type Chain, type ChainId, type DemoToken } from "@/features/wallet/data";
 import type { AddressRisk } from "@/features/wallet/risk";
-import { FEE_NATIVE } from "./send.constants";
+import { readClipboardText } from "@/services/device";
+import { createStaleGuard } from "@/features/auth/staleGuard";
 import { createSendStyles } from "./SendScreen.styles";
 import { OfflineRiskNote, RecipientIcon, SimulationCard } from "./SendScreen.parts";
-import { getRiskCopy } from "./send.utils";
+import { getRecipientValidation, getRiskCopy } from "./send.utils";
 import type { SimulationStatus } from "./send.types";
 
 interface ToStepProps {
@@ -28,12 +29,9 @@ interface ToStepProps {
   toError: boolean;
   toValid: boolean;
   risk: AddressRisk | null;
-  checksAvailable: boolean;
-  bottomInset: number;
+  riskUnavailable: boolean;
   onChangeTo: (value: string) => void;
-  onPaste: () => void;
   onScan: () => void;
-  onPickRecipient: (address: string) => void;
 }
 
 export function ToStep({
@@ -41,40 +39,61 @@ export function ToStep({
   toError,
   toValid,
   risk,
-  checksAvailable,
-  bottomInset,
+  riskUnavailable,
   onChangeTo,
-  onPaste,
   onScan,
-  onPickRecipient,
 }: ToStepProps) {
   const theme = useTheme();
   const styles = useMemo(() => createSendStyles(theme), [theme]);
   const { t } = useTranslation();
+  const [pasteFeedback, setPasteFeedback] = useState<"empty" | "invalid" | null>(null);
+  const [pasteGuard] = useState(createStaleGuard);
+  useEffect(() => () => pasteGuard.invalidate(), [pasteGuard]);
+
+  const editRecipient = (value: string) => {
+    pasteGuard.invalidate();
+    setPasteFeedback(null);
+    onChangeTo(value);
+  };
+  const paste = async () => {
+    pasteGuard.invalidate();
+    const { current, value } = await pasteGuard.run(readClipboardText);
+    if (!current) return;
+    if (getRecipientValidation(value).toValid) editRecipient(value);
+    else setPasteFeedback(value ? "invalid" : "empty");
+  };
 
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={[styles.stepScroll, { paddingBottom: bottomInset + 80 }]}
+      contentContainerStyle={styles.stepScroll}
     >
       <View style={[styles.toInput, { borderColor: toError ? theme.colors.neg : theme.colors.hairline }]}>
         <TextInput
+          testID="send-recipient"
           value={to}
-          onChangeText={onChangeTo}
+          onChangeText={editRecipient}
           autoFocus
           autoCapitalize="none"
           autoCorrect={false}
+          spellCheck={false}
           placeholder={t("send.to.placeholder")}
           placeholderTextColor={theme.colors.textFaint}
           style={styles.toTextInput}
         />
-        <Pressable onPress={onPaste} accessibilityRole="button" accessibilityLabel="Paste address" style={styles.iconInputButton}>
+        <Pressable onPress={() => void paste()} accessibilityRole="button" accessibilityLabel={t("send.to.paste")} style={styles.iconInputButton}>
           <Icon name="paste" size={19} />
         </Pressable>
-        <Pressable onPress={onScan} accessibilityRole="button" accessibilityLabel="Scan QR code" style={styles.iconInputButton}>
+        <Pressable onPress={() => { pasteGuard.invalidate(); onScan(); }} accessibilityRole="button" accessibilityLabel="Scan QR code" style={styles.iconInputButton}>
           <Icon name="scan" size={19} />
         </Pressable>
       </View>
+
+      {pasteFeedback && (
+        <AppText size={12.5} muted accessibilityLiveRegion="polite" style={styles.errorRow}>
+          {t(pasteFeedback === "empty" ? "common.actions.clipboardEmpty" : "send.to.clipboardInvalid")}
+        </AppText>
+      )}
 
       {toError && (
         <View style={styles.errorRow}>
@@ -90,18 +109,24 @@ export function ToStep({
           <RiskResult level={risk.level} {...getRiskCopy(risk, t)} />
         </View>
       )}
-      {toValid && !checksAvailable && <OfflineRiskNote text={t("send.to.riskUnavailable")} />}
+      {toValid && riskUnavailable && <OfflineRiskNote text={t("send.to.riskUnavailable")} />}
 
       <View style={styles.spacer} />
-      <SectionLabel>{t("send.to.recent")}</SectionLabel>
+      <SectionLabel>{t("send.to.samples")}</SectionLabel>
       <Card padding={0} style={styles.recipientsCard}>
         {RECIPIENTS.map((recipient, index) => (
           <Row
             key={recipient.addr}
             last={index === RECIPIENTS.length - 1}
-            onPress={() => onPickRecipient(recipient.addr)}
+            onPress={() => editRecipient(recipient.addr)}
             left={<RecipientIcon flagged={recipient.flagged} />}
-            title={recipient.label ?? shortAddr(recipient.addr, 8, 6)}
+            title={
+              recipient.label ?? (
+                <AppText mono weight="semibold" size={15} numberOfLines={1}>
+                  {shortAddr(recipient.addr, 8, 6)}
+                </AppText>
+              )
+            }
             sub={
               recipient.label ? (
                 <AppText mono size={13} muted>
@@ -138,7 +163,7 @@ export function AmountStep({ token, amt, amtNum, fiat, onKey, onMax, onPickToken
   const { t } = useTranslation();
 
   return (
-    <View style={styles.amountStep}>
+    <ScrollView contentContainerStyle={styles.amountStep}>
       <Pressable onPress={onPickToken} style={styles.tokenPicker}>
         <TokenGlyph symbol={token.symbol} color={token.color} size={32} />
         <AppText weight="bold" size={15}>
@@ -148,19 +173,20 @@ export function AmountStep({ token, amt, amtNum, fiat, onKey, onMax, onPickToken
       </Pressable>
 
       <View style={styles.amountDisplay}>
-        <AppText
-          weight="bold"
-          size={52}
-          tnum
-          color={amtNum > 0 ? theme.colors.text : theme.colors.textFaint}
-          style={styles.amountText}
-        >
-          {amt}
+        <View style={styles.amountRow}>
+          <AppText
+            weight="bold"
+            size={52}
+            tnum
+            color={amtNum > 0 ? theme.colors.text : theme.colors.textFaint}
+            style={styles.amountText}
+          >
+            {amt}
+          </AppText>
           <AppText size={26} muted>
-            {" "}
             {token.symbol}
           </AppText>
-        </AppText>
+        </View>
         <AppText size={16} muted tnum style={styles.fiatText}>
           {t("send.amount.demoApprox", { value: fmtUSD(fiat) })}
         </AppText>
@@ -182,7 +208,7 @@ export function AmountStep({ token, amt, amtNum, fiat, onKey, onMax, onPickToken
           onPress={onReview}
         />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -192,14 +218,16 @@ interface ReviewStepProps {
   fiat: number;
   trimmedTo: string;
   chain: Chain;
-  gasSym: string;
+  fee: string | null;
+  total: string;
+  simulationLoading: boolean;
+  warnings?: string[];
   risk: AddressRisk | null;
-  checksAvailable: boolean;
+  riskUnavailable: boolean;
   netMismatch: boolean;
   recipientNet: ChainId | null;
   simStatus: SimulationStatus;
   balanceAfter: number;
-  bottomInset: number;
 }
 
 export function ReviewStep({
@@ -208,21 +236,23 @@ export function ReviewStep({
   fiat,
   trimmedTo,
   chain,
-  gasSym,
+  fee,
+  total,
+  simulationLoading,
+  warnings,
   risk,
-  checksAvailable,
+  riskUnavailable,
   netMismatch,
   recipientNet,
   simStatus,
   balanceAfter,
-  bottomInset,
 }: ReviewStepProps) {
   const theme = useTheme();
   const styles = useMemo(() => createSendStyles(theme), [theme]);
   const { t } = useTranslation();
 
   return (
-    <ScrollView contentContainerStyle={[styles.stepScroll, { paddingBottom: bottomInset + 90 }]}>
+    <ScrollView contentContainerStyle={styles.stepScroll}>
       <View style={styles.reviewHero}>
         <TokenGlyph symbol={token.symbol} color={token.color} size={56} chainColor={chainBadgeColor(token.chain)} />
         <AppText weight="bold" size={34} tnum style={styles.reviewAmount}>
@@ -236,12 +266,12 @@ export function ReviewStep({
       <Card padding={0} style={styles.recipientsCard}>
         <Row title={t("send.review.to")} right={<AppText mono size={14}>{shortAddr(trimmedTo, 8, 6)}</AppText>} />
         <Row title={t("send.review.network")} right={chain.name} />
-        <Row title={t("send.review.fee")} right={`${FEE_NATIVE} ${gasSym}`} />
+        <Row title={t("send.review.fee")} right={fee ?? t(simulationLoading ? "send.sim.loading" : "send.sim.unavailable")} />
         <Row
           title={t("send.review.total")}
           right={
             <AppText weight="bold" size={15.5} tnum>
-              {t("send.review.totalValue", { amount: fmtToken(amtNum, token.symbol) })}
+              {total}
             </AppText>
           }
           last
@@ -253,7 +283,7 @@ export function ReviewStep({
           <RiskResult level={risk.level} {...getRiskCopy(risk, t)} compact />
         </View>
       )}
-      {!checksAvailable && <OfflineRiskNote text={t("send.review.riskUnavailable")} />}
+      {riskUnavailable && <OfflineRiskNote text={t("send.review.riskUnavailable")} />}
 
       {netMismatch && recipientNet && (
         <View style={styles.mismatch}>
@@ -269,7 +299,14 @@ export function ReviewStep({
         </View>
       )}
 
-      <SimulationCard status={simStatus} token={token} balanceAfter={balanceAfter} gasSym={gasSym} chainName={chain.name} />
+      <SimulationCard
+        status={simStatus}
+        loading={simulationLoading}
+        token={token}
+        balanceAfter={balanceAfter}
+        fee={fee}
+        warnings={warnings}
+      />
 
       <View style={styles.trustNote}>
         <TrustNote icon="lock">{t("send.review.trustNote")}</TrustNote>

@@ -2,30 +2,36 @@
 
 [![CI](https://github.com/naderalfakesh/nadir-wallet/actions/workflows/ci.yml/badge.svg)](https://github.com/naderalfakesh/nadir-wallet/actions/workflows/ci.yml)
 
-A polished, **local-first, non-custodial, testnet-only** crypto wallet showcase.
-It is a senior-level React Native / Expo portfolio project with a typed Hono
-backend, organised as a Turborepo monorepo.
+A **local-first, non-custodial, testnet-only** wallet built with React Native, Expo and Hono. Sends are simulated, and balances, prices and history use sample data.
 
-## Pitch
+<p>
+  <img src="images/pixel-9-home.webp" width="230" alt="Nadir Wallet home with demo balances, a price chart and wallet actions" />
+  <img src="images/pixel-9-send-review.webp" width="230" alt="Send review with an address risk check, network fee and transaction simulation" />
+  <img src="images/pixel-9-security-light.webp" width="230" alt="Security Center in light mode with the security score, trust model and wallet protections" />
+</p>
 
-Nadir Wallet looks and behaves like a premium fintech wallet, but it is built to
-demonstrate _engineering judgement_ rather than to move real money. Wallets are
-generated on-device with real BIP39, the recovery phrase never leaves the
-keychain, and the backend only ever sees public data (addresses, network ids,
-token metadata, transaction drafts for simulation). It runs only on Ethereum
-Sepolia and Polygon Amoy testnets, with no real signing or broadcast yet. That
-is a deliberate, clearly scoped MVP boundary.
+## What you can try
 
-The centerpiece is the native layer: two hand-written VisionCamera
-frame-processor plugins (Swift + Kotlin, Nitro Modules) run Google ML Kit on the
-camera worklet thread. One is an **active face-liveness check** with randomized
-challenges, the other a **QR address scanner** for the send flow.
+- Create or import a test wallet, set an app passcode, and unlock with the passcode or device biometrics.
+- Scan a payment QR or enter a recipient. Review address risk and the estimated fee before confirming a simulated send.
+- Explore the Security Center, including recovery phrase backup and optional face-liveness challenges.
+- Use **Settings → Demo controls** to try API outages and different send outcomes.
+
+## Engineering highlights
+
+- **Native camera processing.** Two Swift and Kotlin Nitro modules run Google ML Kit on the VisionCamera frame thread. [Face liveness](packages/face-liveness) and [QR scanning](packages/code-scanner).
+- **Active liveness.** The face check advances through randomized prompts with a deterministic reducer. [Challenge state machine](apps/mobile/src/features/liveness/livenessChallenge.machine.ts).
+- **Native build fixes.** A config plugin patches ML Kit's Mach-O load commands for Apple Silicon simulators. Android release builds preserve the Nitro JNI classes and ML Kit registrar constructors through R8. [Simulator patch](apps/mobile/plugins/mlkit-sim-patch.py) and [Android build notes](docs/verification/expo-sdk-58.md#r8-keep-rules).
+- **Local key custody.** BIP39 phrases are generated or imported on-device and stored in SecureStore. The API receives public addresses, network IDs and unsigned transaction drafts. [Security model](docs/security-model.md).
 
 ## Demo
 
-Screenshots and video are not published yet. The face-liveness and QR features
-use the camera, so they need a development build on a physical device; the iOS
-Simulator has no camera feed.
+<details>
+  <summary>Watch the Android Send review</summary>
+  <img src="images/pixel-9-send-demo.gif" width="300" alt="Entering a demo amount on the Pixel 9 and reviewing the address risk check, fee and simulation" />
+</details>
+
+The iOS Simulator supports the portfolio, onboarding, lock, and simulated-send flows. The live QR scanner and face-liveness challenges require a physical device with a camera. See the [Pixel 9 device results](docs/verification/device-pixel9-android.md).
 
 ## Tech stack
 
@@ -34,7 +40,7 @@ Simulator has no camera feed.
 | Mobile  | React Native 0.88 (Expo SDK 58), expo-router, TypeScript, react-native-svg                                                                                                  |
 | Crypto  | `viem/accounts` (generation/derivation), `@scure/bip39` (validation), `@noble/hashes` (PIN hashing), `react-native-get-random-values`                                       |
 | Storage | `expo-secure-store` (secrets), `@react-native-async-storage/async-storage` (prefs)                                                                                          |
-| Device  | `expo-local-authentication`, `expo-clipboard`, `expo-web-browser`, `react-native-qrcode-svg`                                                                                |
+| Device  | `expo-local-authentication`, `expo-clipboard`, `expo-haptics`, `react-native-qrcode-svg`                                                                                |
 | Native  | Two custom VisionCamera V5 frame-processor plugins (Nitro Modules, Swift/Kotlin) over Google ML Kit: `face-liveness` (Face Detection) and `code-scanner` (Barcode Scanning) |
 | Backend | Hono + `@hono/node-server`, libsql + Drizzle ORM, Zod, viem                                                                                                                 |
 | Shared  | `@nadir-wallet/{types,crypto-core,wallet-core,config}`                                                                                                                      |
@@ -151,7 +157,8 @@ RPC_URL_POLYGON_AMOY=https://polygon-amoy.g.alchemy.com/v2/YOUR_KEY
 - Recovery phrase stored only in the device keychain (SecureStore); revealing or
   backing it up requires OS authentication (Face ID / Touch ID, Android
   biometrics, or the device passcode as the system fallback) and fails closed
-  when none is set up. Simulated sends ask for the same confirmation; passing
+  when none is set up. Simulated sends ask for the same confirmation, and fall
+  back to the app passcode only on a device with no screen lock at all; passing
   it does not sign or broadcast anything.
 - Onboarding, biometric/passcode lock with auto-lock on background, and a local
   append-only security event log. The app-lock PIN is stored as a salted
@@ -195,12 +202,35 @@ pnpm test
 
 GitHub Actions runs lint, typecheck, and the test suite on every push.
 
-These are logic tests with mocked device APIs; there are no component, e2e, or
-native tests. The iOS app builds and launches on an Xcode 27 simulator, but the
-OS authentication prompts, lock and auto-lock, camera screens, and the native
-plugins have not been checked end to end on a simulator or physical device yet.
-The Android release APK has since passed a device run on a Pixel 9
-([notes](docs/verification/device-pixel9-android.md)); iOS devices are still to do.
+Vitest covers shared logic and mocks device APIs. The Android e2e suite
+covers passcode unlock after restart, Send review with a backend fee, and
+switching to demo data and changing the Receive QR network. It uses the
+separate **Nadir Wallet QA** app and clears its data between tests.
+
+The e2e suite requires Node 22.22.3+ on the 22.x line or Node 24.8+. Build the
+QA variant from the repository root.
+
+```sh
+NADIR_E2E=1 pnpm --filter @nadir-wallet/mobile exec expo prebuild --platform android --no-install
+NADIR_E2E=1 apps/mobile/android/gradlew -p apps/mobile/android assembleRelease -PreactNativeArchitectures=arm64-v8a
+```
+
+Run `pnpm dev:api` in a separate terminal. With the Pixel connected, set
+`ANDROID_SERIAL` to its ADB transport, install the QA build, and forward the
+app's default API port to the Mac.
+
+```sh
+adb -s "$ANDROID_SERIAL" reverse tcp:8787 tcp:8787
+agent-device install apps/mobile/android/app/build/outputs/apk/release/app-release.apk --serial "$ANDROID_SERIAL"
+agent-device close
+pnpm test:e2e
+```
+
+Use `agent-device reinstall com.nadiralfakesh.nadirwallet.qa <apk>` for
+later builds. Set `NADIR_E2E_DEVICE` to select another Android device by name.
+For an emulator, build with its ABI and configure the app's API URL.
+
+The Android release APK passed the previous physical-device run on a [Pixel 9](docs/verification/device-pixel9-android.md). Physical iPhone camera verification is pending.
 
 ## Current limitations
 
@@ -228,7 +258,6 @@ The Android release APK has since passed a device run on a Pixel 9
 - Passive anti-spoofing (PAD) layered under the active liveness check
 - Stronger encrypted-vault model
 - WalletConnect
-- e2e tests for the core non-camera flows
 
 ## Docs
 

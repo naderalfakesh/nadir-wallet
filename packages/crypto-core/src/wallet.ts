@@ -23,6 +23,12 @@ function normalize(phrase: string): string[] {
   return phrase.trim().toLowerCase().split(/\s+/).filter(Boolean);
 }
 
+export function suggestBip39Words(prefix: string): string[] {
+  const normalized = prefix.toLowerCase();
+  if (!/^[a-z]{2,8}$/.test(normalized)) return [];
+  return wordlist.filter((word) => word.startsWith(normalized)).slice(0, 4);
+}
+
 /**
  * Validates a phrase against BIP39: word count, wordlist membership, and
  * checksum. `mnemonicToAccount` alone does not check the checksum, so this is

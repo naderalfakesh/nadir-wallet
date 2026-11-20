@@ -5,6 +5,7 @@ import NitroModules
 import VisionCamera
 
 class HybridFaceLiveness: HybridFaceLivenessSpec {
+  private let lock = NSLock()
   private lazy var detector: FaceDetector = {
     let options = FaceDetectorOptions()
     options.performanceMode = .fast
@@ -16,6 +17,9 @@ class HybridFaceLiveness: HybridFaceLivenessSpec {
   }()
 
   func detect(frame: any HybridFrameSpec) throws -> FaceObservation {
+    lock.lock()
+    defer { lock.unlock() }
+
     guard let nativeFrame = frame as? any NativeFrame,
           let sampleBuffer = nativeFrame.sampleBuffer else {
       throw RuntimeError.error(withMessage: "Frame is not a valid NativeFrame!")

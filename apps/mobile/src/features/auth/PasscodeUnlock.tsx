@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 import { AppText, Icon } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -17,6 +17,8 @@ interface PasscodeUnlockProps {
   onFailure: () => void;
   onUseBiometric: () => void;
   biometricAvailable: boolean;
+  /** Line under the title while idle; defaults to the unlock hint. */
+  hint?: string;
 }
 
 export function PasscodeUnlock({
@@ -26,6 +28,7 @@ export function PasscodeUnlock({
   onFailure,
   onUseBiometric,
   biometricAvailable,
+  hint,
 }: PasscodeUnlockProps) {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -66,11 +69,19 @@ export function PasscodeUnlock({
     ? t("lock.lockout", { seconds: lockLeft })
     : error
       ? t("lock.incorrect", { count: attemptsLeft(lockout) })
-      : t("lock.unlockWallet");
+      : (hint ?? t("lock.unlockWallet"));
 
   return (
-    <View style={{ flex: 1, alignItems: "center", paddingHorizontal: theme.spacing.pad }}>
-      <View style={{ height: 56 }} />
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        alignItems: "center",
+        paddingHorizontal: theme.spacing.pad,
+        paddingBottom: theme.spacing.pad,
+        paddingTop: 56,
+      }}
+    >
       <View
         style={{
           width: 60,
@@ -114,6 +125,6 @@ export function PasscodeUnlock({
           </AppText>
         </Pressable>
       )}
-    </View>
+    </ScrollView>
   );
 }

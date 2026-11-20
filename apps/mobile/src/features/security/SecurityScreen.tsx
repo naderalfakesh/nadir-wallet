@@ -15,7 +15,7 @@ import {
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useSheets } from "@/providers/SheetProvider";
-import { useApp } from "@/providers/AppProvider";
+import { useApp, useSecurityEvents } from "@/providers/AppProvider";
 import { useSecurityChecklist } from "./useSecurityChecklist";
 import { eventWhen } from "./events";
 import { createSecurityStyles } from "./SecurityScreen.styles";
@@ -27,17 +27,17 @@ export function SecurityScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const sheets = useSheets();
-  const { prefs, setPref, events } = useApp();
+  const { prefs, setPref } = useApp();
+  const events = useSecurityEvents();
   // Re-read the clock whenever the tab gains focus so "Today" rolls over.
   const [now, setNow] = useState(() => new Date());
   useFocusEffect(useCallback(() => setNow(new Date()), []));
-  const [txProtection, setTxProtection] = useState(true);
   const styles = useMemo(() => createSecurityStyles(theme), [theme]);
 
   const { items, score, total, pct, tier } = useSecurityChecklist();
 
   return (
-    <Screen>
+    <Screen bottomInset={false}>
       <ScreenHeader title={t("security.title")} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
         <View style={{ paddingHorizontal: theme.spacing.pad }}>
@@ -62,7 +62,7 @@ export function SecurityScreen() {
                 sub={it.sub}
                 right={
                   it.toggle ? (
-                    <Toggle on={it.done} onChange={it.toggle} />
+                    <Toggle label={it.label} on={it.done} onChange={it.toggle} />
                   ) : it.onPress ? undefined : (
                     <AppText weight="semibold" size={13} color={it.done ? colors.pos : colors.warn}>
                       {it.done ? t("security.protection.on") : t("security.protection.off")}
@@ -111,7 +111,7 @@ export function SecurityScreen() {
 
         <View style={styles.section}>
           <SectionLabel>{t("security.txProtection.title")}</SectionLabel>
-          <TxProtectionCard on={txProtection} onToggle={() => setTxProtection((v) => !v)} />
+          <TxProtectionCard on={prefs.txProtection} onToggle={() => setPref("txProtection", !prefs.txProtection)} />
         </View>
 
         <View style={styles.section}>

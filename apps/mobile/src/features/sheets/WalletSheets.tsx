@@ -7,6 +7,7 @@ import { fmtUSD, fmtToken } from "@/utils/format";
 import { displayAddress } from "@/services/wallet/account";
 import { useWallet } from "@/providers/WalletDataProvider";
 import { useApp } from "@/providers/AppProvider";
+import { useSheets } from "@/providers/SheetProvider";
 import { ACCOUNT } from "@/features/wallet/data";
 import type { SheetBodyProps, SheetCloseProps } from "./types";
 
@@ -14,6 +15,7 @@ export function AccountsSheet({ close }: SheetCloseProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const { prefs } = useApp();
+  const { open } = useSheets();
   return (
     <View>
       <SheetHeader title={t("sheets.accounts.title")} onClose={close} />
@@ -26,7 +28,7 @@ export function AccountsSheet({ close }: SheetCloseProps) {
           right={<Icon name="checkCircle" size={22} color={theme.colors.accent} />}
         />
       </Card>
-      <Button label={t("sheets.accounts.add")} icon="plus" variant="soft" style={{ marginTop: 14 }} onPress={close} />
+      <Button label={t("sheets.accounts.add")} icon="plus" variant="soft" style={{ marginTop: 14 }} onPress={() => open("soon", { title: t("sheets.accounts.add") })} />
     </View>
   );
 }

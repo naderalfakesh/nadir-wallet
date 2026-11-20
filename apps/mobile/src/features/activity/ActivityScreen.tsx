@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { RefreshControl, ScrollView, View } from "react-native";
 import {
   Screen,
   ScreenHeader,
@@ -16,8 +16,8 @@ import { useSheets } from "@/providers/SheetProvider";
 import { useWallet } from "@/providers/WalletDataProvider";
 import { TransactionRow } from "@/features/wallet/TransactionRow";
 import { createActivityStyles } from "./ActivityScreen.styles";
-import { FilterChip } from "./ActivityScreen.parts";
-import { filterTransactions, getActivityDays, getActivitySubtitle } from "./activity.utils";
+import { ActivitySubtitle, FilterChip } from "./ActivityScreen.parts";
+import { filterTransactions, getActivityDays } from "./activity.utils";
 import type { ActivityFilter, ActivityFilterOption } from "./activity.types";
 
 export function ActivityScreen() {
@@ -25,7 +25,7 @@ export function ActivityScreen() {
   const styles = useMemo(() => createActivityStyles(theme), [theme]);
   const { t } = useTranslation();
   const sheets = useSheets();
-  const { transactions, backend, refresh } = useWallet();
+  const { transactions, backend, refresh, loading } = useWallet();
   const [filter, setFilter] = useState<ActivityFilter>("all");
 
   const rows = filterTransactions(transactions, filter);
@@ -38,7 +38,7 @@ export function ActivityScreen() {
   ];
 
   return (
-    <Screen>
+    <Screen bottomInset={false}>
       <ScreenHeader
         title={t("activity.title")}
         trailing={
@@ -61,14 +61,18 @@ export function ActivityScreen() {
         ))}
       </View>
 
-      {rows.length === 0 ? (
-        <EmptyState
-          icon="activity"
-          title={t("activity.empty.filteredTitle")}
-          body={t("activity.empty.filteredBody")}
-        />
-      ) : (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.list}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.list}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={theme.colors.accent} />}
+      >
+        {rows.length === 0 ? (
+          <EmptyState
+            icon="activity"
+            title={t("activity.empty.filteredTitle")}
+            body={t("activity.empty.filteredBody")}
+          />
+        ) : (
           <View style={styles.listInner}>
             {days.map((day) => {
               const dayRows = rows.filter((tx) => tx.day === day);
@@ -80,7 +84,7 @@ export function ActivityScreen() {
                       <TransactionRow
                         key={tx.id}
                         tx={tx}
-                        subtitle={getActivitySubtitle(tx, t)}
+                        subtitle={<ActivitySubtitle tx={tx} />}
                         last={i === dayRows.length - 1}
                         onPress={() => sheets.open("txDetail", { id: tx.id })}
                       />
@@ -95,8 +99,8 @@ export function ActivityScreen() {
               </AppText>
             </View>
           </View>
-        </ScrollView>
-      )}
+        )}
+      </ScrollView>
     </Screen>
   );
 }

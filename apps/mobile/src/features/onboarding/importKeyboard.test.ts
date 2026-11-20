@@ -6,10 +6,11 @@ import { describe, expect, it } from "vitest";
 // The test runner has no native renderer, so these pin the layout props that
 // keep the Import button reachable while the autofocused keyboard is up.
 const source = readFileSync(join(__dirname, "ImportScreen.tsx"), "utf8");
+const flow = readFileSync(join(__dirname, "OnboardingFlow.tsx"), "utf8");
 
 describe("Import wallet keyboard handling", () => {
-  it("lifts the content above the iOS keyboard", () => {
-    expect(source).toMatch(/<KeyboardAvoidingView[^>]*behavior=\{Platform\.OS === "ios" \? "padding"/);
+  it("uses the shared keyboard-avoiding layout for the import step", () => {
+    expect(flow).toMatch(/<Screen avoidKeyboard>\s*<ImportScreen/);
   });
 
   it("scrolls, and lets the first tap reach the Import button while the keyboard is open", () => {

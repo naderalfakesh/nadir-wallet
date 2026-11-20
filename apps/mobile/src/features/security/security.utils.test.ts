@@ -7,13 +7,14 @@ describe("getSecurityTier", () => {
     expect(getSecurityTier(0.99)).toBe("actionNeeded");
   });
 
-  it("needs action from 70% up", () => {
-    expect(getSecurityTier(0.7)).toBe("actionNeeded");
+  it("needs action from 60% up", () => {
+    expect(getSecurityTier(4 / 6)).toBe("actionNeeded");
+    expect(getSecurityTier(0.6)).toBe("actionNeeded");
     expect(getSecurityTier(0.8)).toBe("actionNeeded");
   });
 
-  it("is at risk below 70%", () => {
-    expect(getSecurityTier(0.69)).toBe("atRisk");
+  it("is at risk below 60%", () => {
+    expect(getSecurityTier(0.59)).toBe("atRisk");
     expect(getSecurityTier(0.2)).toBe("atRisk");
     expect(getSecurityTier(0)).toBe("atRisk");
   });

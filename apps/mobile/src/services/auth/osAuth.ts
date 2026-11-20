@@ -77,7 +77,8 @@ export function planOsAuth(
  * Asks the OS to verify the device owner: Face ID / Touch ID or the device
  * passcode on iOS, Class 3 biometrics or the device PIN/pattern/password on
  * Android. Fails closed when the device has no enrolled credential at all.
- * The app PIN is deliberately not accepted here.
+ * The app PIN is deliberately not accepted here; only the simulated send
+ * offers it, and only when this returns "unavailable".
  */
 export async function requireOsAuth(promptMessage: string): Promise<OsAuthResult> {
   if (inFlight) return { ok: false, reason: "cancelled" };

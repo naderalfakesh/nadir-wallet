@@ -12,7 +12,8 @@ export function getBalanceValue(total: number, hidden: boolean, priceUnavailable
 
 export function getBalanceChange(total: number, change: number, hidden: boolean): string {
   if (hidden) return "••••";
-  return fmtUSD(total * (change / 100), { sign: true });
+  const previous = total / (1 + change / 100);
+  return fmtUSD(total - previous, { sign: true });
 }
 
 export function getTokenValue(token: DemoToken, hidden: boolean, priceUnavailable: boolean): string {
@@ -21,6 +22,7 @@ export function getTokenValue(token: DemoToken, hidden: boolean, priceUnavailabl
   return fmtUSD(token.value);
 }
 
-export function getTokenAmount(token: DemoToken): string {
+export function getTokenAmount(token: DemoToken, hidden: boolean): string {
+  if (hidden) return `•••• ${token.symbol}`;
   return fmtToken(token.amount, token.symbol);
 }

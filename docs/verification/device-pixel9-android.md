@@ -43,6 +43,24 @@ Checked on the phone with APK `1df5d086…`:
   goes to Send with `0x1111…` on Sepolia.
 - Biometric wording is neutral.
 
+## Portfolio update
+
+On 2026-11-16, the isolated `com.nadiralfakesh.nadirwallet.qa` release build
+(`4e888d09…`) passed all three [Android end-to-end tests](../../tests/wallet.e2e.ts)
+on the Pixel 9 with R8 enabled.
+
+- The app locks after a restart and unlocks with the app passcode.
+- Send rejects a partial EVM address without showing an API outage. Review
+  displays the backend's Sepolia fee of `0.0000525 ETH`.
+- Switching to bundled demo data updates Settings. The Receive sheet updates
+  its payment QR when the network changes from Ethereum Sepolia to Polygon Amoy.
+
+On 2026-11-18, the QA release build (`04aaf623…`) passed all three Android
+end-to-end tests again. The lock keypad, its biometric fallback link, the
+Change passcode keypad and the Send footer cleared the gesture area on the
+Pixel 9. The Receive sheet and tab bar also cleared the gesture area. Wallet
+import and Send continued while the Android keyboard was still open.
+
 ## Deferred
 
 - iOS Face ID, the iPhone camera (QR scan and liveness) and the iOS blur over

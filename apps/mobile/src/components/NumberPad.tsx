@@ -1,3 +1,4 @@
+import { haptics } from "@/services/device/haptics";
 import React from "react";
 import { Pressable, View } from "react-native";
 import { AppText } from "./Text";
@@ -11,7 +12,7 @@ export function NumberPad({ onKey }: { onKey: (key: string) => void }) {
       {KEYS.map((k) => (
         <Pressable
           key={k}
-          onPress={() => onKey(k)}
+          onPress={() => { haptics.selection(); onKey(k); }}
           accessibilityRole="button"
           accessibilityLabel={k === "del" ? "Delete" : k === "." ? "Decimal point" : k}
           style={({ pressed }) => ({

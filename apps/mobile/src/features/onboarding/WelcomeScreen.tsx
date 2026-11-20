@@ -1,6 +1,5 @@
 import React from "react";
 import { View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen, Brandmark, AppText, Button, TestnetBadge, TrustNote } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -12,7 +11,6 @@ interface WelcomeScreenProps {
 
 export function WelcomeScreen({ onCreate, onImport }: WelcomeScreenProps) {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
 
   return (
@@ -38,7 +36,7 @@ export function WelcomeScreen({ onCreate, onImport }: WelcomeScreenProps) {
         <View
           style={{
             paddingHorizontal: theme.spacing.pad,
-            paddingBottom: insets.bottom + theme.spacing.pad,
+            paddingBottom: theme.spacing.pad,
             gap: 11,
           }}
         >

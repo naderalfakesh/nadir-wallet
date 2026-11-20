@@ -11,13 +11,15 @@ import { createTokenDetailStyles } from "./TokenDetailScreen.styles";
 
 interface TokenHeroProps {
   token: DemoToken;
+  change: number;
+  historyLabel: string;
   priceUnavailable: boolean;
   priceStatus: PriceStatus;
   unavailableLabel: string;
   onRetry: () => void;
 }
 
-export function TokenHero({ token, priceUnavailable, priceStatus, unavailableLabel, onRetry }: TokenHeroProps) {
+export function TokenHero({ token, change, historyLabel, priceUnavailable, priceStatus, unavailableLabel, onRetry }: TokenHeroProps) {
   const theme = useTheme();
   const styles = useMemo(() => createTokenDetailStyles(theme), [theme]);
 
@@ -32,7 +34,8 @@ export function TokenHero({ token, priceUnavailable, priceStatus, unavailableLab
       </AppText>
       {!priceUnavailable && (
         <View style={styles.heroChange}>
-          <ChangeBadge pct={token.change} />
+          <ChangeBadge pct={change} />
+          <AppText size={12.5} muted>{historyLabel}</AppText>
         </View>
       )}
       <PriceFreshness status={priceStatus} onRetry={onRetry} />

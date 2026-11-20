@@ -15,6 +15,7 @@ import status from "@/i18n/locales/en/status.json";
 import token from "@/i18n/locales/en/token.json";
 import tx from "@/i18n/locales/en/tx.json";
 
+vi.mock("expo-haptics", () => ({}));
 vi.mock("react-native", () => ({ Share: { share: vi.fn() } }));
 vi.mock("expo-clipboard", () => ({ setStringAsync: vi.fn() }));
 

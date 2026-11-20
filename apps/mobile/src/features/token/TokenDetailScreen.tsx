@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { RefreshControl, ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
   Screen,
@@ -15,7 +15,8 @@ import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useWallet } from "@/providers/WalletDataProvider";
 import { useSheets } from "@/providers/SheetProvider";
-import { CHAINS, tokenById, SPARKLINE, RANGES, type Range } from "@/features/wallet/data";
+import { CHAINS, tokenById, RANGES, type Range } from "@/features/wallet/data";
+import { getDemoChart } from "@/features/wallet/chart";
 import { createTokenDetailStyles } from "./TokenDetailScreen.styles";
 import { MarketCard, RecentTransactions, TokenHero } from "./TokenDetailScreen.parts";
 
@@ -24,12 +25,13 @@ export function TokenDetailScreen({ id }: { id: string }) {
   const styles = useMemo(() => createTokenDetailStyles(theme), [theme]);
   const router = useRouter();
   const { t } = useTranslation();
-  const { tokens, transactions, backend, price, refresh } = useWallet();
+  const { tokens, transactions, backend, price, refresh, loading } = useWallet();
   const sheets = useSheets();
   const [range, setRange] = useState<Range>("1W");
 
   const token = tokens.find((x) => x.id === id) ?? tokenById(id);
   const chain = CHAINS[token.chain];
+  const chart = getDemoChart(token.id, range, token.change);
   const priceUnavailable = price === "unavailable";
   const dimChart = backend === "rpc_unavailable" || priceUnavailable;
   const txs = transactions.filter((x) => x.token === token.symbol).slice(0, 3);
@@ -49,7 +51,11 @@ export function TokenDetailScreen({ id }: { id: string }) {
           />
         }
       />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={theme.colors.accent} />}
+      >
         {backend !== "online" && (
           <View style={styles.notice}>
             <BackendNotice status={backend} onRetry={refresh} />
@@ -59,6 +65,8 @@ export function TokenDetailScreen({ id }: { id: string }) {
         <View style={styles.body}>
           <TokenHero
             token={token}
+            change={chart.change}
+            historyLabel={t("home.demoHistory", { range })}
             priceUnavailable={priceUnavailable}
             priceStatus={price}
             unavailableLabel={t("token.valueUnavailable")}
@@ -66,7 +74,7 @@ export function TokenDetailScreen({ id }: { id: string }) {
           />
 
           <View style={[styles.chartWrap, { opacity: dimChart ? 0.4 : 1 }]}>
-            <Sparkline data={SPARKLINE} up={token.change >= 0} height={104} />
+            <Sparkline data={chart.data} up={chart.change >= 0} height={104} />
           </View>
           <Segmented options={RANGES} value={range} onChange={setRange} small />
 
@@ -76,7 +84,7 @@ export function TokenDetailScreen({ id }: { id: string }) {
               icon="receive"
               variant="soft"
               style={styles.actionButton}
-              onPress={() => sheets.open("receive", { token: token.symbol })}
+              onPress={() => sheets.open("receive", { chain: token.chain, token: token.symbol })}
             />
             <Button
               label={t("common.actions.send")}

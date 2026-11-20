@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Animated, Dimensions, Modal, Pressable, ScrollView, View } from "react-native";
+import { Modal, Pressable, ScrollView, View, useWindowDimensions } from "react-native";
+import { GestureDetector, GestureHandlerRootView, usePanGesture } from "react-native-gesture-handler";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { scheduleOnRN } from "react-native-worklets";
 import { alpha, useTheme } from "@/theme";
-
-// Start the sheet a full screen-height below so the open animation always
-// slides up from true offscreen, on any device.
-const OFFSCREEN = Dimensions.get("window").height;
 
 interface BottomSheetProps {
   visible: boolean;
@@ -16,75 +15,83 @@ interface BottomSheetProps {
 export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
   const [rendered, setRendered] = useState(visible);
-  const [translateY] = useState(() => new Animated.Value(OFFSCREEN));
-  const [backdrop] = useState(() => new Animated.Value(0));
+  const progress = useSharedValue(0);
+  const drag = useSharedValue(0);
 
-  // Mount during render so the open animation runs from a true offscreen start;
-  // unmount happens after the close animation finishes.
   if (visible && !rendered) setRendered(true);
 
   useEffect(() => {
     if (visible) {
-      Animated.parallel([
-        Animated.timing(translateY, { toValue: 0, duration: 320, useNativeDriver: true }),
-        Animated.timing(backdrop, { toValue: 1, duration: 200, useNativeDriver: true }),
-      ]).start();
+      drag.set(0);
+      progress.value = withTiming(1, { duration: 300 });
     } else if (rendered) {
-      Animated.parallel([
-        Animated.timing(translateY, { toValue: OFFSCREEN, duration: 240, useNativeDriver: true }),
-        Animated.timing(backdrop, { toValue: 0, duration: 200, useNativeDriver: true }),
-      ]).start(() => setRendered(false));
+      progress.value = withTiming(0, { duration: 230 }, (finished) => {
+        if (finished) scheduleOnRN(setRendered, false);
+      });
     }
-  }, [visible, rendered, translateY, backdrop]);
+  }, [visible, rendered, drag, progress]);
+
+  const pan = usePanGesture({
+    enabled: visible,
+    activeOffsetY: 8,
+    onUpdate: ({ translationY }) => {
+      drag.set(Math.max(0, translationY));
+    },
+    onDeactivate: ({ canceled, translationY, velocityY }) => {
+      if (!canceled && (translationY >= 96 || (translationY >= 18 && velocityY >= 850))) {
+        scheduleOnRN(onClose);
+      } else {
+        drag.set(withSpring(0, { damping: 22, stiffness: 240 }));
+      }
+    },
+  });
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: (1 - progress.value) * height + drag.value }],
+  }));
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: progress.value * (1 - Math.min(drag.value / height, 1)),
+  }));
 
   if (!rendered) return null;
 
   return (
     <Modal transparent visible={rendered} onRequestClose={onClose} animationType="none">
-      <View style={{ flex: 1, justifyContent: "flex-end" }}>
+      <GestureHandlerRootView style={{ flex: 1, justifyContent: "flex-end" }}>
         <Animated.View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: alpha("#000", 0.55),
-            opacity: backdrop,
-          }}
+          style={[
+            { position: "absolute", inset: 0, backgroundColor: alpha("#000", 0.55) },
+            backdropStyle,
+          ]}
         >
-          <Pressable style={{ flex: 1 }} onPress={onClose} accessibilityLabel="Close sheet" />
+          <Pressable style={{ flex: 1 }} onPress={onClose} accessibilityRole="button" accessibilityLabel="Close sheet" />
         </Animated.View>
         <Animated.View
-          style={{
-            transform: [{ translateY }],
-            maxHeight: "88%",
-            backgroundColor: theme.colors.bgGrad1,
-            borderTopLeftRadius: theme.radius.sheet,
-            borderTopRightRadius: theme.radius.sheet,
-            borderTopWidth: 1,
-            borderColor: theme.colors.hairlineStrong,
-            paddingHorizontal: theme.spacing.pad,
-            paddingTop: 12,
-            paddingBottom: insets.bottom + theme.spacing.pad,
-          }}
+          style={[
+            {
+              maxHeight: "88%",
+              backgroundColor: theme.colors.bgGrad1,
+              borderTopLeftRadius: theme.radius.sheet,
+              borderTopRightRadius: theme.radius.sheet,
+              borderTopWidth: 1,
+              borderColor: theme.colors.hairlineStrong,
+              paddingHorizontal: theme.spacing.pad,
+              paddingBottom: insets.bottom + theme.spacing.pad,
+            },
+            sheetStyle,
+          ]}
         >
-          <View
-            style={{
-              width: 40,
-              height: 5,
-              borderRadius: 99,
-              backgroundColor: theme.colors.hairlineStrong,
-              alignSelf: "center",
-              marginBottom: 14,
-            }}
-          />
+          <GestureDetector gesture={pan}>
+            <View style={{ height: 32, justifyContent: "center", alignItems: "center" }}>
+              <View style={{ width: 40, height: 5, borderRadius: 99, backgroundColor: theme.colors.hairlineStrong }} />
+            </View>
+          </GestureDetector>
           <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             {children}
           </ScrollView>
         </Animated.View>
-      </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }

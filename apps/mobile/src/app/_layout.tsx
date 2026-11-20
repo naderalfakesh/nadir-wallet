@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { NavigationBar } from "expo-navigation-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { AppProvider, useApp } from "@/providers/AppProvider";
 import { WalletDataProvider } from "@/providers/WalletDataProvider";
@@ -31,9 +32,17 @@ import { SheetHost } from "@/features/sheets/SheetHost";
 
 SplashScreen.preventAutoHideAsync();
 
-function ThemedStatusBar() {
+// The in-app theme can differ from the system one, so both system bars follow
+// it: dark icons on the light theme, light icons on the dark theme.
+function ThemedSystemBars() {
   const { scheme } = useThemeControls();
-  return <StatusBar style={scheme === "light" ? "dark" : "light"} />;
+  const style = scheme === "light" ? "dark" : "light";
+  return (
+    <>
+      <StatusBar style={style} />
+      <NavigationBar style={style} />
+    </>
+  );
 }
 
 // Each group is registered only while it is open (see routeAccess). A closed
@@ -104,7 +113,7 @@ export default function RootLayout() {
             <DemoStateProvider initial={boot.demo}>
               <WalletDataProvider>
                 <SheetProvider>
-                  <ThemedStatusBar />
+                  <ThemedSystemBars />
                   <RootStack />
                   <AutoLock />
                 </SheetProvider>

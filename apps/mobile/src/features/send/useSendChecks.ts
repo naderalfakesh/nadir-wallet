@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { NetworkId } from "@nadir-wallet/types";
+import type { NetworkId, TransactionSimulationResponse } from "@nadir-wallet/types";
 import { api } from "@/services/api";
 import type { AddressRisk, RiskReason } from "@/features/wallet/risk";
 
@@ -26,7 +26,7 @@ export function useRiskCheck(opts: {
     const id = ++reqId.current;
     let cancelled = false;
 
-    void (async () => {
+    const timer = setTimeout(async () => {
       const res = await api.checkAddress({
         address,
         networkId,
@@ -41,8 +41,9 @@ export function useRiskCheck(opts: {
       const level = res.data.riskLevel;
       const reason: RiskReason = level === "high" ? "reported" : level === "low" ? "known" : "firstTime";
       setState({ key, status: "ok", risk: { level, blocked: level === "high", reason } });
-    })();
+    }, 250);
     return () => {
+      clearTimeout(timer);
       cancelled = true;
     };
   }, [enabled, address, networkId, amount, knownContact, key]);
@@ -51,6 +52,10 @@ export function useRiskCheck(opts: {
   return { status: state.status, risk: state.risk };
 }
 
+type SimulationResult =
+  | { status: "idle" | "unavailable"; data?: undefined }
+  | { status: "passed" | "failed"; data: TransactionSimulationResponse };
+
 // Live transaction simulation. Sends a public transaction draft only.
 export function useSimulation(opts: {
   enabled: boolean;
@@ -58,10 +63,10 @@ export function useSimulation(opts: {
   from: string;
   to: string;
   value: string;
-}): { status: "idle" | "passed" | "failed" | "unavailable" } {
+}): SimulationResult {
   const { enabled, networkId, from, to, value } = opts;
   const key = `${networkId}|${from}|${to}|${value}`;
-  const [state, setState] = useState<{ key: string; status: "idle" | "passed" | "failed" | "unavailable" }>({
+  const [state, setState] = useState<{ key: string } & SimulationResult>({
     key: "",
     status: "idle",
   });
@@ -76,7 +81,9 @@ export function useSimulation(opts: {
     void (async () => {
       const res = await api.simulateTransaction({ networkId, from, to, value });
       if (cancelled || id !== reqId.current) return;
-      setState({ key, status: res.ok ? (res.data.isValid ? "passed" : "failed") : "unavailable" });
+      setState(res.ok
+        ? { key, status: res.data.isValid ? "passed" : "failed", data: res.data }
+        : { key, status: "unavailable" });
     })();
     return () => {
       cancelled = true;
@@ -84,5 +91,5 @@ export function useSimulation(opts: {
   }, [enabled, networkId, from, to, value, key]);
 
   if (!enabled || state.key !== key) return { status: "idle" };
-  return { status: state.status };
+  return state;
 }

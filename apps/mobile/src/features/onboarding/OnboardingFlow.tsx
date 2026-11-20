@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ScrollView } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { Screen, ScreenHeader } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -19,7 +19,6 @@ type Step = "intro" | "welcome" | "explain" | "reveal" | "verify" | "import" | "
 
 export function OnboardingFlow() {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { setPref, setPasscode, logEvent, createWallet, introSeen, markIntroSeen } = useApp();
   const [step, setStep] = useState<Step>(() => initialOnboardingStep(introSeen));
@@ -72,14 +71,18 @@ export function OnboardingFlow() {
   }
 
   if (step === "explain") {
-    return <ExplainStep onBack={() => setStep("welcome")} onContinue={() => setStep("reveal")} />;
+    return (
+      <Animated.View entering={FadeIn.duration(180)} style={{ flex: 1 }}>
+        <ExplainStep onBack={() => setStep("welcome")} onContinue={() => setStep("reveal")} />
+      </Animated.View>
+    );
   }
 
   if (step === "reveal") {
     return (
       <Screen>
         <ScreenHeader title={t("onboarding.reveal.title")} subtitle={t("onboarding.reveal.step")} onBack={() => setStep("explain")} />
-        <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: insets.bottom + pad }}>
+        <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: pad }}>
           <SeedReveal words={words} onContinue={() => setStep("verify")} ctaLabel={t("onboarding.reveal.cta")} />
         </ScrollView>
       </Screen>
@@ -90,7 +93,7 @@ export function OnboardingFlow() {
     return (
       <Screen>
         <ScreenHeader title={t("onboarding.verify.title")} subtitle={t("onboarding.verify.step")} onBack={() => setStep("reveal")} />
-        <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: insets.bottom + pad }}>
+        <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: pad }}>
           <SeedVerify words={words} onContinue={() => setStep("passcode")} />
         </ScrollView>
       </Screen>
@@ -99,7 +102,7 @@ export function OnboardingFlow() {
 
   if (step === "import") {
     return (
-      <Screen>
+      <Screen avoidKeyboard>
         <ImportScreen
           onBack={() => setStep("welcome")}
           onDone={(phrase) => {

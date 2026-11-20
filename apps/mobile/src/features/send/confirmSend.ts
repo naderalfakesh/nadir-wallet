@@ -5,6 +5,10 @@ export type ConfirmResult =
   | { ok: true; next: "pending" | "failed" }
   | { ok: false; reason: OsAuthFailure };
 
+export function nextSendPhase(outcome: SendOutcome): "pending" | "failed" {
+  return outcome === "failed" ? "failed" : "pending";
+}
+
 /** OS authentication gates the demo outcome; there is no key use, signing or broadcast behind it. */
 export async function confirmSimulatedSend(
   promptMessage: string,
@@ -12,5 +16,5 @@ export async function confirmSimulatedSend(
 ): Promise<ConfirmResult> {
   const res = await requireOsAuth(promptMessage);
   if (!res.ok) return res;
-  return { ok: true, next: outcome === "failed" ? "failed" : "pending" };
+  return { ok: true, next: nextSendPhase(outcome) };
 }

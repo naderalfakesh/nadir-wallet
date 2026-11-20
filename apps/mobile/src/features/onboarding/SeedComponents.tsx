@@ -48,7 +48,6 @@ export function SeedReveal({
   const theme = useTheme();
   const { t } = useTranslation();
   const [revealed, setRevealed] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   return (
     <View>
@@ -71,7 +70,7 @@ export function SeedReveal({
       </View>
 
       <View>
-        <SeedGrid words={words} />
+        <SeedGrid words={revealed ? words : words.map(() => "••••••")} />
         {!revealed && (
           <Pressable
             onPress={() => setRevealed(true)}
@@ -96,22 +95,7 @@ export function SeedReveal({
         )}
       </View>
 
-      {revealed && (
-        <Pressable
-          onPress={() => {
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1500);
-          }}
-          style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 8, height: 44, marginTop: 8 }}
-        >
-          <Icon name={copied ? "check" : "copy"} size={18} color={theme.colors.accent} />
-          <AppText weight="semibold" size={14} color={theme.colors.accent}>
-            {copied ? t("onboarding.reveal.copied") : t("onboarding.reveal.copy")}
-          </AppText>
-        </Pressable>
-      )}
-
-      <Button label={ctaLabel} disabled={!revealed} onPress={onContinue} style={{ marginTop: revealed ? 6 : 18 }} />
+      <Button label={ctaLabel} disabled={!revealed} onPress={onContinue} style={{ marginTop: 18 }} />
     </View>
   );
 }

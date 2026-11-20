@@ -45,7 +45,6 @@ export function demoSecurityEvents(now: Date): SecurityEvent[] {
     makeSecurityEvent("demo-4", "risk_check", ago(DAY + 2 * HOUR + 2 * MINUTE), {
       detail: "demo.eth — low risk",
     }),
-    makeSecurityEvent("demo-5", "backup", ago(3 * DAY + 5 * HOUR)),
     makeSecurityEvent("demo-6", "autolock", ago(4 * DAY + 9 * HOUR), { detailVars: { min: 1 } }),
   ];
 }

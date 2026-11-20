@@ -1,6 +1,7 @@
 {
   "totalBalance": "Total balance",
-  "today": "today",
+  "demoHistory": "{{range}} demo history",
+  "manageTokens": "Manage tokens",
   "tokens": "Tokens",
   "recentActivity": "Recent activity",
   "estimatedDemoValue": "Estimated demo value · prices cached",

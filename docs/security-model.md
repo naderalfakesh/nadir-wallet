@@ -127,13 +127,16 @@ simulated send both require OS device-owner authentication through
   used on its own, with no credential fallback. A device with only a screen lock
   gets the credential prompt. A device whose only biometric is Class 2 is
   refused, with guidance to add a fingerprint or other strong biometric.
-- The app-lock PIN is **not** accepted for these actions, and there is no
-  timer or app-level bypass. These prompts are required whether or not
+- The app-lock PIN is **not** accepted for revealing or backing up the phrase,
+  and there is no timer or app-level bypass. A simulated send accepts it in one
+  case only: the device has no biometric enrolled and no screen lock, so the OS
+  has nothing to check. Nothing is signed or read from the keychain behind that
+  step, and wrong entries count toward the same lockout as the lock screen. These prompts are required whether or not
   biometric unlock is turned on for the lock screen.
 - **Fails closed.** If the device has no biometric enrolled _and_ no screen
   lock, if the Face ID usage description is missing, or if the prompt is
   cancelled, fails, hits a biometric lockout or throws, nothing is revealed
-  and the send does not advance. The screen explains what happened and how to
+  and the send does not advance (apart from the app-passcode case above). The screen explains what happened and how to
   set up a screen lock.
 
 The phrase is read from SecureStore only through `revealMnemonic`
@@ -204,6 +207,13 @@ deliberately light:
   sensitive or account-bound, and the mobile client has no credentials to
   leak. A production deployment would put both behind the edge (per-IP limits
   on `/security/report`, an allowlisted origin for any web client).
+
+## Transaction protection
+
+Recipient screening is enabled by default. It blocks addresses flagged as high
+risk and warns when the risk service is unavailable. The Security Center switch
+controls recipient screening for simulated sends. Transaction simulation and
+device authentication for confirmation are separate checks.
 
 ## Why signing / broadcast is intentionally out of scope
 

@@ -5,12 +5,16 @@ import NitroModules
 import VisionCamera
 
 class HybridCodeScanner: HybridCodeScannerSpec {
+  private let lock = NSLock()
   private lazy var scanner: BarcodeScanner = {
     let options = BarcodeScannerOptions(formats: .qrCode)
     return BarcodeScanner.barcodeScanner(options: options)
   }()
 
   func scan(frame: any HybridFrameSpec) throws -> [String] {
+    lock.lock()
+    defer { lock.unlock() }
+
     guard let nativeFrame = frame as? any NativeFrame,
           let sampleBuffer = nativeFrame.sampleBuffer else {
       throw RuntimeError.error(withMessage: "Frame is not a valid NativeFrame!")

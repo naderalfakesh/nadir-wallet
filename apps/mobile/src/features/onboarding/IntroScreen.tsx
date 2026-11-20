@@ -1,6 +1,5 @@
 import React, { type ComponentRef, useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, findNodeHandle, Pressable, ScrollView, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen, Brandmark, AppText, Button, Icon, TestnetBadge } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -12,7 +11,6 @@ import { INTRO_STEPS, nextIntroIndex } from "./firstRun";
 export function IntroScreen({ onDone }: { onDone: () => void }) {
   const theme = useTheme();
   const styles = useMemo(() => createOnboardingStyles(theme), [theme]);
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [index, setIndex] = useState(0);
   const titleRef = useRef<ComponentRef<typeof View>>(null);
@@ -74,7 +72,7 @@ export function IntroScreen({ onDone }: { onDone: () => void }) {
         ) : null}
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.pad }]}>
+      <View style={styles.footer}>
         <Button
           label={next !== null ? t("onboarding.intro.next") : t("onboarding.intro.start")}
           onPress={() => (next !== null ? setIndex(next) : onDone())}

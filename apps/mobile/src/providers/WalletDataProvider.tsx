@@ -1,9 +1,9 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/services/api";
 import type { BackendStatus, PriceStatus } from "@/types/status";
 import {
   TOKENS,
-  TRANSACTIONS,
+  demoTransactions,
   PORTFOLIO_TOTAL,
   PORTFOLIO_CHANGE_PCT,
   type DemoToken,
@@ -22,12 +22,12 @@ interface WalletData {
   price: PriceStatus;
   source: "live" | "demo";
   loading: boolean;
+  initialLoading: boolean;
   refresh: () => void;
 }
 
 const DEMO_VIEW = {
   tokens: TOKENS,
-  transactions: TRANSACTIONS,
   total: PORTFOLIO_TOTAL,
   change: PORTFOLIO_CHANGE_PCT,
 };
@@ -38,29 +38,26 @@ export function WalletDataProvider({ children }: { children: React.ReactNode }) 
   const { liveApi, backend: demoBackend, price: demoPrice, retry } = useDemoState();
   const { prefs } = useApp();
   const address = prefs.walletAddress;
-  const [live, setLive] = useState<LivePortfolio | null>(null);
-  const [backendLive, setBackendLive] = useState<BackendStatus>("online");
-  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{
+    address: string;
+    portfolio: LivePortfolio | null;
+  } | null>(null);
+  const [loadingAddress, setLoadingAddress] = useState<string | null>(null);
+  const request = useRef(0);
+  const live = result?.address === address ? result.portfolio : null;
+  const loading = loadingAddress === address;
+  const initialLoading = liveApi && !!address && result?.address !== address;
 
   const load = useCallback(async () => {
-    if (!address) return; // No wallet yet - fall back to demo data.
-    setLoading(true);
+    if (!address) return;
+    const id = ++request.current;
+    setLoadingAddress(address);
     const health = await api.health();
-    if (!health.ok) {
-      setBackendLive("api_unavailable");
-      setLive(null);
-      setLoading(false);
-      return;
-    }
-    setBackendLive("online");
-    const portfolio = await fetchLivePortfolio(address);
-    if (portfolio) {
-      setLive(portfolio);
-    } else {
-      setBackendLive("api_unavailable");
-      setLive(null);
-    }
-    setLoading(false);
+    if (id !== request.current) return;
+    const portfolio = health.ok ? await fetchLivePortfolio(address) : null;
+    if (id !== request.current) return;
+    setResult({ address, portfolio });
+    setLoadingAddress(null);
   }, [address]);
 
   const refresh = useCallback(() => {
@@ -68,7 +65,7 @@ export function WalletDataProvider({ children }: { children: React.ReactNode }) 
     else retry();
   }, [liveApi, load, retry]);
 
-  // Fetch off the synchronous effect path so loading state isn't set during render.
+  // Keep portfolio results tied to the current wallet and the latest refresh.
   useEffect(() => {
     if (!liveApi) return;
     let active = true;
@@ -77,12 +74,16 @@ export function WalletDataProvider({ children }: { children: React.ReactNode }) 
     });
     return () => {
       active = false;
+      request.current += 1;
     };
   }, [liveApi, load]);
 
+  // Dated once per app session, relative to when the wallet data first loads.
+  const demoTx = useMemo(() => demoTransactions(new Date()), []);
+
   const value = useMemo<WalletData>(() => {
     if (!liveApi) {
-      return { ...DEMO_VIEW, backend: demoBackend, price: demoPrice, source: "demo", loading: false, refresh };
+      return { ...DEMO_VIEW, transactions: demoTx, backend: demoBackend, price: demoPrice, source: "demo", loading: false, initialLoading: false, refresh };
     }
     if (live) {
       return {
@@ -90,23 +91,26 @@ export function WalletDataProvider({ children }: { children: React.ReactNode }) 
         transactions: live.transactions,
         total: live.total,
         change: live.change,
-        backend: backendLive,
+        backend: "online",
         price: live.priceStatus,
         source: "live",
         loading,
+        initialLoading: false,
         refresh,
       };
     }
     // Live mode but no data yet: keep demo data visible and surface API status.
     return {
       ...DEMO_VIEW,
-      backend: loading ? "online" : backendLive,
-      price: loading ? demoPrice : "unavailable",
+      transactions: demoTx,
+      backend: initialLoading || !address ? "online" : "api_unavailable",
+      price: initialLoading ? demoPrice : "unavailable",
       source: "demo",
       loading,
+      initialLoading,
       refresh,
     };
-  }, [liveApi, live, backendLive, demoBackend, demoPrice, loading, refresh]);
+  }, [liveApi, live, demoTx, demoBackend, demoPrice, loading, initialLoading, address, refresh]);
 
   return <WalletDataContext.Provider value={value}>{children}</WalletDataContext.Provider>;
 }

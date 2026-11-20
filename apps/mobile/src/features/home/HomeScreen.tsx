@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { ScrollView } from "react-native";
+import { RefreshControl, ScrollView } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Screen } from "@/components";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -30,7 +30,7 @@ export function HomeScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const sheets = useSheets();
-  const { tokens, transactions, total, change, backend, price, refresh } = useWallet();
+  const { tokens, transactions, total, change, backend, price, refresh, loading, initialLoading } = useWallet();
   const { prefs, setPref } = useApp();
   const [range, setRange] = useState<Range>("1W");
   const hidden = prefs.hideBalances;
@@ -71,8 +71,12 @@ export function HomeScreen() {
   ];
 
   return (
-    <Screen>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+    <Screen bottomInset={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={loading && !initialLoading} onRefresh={refresh} tintColor={theme.colors.accent} />}
+      >
         <AccountBar
           hidden={hidden}
           onToggleBalances={() => setPref("hideBalances", !hidden)}
@@ -87,7 +91,8 @@ export function HomeScreen() {
           title={t("home.totalBalance")}
           unavailableLabel={t("home.valueUnavailable")}
           testnetLabel={t("common.testnet.badge")}
-          todayLabel={t("home.today")}
+          loading={initialLoading}
+          historyLabel={t("home.demoHistory", { range })}
           onRetry={refresh}
           onRangeChange={setRange}
         />
@@ -103,6 +108,8 @@ export function HomeScreen() {
         )}
 
         <TokenList
+          loading={initialLoading}
+          onManage={() => sheets.open("soon", { title: t("home.manageTokens") })}
           title={t("home.tokens")}
           manageLabel={t("common.actions.manage")}
           state={{ tokens, hidden, priceUnavailable }}

@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Pressable, View } from "react-native";
 import { SheetHeader, AppText, Button, Icon, QRCode, TestnetBadge } from "@/components";
+import { getNetwork } from "@nadir-wallet/crypto-core";
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
 import { copyText, shareText } from "@/services/device";
 import { useApp } from "@/providers/AppProvider";
-import { CHAINS, TOKENS, type ChainId } from "@/features/wallet/data";
+import { CHAINS, chainToNetworkId, type ChainId } from "@/features/wallet/data";
 import type { SheetBodyProps } from "./types";
 
 export function ReceiveSheet({ params, close }: SheetBodyProps<"receive">) {
@@ -14,10 +15,13 @@ export function ReceiveSheet({ params, close }: SheetBodyProps<"receive">) {
   const { prefs } = useApp();
   const address = prefs.walletAddress;
   const symbol = params?.token;
-  const initialChain = symbol ? (TOKENS.find((x) => x.symbol === symbol)?.chain ?? "ethereum") : "ethereum";
-  const [chain, setChain] = useState<ChainId>(initialChain);
+  const [chain, setChain] = useState<ChainId>(params?.chain ?? "ethereum");
   const [copied, setCopied] = useState(false);
   const ch = CHAINS[chain];
+  const networkId = chainToNetworkId(chain);
+  const network = networkId ? getNetwork(networkId) : undefined;
+  const chainQualified = network && (!symbol || symbol === network.nativeCurrency.symbol);
+  const qrValue = chainQualified ? `ethereum:${address}@${network.chainId}` : address;
 
   return (
     <View>
@@ -57,12 +61,12 @@ export function ReceiveSheet({ params, close }: SheetBodyProps<"receive">) {
 
       <View style={{ alignItems: "center" }}>
         <View style={{ padding: 16, backgroundColor: "#fff", borderRadius: 22 }}>
-          <QRCode value={address} size={188} />
+          <QRCode value={qrValue} size={188} />
         </View>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 16 }}>
           <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: ch.color }} />
           <AppText weight="semibold" size={13.5} muted>
-            {t("receive.addressLabel", { chain: ch.name })}
+            {t(chainQualified ? "receive.networkQrLabel" : "receive.addressLabel", { chain: ch.name })}
           </AppText>
         </View>
       </View>

@@ -65,10 +65,10 @@ export function TxDetailSheet({ params, close }: SheetBodyProps<"txDetail">) {
       )}
 
       <Card padding={0} style={{ paddingHorizontal: 16, marginTop: 16 }}>
-        <Row title={partyLabel} right={<AppText mono size={13.5}>{tx.party}</AppText>} />
+        <Row title={partyLabel} right={tx.party.startsWith("0x") ? <AppText mono size={13.5}>{tx.party}</AppText> : tx.party} />
         <Row title={t("tx.network")} right={chain.name} />
         <Row title={t("tx.date")} right={tx.when} />
-        <Row title={t("tx.fee")} right={fmtUSD(tx.fee)} />
+        {tx.type !== "receive" && <Row title={t("tx.fee")} right={fmtUSD(tx.fee)} />}
         {tx.status === "confirmed" && (
           <Row title={t("tx.confirmations")} right={<AppText size={15.5} tnum>{tx.confirmations.toLocaleString()}</AppText>} />
         )}

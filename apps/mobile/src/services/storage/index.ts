@@ -30,6 +30,7 @@ export interface Prefs {
   biometricEnabled: boolean;
   autoLockMinutes: number;
   hideBalances: boolean;
+  txProtection: boolean;
   /** Require a passed liveness check before revealing the recovery phrase. */
   requireLivenessReveal: boolean;
   /** Require a passed liveness check before confirming a high-value send. */
@@ -54,6 +55,7 @@ export const DEFAULT_PREFS: Prefs = {
   biometricEnabled: false,
   autoLockMinutes: 1,
   hideBalances: false,
+  txProtection: true,
   requireLivenessReveal: false,
   requireLivenessSend: false,
   lastAccountId: "main",

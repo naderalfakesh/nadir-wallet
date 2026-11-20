@@ -29,6 +29,7 @@ class HybridFaceLiveness : HybridFaceLivenessSpec() {
   @DoNotStrip
   @Keep
   @OptIn(ExperimentalGetImage::class)
+  @Synchronized
   override fun detect(frame: HybridFrameSpec): FaceObservation {
     val nativeFrame = frame as? NativeFrame
       ?: throw Error("Frame is not a NativeFrame!")

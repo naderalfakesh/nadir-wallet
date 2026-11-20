@@ -1,15 +1,15 @@
-import { getNetwork } from "@nadir-wallet/crypto-core";
+import { getNetwork, isEvmAddress } from "@nadir-wallet/crypto-core";
 import { chainToNetworkId, type DemoToken } from "@/features/wallet/data";
+import { fmtToken } from "@/utils/format";
 import type { AddressRisk } from "@/features/wallet/risk";
 import type { ScanRejectReason, ScanTarget } from "@/features/scan/scanBridge";
 import type { SimulationStatus, RecipientValidation, RiskCopy, RiskTranslator } from "./send.types";
 
-const EVM_ADDRESS_PATTERN = /^0x[0-9a-fA-F]{6,}$/;
 const ENS_PATTERN = /\.(eth|sol)$/i;
 
 export function getRecipientValidation(to: string): RecipientValidation {
   const trimmedTo = to.trim();
-  const looksAddr = EVM_ADDRESS_PATTERN.test(trimmedTo);
+  const looksAddr = isEvmAddress(trimmedTo);
   const looksEns = ENS_PATTERN.test(trimmedTo);
   const toValid = looksAddr || looksEns;
   const toError = trimmedTo.length > 3 && !toValid;
@@ -92,4 +92,22 @@ export function getInitialToken(tokens: DemoToken[], tokenId: string | undefined
   const selected = tokens.find((token) => token.id === tokenId);
   if (selected) return selected;
   return tokens[0] ?? fallback;
+}
+
+export interface SendFee {
+  amount: number;
+  symbol: string;
+}
+
+/** Amount plus fee as one figure when both are the same token, otherwise the two side by side. */
+export function getSendTotal(amount: number, symbol: string, fee: SendFee | null): string {
+  if (!fee) return fmtToken(amount, symbol);
+  if (fee.symbol === symbol) return fmtToken(amount + fee.amount, symbol);
+  return `${fmtToken(amount, symbol)} + ${fmtToken(fee.amount, fee.symbol)}`;
+}
+
+/** What is left of the sent token; the fee only comes out of it when it is paid in that token. */
+export function getBalanceAfter(balance: number, amount: number, symbol: string, fee: SendFee | null): number {
+  const spent = amount + (fee && fee.symbol === symbol ? fee.amount : 0);
+  return Math.max(0, balance - spent);
 }

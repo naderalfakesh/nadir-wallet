@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { ScreenHeader, AppText, Icon } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -62,7 +62,7 @@ export function CreatePasscode({
         subtitle={stage === "set" ? t("onboarding.passcode.step1") : t("onboarding.passcode.step2")}
         onBack={back}
       />
-      <View style={{ flex: 1, alignItems: "center", padding: theme.spacing.pad }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: "center", padding: theme.spacing.pad }}>
         <View style={{ height: 12 }} />
         <View
           style={{
@@ -102,7 +102,7 @@ export function CreatePasscode({
             if (!saving.current) press(key);
           }}
         />
-      </View>
+      </ScrollView>
     </View>
   );
 }

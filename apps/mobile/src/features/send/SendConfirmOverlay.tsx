@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen, AppText, Button, Icon, StatusPill } from "@/components";
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -10,8 +9,10 @@ import { CHAINS, type DemoToken } from "@/features/wallet/data";
 import type { SendOutcome } from "@/providers/DemoStateProvider";
 import { LivenessFlow } from "@/features/liveness/LivenessFlow";
 import { DeviceAuthGate, type GateOutcome } from "@/features/auth/DeviceAuthGate";
+import { PasscodeUnlock } from "@/features/auth/PasscodeUnlock";
+import { useApp } from "@/providers/AppProvider";
 import { createStaleGuard } from "@/features/auth/staleGuard";
-import { confirmSimulatedSend } from "./confirmSend";
+import { confirmSimulatedSend, nextSendPhase } from "./confirmSend";
 import { createOverlayStyles } from "./SendConfirmOverlay.styles";
 
 export type SendPhase = "liveness" | "auth" | "pending" | "success" | "failed";
@@ -33,11 +34,14 @@ export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fi
   const theme = useTheme();
   const styles = useMemo(() => createOverlayStyles(theme), [theme]);
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const chain = CHAINS[token.chain];
   const goWallet = () => router.replace("/home");
-  const footerPad = { paddingBottom: insets.bottom + theme.spacing.pad };
+
+  const { verifyPasscode, lockout, recordUnlockFailure, clearLockout } = useApp();
+  // A device with no screen lock has nothing for the OS to check, so the app
+  // passcode confirms the simulated send there instead.
+  const [usePasscode, setUsePasscode] = useState(false);
 
   const [guard] = useState(createStaleGuard);
   useEffect(() => () => guard.invalidate(), [guard]);
@@ -71,8 +75,39 @@ export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fi
   if (phase === "auth") {
     return (
       <Screen>
-        <DeviceAuthGate title={t("send.overlay.confirmTitle")} subtitle={t("send.overlay.confirmSub")} authenticate={confirm} auto />
-        <View style={[styles.footer, footerPad]}>
+        {usePasscode ? (
+          <PasscodeUnlock
+            verify={verifyPasscode}
+            lockout={lockout}
+            onFailure={recordUnlockFailure}
+            onUnlock={() => {
+              clearLockout();
+              setUsePasscode(false);
+              setPhase(nextSendPhase(outcome));
+            }}
+            onUseBiometric={() => setUsePasscode(false)}
+            biometricAvailable={false}
+            hint={t("send.overlay.prompt")}
+          />
+        ) : (
+          <DeviceAuthGate
+            title={t("send.overlay.confirmTitle")}
+            subtitle={t("send.overlay.confirmSub")}
+            authenticate={confirm}
+            auto
+            failureCopy={{
+              cancelled: t("send.overlay.authCancelled"),
+              failed: t("send.overlay.authFailed"),
+              needsStrongBiometric: t("send.overlay.authNeedsStrongBiometric"),
+            }}
+            unavailableFallback={{
+              message: t("send.overlay.noDeviceLock"),
+              label: t("send.overlay.usePasscode"),
+              onPress: () => setUsePasscode(true),
+            }}
+          />
+        )}
+        <View style={styles.footer}>
           <Button label={t("send.overlay.backToReview")} variant="ghost" onPress={backToReview} />
         </View>
       </Screen>
@@ -96,7 +131,7 @@ export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fi
             <StatusPill status="pending" />
           </View>
         </View>
-        <View style={[styles.footer, footerPad]}>
+        <View style={styles.footer}>
           <Button label={t("send.overlay.backToWallet")} onPress={goWallet} />
         </View>
       </Screen>
@@ -117,7 +152,7 @@ export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fi
             {t("send.overlay.failedBody")}
           </AppText>
         </View>
-        <View style={[styles.footer, footerPad]}>
+        <View style={styles.footer}>
           <Button label={t("send.overlay.retry")} icon="refresh" onPress={onRetry} />
           <Button label={t("send.overlay.backToWallet")} variant="ghost" onPress={goWallet} />
         </View>
@@ -144,7 +179,7 @@ export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fi
           {t("send.overlay.sentBody", { network: chain.name })}
         </AppText>
       </View>
-      <View style={[styles.footer, footerPad]}>
+      <View style={styles.footer}>
         <Button label={t("send.overlay.done")} onPress={goWallet} />
       </View>
     </Screen>

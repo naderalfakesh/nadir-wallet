@@ -1,4 +1,5 @@
 import type { NetworkId } from "@nadir-wallet/types";
+import { formatWhenDay } from "./when";
 import type { Chain, ChainId, DemoToken, DemoTransaction, SavedRecipient } from "./types";
 
 export type { Chain, ChainId, DemoToken, DemoTransaction, SavedRecipient, TxType } from "./types";
@@ -42,23 +43,29 @@ export const PORTFOLIO_CHANGE_PCT =
   TOKENS.reduce((s, t) => s + t.change * t.value, 0) / PORTFOLIO_TOTAL;
 export const PORTFOLIO_CHANGE_ABS = PORTFOLIO_TOTAL * (PORTFOLIO_CHANGE_PCT / 100);
 
-export const SPARKLINE = [
-  0.42, 0.4, 0.45, 0.43, 0.48, 0.52, 0.5, 0.47, 0.51, 0.55, 0.53, 0.58, 0.56, 0.54, 0.6, 0.63,
-  0.61, 0.59, 0.64, 0.62, 0.66, 0.7, 0.68, 0.65, 0.71, 0.74, 0.72, 0.76, 0.8, 0.83,
-];
-
 export const RANGES = ["1H", "1D", "1W", "1M", "1Y", "All"] as const;
 export type Range = (typeof RANGES)[number];
 
-export const TRANSACTIONS: DemoTransaction[] = [
-  { id: "t1", type: "receive", token: "ETH", amount: 0.25, fiat: 760.88, party: "Sepolia Faucet", chain: "ethereum", status: "confirmed", when: "Today · 2:14 PM", day: "Today", fee: 0.41, confirmations: 142, hash: "0x9c41a7e2f80b3d6c5a91e4072bd138fae6201c9d44ab7e35f0c2189d6e7a4b30" },
-  { id: "t2", type: "send", token: "USDC", amount: 120.0, fiat: 120.0, party: "0xD1c9…5E0b", chain: "base", status: "confirmed", when: "Today · 9:02 AM", day: "Today", fee: 0.02, confirmations: 880, hash: "0x3e72b105d9af46c81207e5fa9b0c3d8124e6079ab5fd3c20198e4671a0db5c9f" },
-  { id: "t3", type: "swap", token: "OP", amount: 78, fiat: 143.68, party: "ETH → OP", chain: "optimism", status: "pending", when: "Today · 8:47 AM", day: "Today", fee: 0.05, confirmations: 0, hash: "0x71fd0a9c3e25b4860d17fa2e91c5083b6d4097ae23f1cb59802e6d41a7b0f3c8" },
-  { id: "t4", type: "receive", token: "POL", amount: 120, fiat: 62.4, party: "Amoy Faucet", chain: "polygon", status: "confirmed", when: "Yesterday · 6:31 PM", day: "Yesterday", fee: 0.0001, confirmations: 4096, hash: "0x5a2cf09b4e16d738a0297fb1ce5083b6d4097ae23f1cb59802e6d41a7b0f3c8e" },
-  { id: "t5", type: "send", token: "ARB", amount: 90, fiat: 88.56, party: "0x44Ae…D7c1", chain: "arbitrum", status: "confirmed", when: "Yesterday · 11:20 AM", day: "Yesterday", fee: 0.03, confirmations: 2310, hash: "0xa1b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef0fedcba9876543210" },
-  { id: "t6", type: "receive", token: "USDC", amount: 500.0, fiat: 500.0, party: "Circle Faucet", chain: "base", status: "confirmed", when: "May 28 · 4:05 PM", day: "May 28", fee: 0.02, confirmations: 9012, hash: "0xb7e3f9201a4c8d65e0792fa3bc15084d6e9217cf30ab5e48f1029d6a7b3c5e0f" },
-  { id: "t7", type: "send", token: "ETH", amount: 0.04, fiat: 121.74, party: "0x9fE2…0aB3", chain: "ethereum", status: "failed", when: "May 27 · 1:12 PM", day: "May 27", fee: 0.39, confirmations: 0, hash: "0xf0e1d2c3b4a5968778695a4b3c2d1e0f9a8b7c6d5e4f3021123344556677889900", failReason: "Out of gas — the transaction ran out of gas before completing." },
+const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+
+// Newest first. `ago` is how long before `now` each entry happened, so the
+// history never shows a time that hasn't happened yet or a stale calendar date.
+const rawTransactions: (Omit<DemoTransaction, "when" | "day"> & { ago: number })[] = [
+  { id: "t3", type: "swap", token: "OP", amount: 78, fiat: 143.68, party: "ETH → OP", chain: "optimism", status: "pending", ago: 6 * MINUTE, fee: 0.05, confirmations: 0, hash: "0x71fd0a9c3e25b4860d17fa2e91c5083b6d4097ae23f1cb59802e6d41a7b0f3c8" },
+  { id: "t1", type: "receive", token: "ETH", amount: 0.25, fiat: 760.88, party: "Sepolia Faucet", chain: "ethereum", status: "confirmed", ago: 48 * MINUTE, fee: 0.41, confirmations: 142, hash: "0x9c41a7e2f80b3d6c5a91e4072bd138fae6201c9d44ab7e35f0c2189d6e7a4b30" },
+  { id: "t2", type: "send", token: "USDC", amount: 120.0, fiat: 120.0, party: "0xD1c9…5E0b", chain: "base", status: "confirmed", ago: 5 * HOUR, fee: 0.02, confirmations: 880, hash: "0x3e72b105d9af46c81207e5fa9b0c3d8124e6079ab5fd3c20198e4671a0db5c9f" },
+  { id: "t4", type: "receive", token: "POL", amount: 120, fiat: 62.4, party: "Amoy Faucet", chain: "polygon", status: "confirmed", ago: DAY + 3 * HOUR, fee: 0.0001, confirmations: 4096, hash: "0x5a2cf09b4e16d738a0297fb1ce5083b6d4097ae23f1cb59802e6d41a7b0f3c8e" },
+  { id: "t5", type: "send", token: "ARB", amount: 90, fiat: 88.56, party: "0x44Ae…D7c1", chain: "arbitrum", status: "confirmed", ago: DAY + 9 * HOUR, fee: 0.03, confirmations: 2310, hash: "0xa1b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef0fedcba9876543210" },
+  { id: "t6", type: "receive", token: "USDC", amount: 500.0, fiat: 500.0, party: "Circle Faucet", chain: "base", status: "confirmed", ago: 6 * DAY + 2 * HOUR, fee: 0.02, confirmations: 9012, hash: "0xb7e3f9201a4c8d65e0792fa3bc15084d6e9217cf30ab5e48f1029d6a7b3c5e0f" },
+  { id: "t7", type: "send", token: "ETH", amount: 0.04, fiat: 121.74, party: "0x9fE2…0aB3", chain: "ethereum", status: "failed", ago: 7 * DAY + 5 * HOUR, fee: 0.39, confirmations: 0, hash: "0xf0e1d2c3b4a5968778695a4b3c2d1e0f9a8b7c6d5e4f3021123344556677889900", failReason: "Out of gas — the transaction ran out of gas before completing." },
 ];
+
+/** Demo history dated in the recent past relative to `now`. */
+export function demoTransactions(now: Date): DemoTransaction[] {
+  return rawTransactions.map(({ ago, ...tx }) => ({ ...tx, ...formatWhenDay(now.getTime() - ago, now) }));
+}
 
 // Full 40-char addresses so the live risk API (which validates address format)
 // returns the intended low/medium/high for each recent.

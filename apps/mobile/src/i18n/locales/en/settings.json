@@ -15,13 +15,12 @@
     "dark": "Dark",
     "light": "Light",
     "privacy": "Privacy",
-    "privacySub": "Hide balances, analytics"
+    "privacySub": "Hide balances"
   },
   "security": {
     "section": "Security",
     "center": "Security Center",
-    "protected": "Protected",
-    "actionNeeded": "Action needed",
+    "protected": "{{score}}/{{total}} protections active",
     "recovery": "Recovery phrase",
     "notifications": "Notifications"
   },

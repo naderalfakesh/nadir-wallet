@@ -13,6 +13,7 @@
     "buy": "Buy",
     "retry": "Retry",
     "copy": "Copy",
+    "clipboardEmpty": "No text available to paste.",
     "copied": "Copied",
     "share": "Share",
     "done": "Done",

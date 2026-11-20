@@ -8,6 +8,7 @@ type Variant = "primary" | "ghost" | "soft";
 
 interface ButtonProps {
   label: string;
+  testID?: string;
   onPress?: () => void;
   variant?: Variant;
   icon?: IconName;
@@ -18,6 +19,7 @@ interface ButtonProps {
 
 export function Button({
   label,
+  testID,
   onPress,
   variant = "primary",
   icon,
@@ -28,18 +30,26 @@ export function Button({
   const theme = useTheme();
   const { colors } = theme;
 
-  const bg =
-    variant === "primary"
+  const mutedPrimary = disabled && variant === "primary";
+  const bg = mutedPrimary
+    ? colors.surface2
+    : variant === "primary"
       ? colors.accent
       : variant === "ghost"
         ? colors.surface2
         : colors.accentDim;
-  const fg =
-    variant === "primary" ? colors.accentInk : variant === "ghost" ? colors.text : colors.accent;
+  const fg = mutedPrimary
+    ? colors.textMuted
+    : variant === "primary"
+      ? colors.accentInk
+      : variant === "ghost"
+        ? colors.text
+        : colors.accent;
   const h = height ?? (variant === "soft" ? 52 : 56);
 
   return (
     <Pressable
+      testID={testID}
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
@@ -56,7 +66,7 @@ export function Button({
           paddingHorizontal: 18,
         },
         variant === "primary" && !disabled && theme.shadows.accentGlow,
-        disabled && { opacity: 0.4 },
+        disabled && !mutedPrimary && { opacity: 0.4 },
         pressed && !disabled && { transform: [{ scale: 0.98 }] },
         style,
       ]}

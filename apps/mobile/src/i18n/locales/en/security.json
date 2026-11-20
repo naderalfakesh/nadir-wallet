@@ -5,7 +5,7 @@
     "excellent": "Excellent",
     "actionNeeded": "Action needed",
     "atRisk": "At risk",
-    "protected": "Your wallet is well protected.",
+    "active": "{{score}} of {{total}} protections active.",
     "finishBackup": "Finish your backup to fully protect your funds."
   },
   "model": {
@@ -13,7 +13,7 @@
     "keysTitle": "Keys stay on this device",
     "keysBody": "Your recovery phrase and private keys are generated and stored only on this device — never uploaded.",
     "signTitle": "No signing in this demo",
-    "signBody": "Sends are simulated: nothing is signed or broadcast. Confirming one still asks for your biometrics or device passcode.",
+    "signBody": "Sends are simulated: nothing is signed or broadcast. Confirming one still asks for your biometrics or device passcode, or your app passcode on a device with no screen lock.",
     "backendTitle": "Backend sees public data only",
     "backendBody": "Only your public address is shared — for cached prices, address risk checks and transaction simulation."
   },
@@ -24,7 +24,7 @@
     "backupTodo": "Not backed up yet",
     "biometric": "Biometric unlock",
     "biometricSub": "{{Biometry}}",
-    "pin": "App lock PIN",
+    "pin": "App passcode",
     "pinSub": "6-digit code",
     "autolock": "Auto-lock",
     "autolockSub": "After {{min}} min",
@@ -47,7 +47,7 @@
   "txProtection": {
     "title": "Transaction protection",
     "heading": "Suspicious activity protection",
-    "sub": "Screens recipients & contracts before you send",
+    "sub": "Checks recipients and blocks high-risk addresses when enabled",
     "riskLevels": "RISK LEVELS",
     "low": "Low",
     "lowBody": "Known address, verified contract — safe to proceed.",
@@ -77,7 +77,7 @@
     "riskBlockTitle": "High-risk recipient blocked",
     "riskBlockDetail": "Send to a reported address prevented",
     "simFailTitle": "Transaction simulation failed",
-    "simFailDetail": "Insufficient gas — not submitted",
+    "simFailDetail": "The transaction preview failed",
     "autolockTitle": "Auto-lock updated",
     "autolockDetail": "Locks after {{min}} min",
     "autolockTriggeredTitle": "Wallet auto-locked",

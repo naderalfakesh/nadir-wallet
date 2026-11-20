@@ -36,9 +36,10 @@ export function useSecurityChecklist() {
       { key: "bio", label: t("security.protection.biometric"), done: prefs.biometricEnabled, sub: t("security.protection.biometricSub"), toggle: toggleBiometric },
       { key: "pin", label: t("security.protection.pin"), done: true, sub: t("security.protection.pinSub") },
       { key: "autolock", label: t("security.protection.autolock"), done: true, sub: t("security.protection.autolockSub", { min: prefs.autoLockMinutes }), onPress: cycleAutoLock },
+      { key: "txProtection", label: t("security.txProtection.title"), done: prefs.txProtection, sub: t("security.txProtection.sub") },
       { key: "signing", label: t("security.protection.signing"), done: true, sub: t("security.protection.signingSub") },
     ],
-    [t, router, prefs.backupConfirmed, prefs.biometricEnabled, prefs.autoLockMinutes, toggleBiometric, cycleAutoLock],
+    [t, router, prefs.backupConfirmed, prefs.biometricEnabled, prefs.autoLockMinutes, prefs.txProtection, toggleBiometric, cycleAutoLock],
   );
 
   const score = items.filter((i) => i.done).length;

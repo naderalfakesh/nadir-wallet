@@ -65,7 +65,7 @@ export function createSendStyles(theme: Theme) {
       justifyContent: "center",
     },
     amountStep: {
-      flex: 1,
+      flexGrow: 1,
       padding: theme.spacing.pad,
     },
     tokenPicker: {
@@ -83,9 +83,14 @@ export function createSendStyles(theme: Theme) {
       marginBottom: 8,
     },
     amountDisplay: {
-      flex: 1,
+      flexGrow: 1,
       alignItems: "center",
       justifyContent: "center",
+    },
+    amountRow: {
+      flexDirection: "row",
+      alignItems: "baseline",
+      gap: 8,
     },
     amountText: {
       letterSpacing: -1.6,
@@ -110,8 +115,8 @@ export function createSendStyles(theme: Theme) {
     },
     reviewHero: {
       alignItems: "center",
-      paddingTop: 4,
-      paddingBottom: 18,
+      paddingTop: 0,
+      paddingBottom: 12,
     },
     reviewAmount: {
       marginTop: 12,
@@ -140,10 +145,6 @@ export function createSendStyles(theme: Theme) {
       marginTop: 12,
     },
     footer: {
-      position: "absolute",
-      left: 0,
-      right: 0,
-      bottom: 0,
       padding: theme.spacing.pad,
       backgroundColor: theme.colors.bg,
       borderTopWidth: 1,

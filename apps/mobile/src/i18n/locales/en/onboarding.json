@@ -6,7 +6,7 @@
     "start": "Get started",
     "progress": "Step {{n}} of {{total}}",
     "nadir": {
-      "title": "Nadir",
+      "title": "Nadir Wallet",
       "body": "A self-custody wallet for testnet practice. Learn how keys, backups and sends work without risking real money."
     },
     "keys": {
@@ -19,7 +19,7 @@
     }
   },
   "welcome": {
-    "tagline": "Self-custody for multi-chain assets. Your keys, your crypto — secured by design.",
+    "tagline": "Self-custody on test networks. Your keys never leave this device.",
     "badge": "Testnet demo · no real funds",
     "create": "Create a new wallet",
     "import": "I already have a wallet",
@@ -43,8 +43,6 @@
     "warning": "Write these 12 words down in order and store them offline. Never share them. Don't screenshot.",
     "demoNote": "This is a real recovery phrase. Nadir is testnet-only and simulates sends, but keep the phrase private anyway.",
     "tapToReveal": "Tap to reveal",
-    "copy": "Copy to clipboard",
-    "copied": "Copied to clipboard",
     "cta": "I've written it down"
   },
   "verify": {
@@ -81,6 +79,7 @@
     "sub": "Enter your recovery phrase",
     "placeholder": "Enter your 12 or 24-word recovery phrase, separated by spaces",
     "paste": "Paste",
+    "sample": "Generate sample",
     "words": "{{count}} words",
     "invalidWord": "\"{{word}}\" isn't a valid recovery word.",
     "invalidChecksum": "This phrase is invalid — its checksum doesn't match.",

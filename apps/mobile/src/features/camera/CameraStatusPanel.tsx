@@ -25,7 +25,7 @@ export function CameraStatusPanel({ feature, status, onRequestPermission }: Came
 
   return (
     <View style={styles.root}>
-      <Icon name="scan" size={36} color={status === "unavailable" ? colors.warn : colors.accent} />
+      <Icon name={feature === "liveness" ? "faceid" : "scan"} size={36} color={status === "unavailable" ? colors.warn : colors.accent} />
       <AppText weight="bold" size={18} color="#FFFFFF" style={styles.title} accessibilityRole="header">
         {t(copy.titleKey)}
       </AppText>

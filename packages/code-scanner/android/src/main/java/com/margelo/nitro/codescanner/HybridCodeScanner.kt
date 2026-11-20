@@ -25,6 +25,7 @@ class HybridCodeScanner : HybridCodeScannerSpec() {
   @DoNotStrip
   @Keep
   @OptIn(ExperimentalGetImage::class)
+  @Synchronized
   override fun scan(frame: HybridFrameSpec): Array<String> {
     val nativeFrame = frame as? NativeFrame
       ?: throw Error("Frame is not a NativeFrame!")

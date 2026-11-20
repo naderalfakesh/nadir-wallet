@@ -1,8 +1,8 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
-import type { DemoToken } from "@/features/wallet/types";
+import type { ChainId, DemoToken } from "@/features/wallet/types";
 
 export interface SheetParams {
-  receive: { token?: string } | undefined;
+  receive: { chain: ChainId; token: string } | undefined;
   txDetail: { id: string };
   accounts: undefined;
   pickToken: { current?: string; onPick?: (token: DemoToken) => void } | undefined;

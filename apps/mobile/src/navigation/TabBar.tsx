@@ -1,3 +1,4 @@
+import { haptics } from "@/services/device/haptics";
 import React, { type ComponentProps } from "react";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -47,7 +48,10 @@ export function TabBar({ state, emitter, navigateToTab }: TabBarProps) {
 
         const onPress = () => {
           const event = emitter.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
-          if (!focused && !event.defaultPrevented) navigateToTab(route.key);
+          if (!focused && !event.defaultPrevented) {
+            haptics.selection();
+            navigateToTab(route.key);
+          }
         };
 
         return (
@@ -55,6 +59,7 @@ export function TabBar({ state, emitter, navigateToTab }: TabBarProps) {
             key={route.key}
             onPress={onPress}
             accessibilityRole="button"
+            testID={`tab-${route.name}`}
             accessibilityState={{ selected: focused }}
             style={{ alignItems: "center", gap: 4, paddingHorizontal: 12, paddingVertical: 4 }}
           >

@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { StyleSheet, Vibration, View } from "react-native";
+import { haptics } from "@/services/device/haptics";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Camera, useCameraDevice, useCameraPermission, useFrameOutput } from "react-native-vision-camera";
-import { scheduleOnRN } from "react-native-worklets";
+import { createSynchronizable, scheduleOnRN } from "react-native-worklets";
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from "react-native-reanimated";
 import { createFaceLiveness } from "@nadir-wallet/face-liveness";
 import { AppText, Icon } from "@/components";
@@ -19,6 +20,12 @@ import { BottomPromptPanel, LivenessHeader, ResultBadge } from "./LivenessFlow.p
 import { livenessStyles as styles } from "./LivenessFlow.styles";
 import { getChallengeProgress, getLivenessPrompt, isCameraActivePhase } from "./liveness.utils";
 import type { LivenessFlowProps } from "./liveness.types";
+
+// Reuse the detector across visits so an in-flight frame keeps a valid native object.
+let sharedPlugin: ReturnType<typeof createFaceLiveness> | null = null;
+function getFaceDetector() {
+  return (sharedPlugin ??= tryCreateNative(createFaceLiveness));
+}
 
 /**
  * Any camera or native failure ends in an error panel and never calls
@@ -50,7 +57,7 @@ function LivenessCamera({ mode, onPass, onCancel }: LivenessFlowProps) {
   const { hasPermission, canRequestPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice("front");
   const { state, process, reset } = useLivenessChallenge();
-  const plugin = useMemo(() => tryCreateNative(createFaceLiveness), []);
+  const [plugin] = useState(getFaceDetector);
   const [failed, setFailed] = useState(false);
   const markFailed = useCallback(() => setFailed(true), []);
   const loggedRef = useRef(false);
@@ -80,15 +87,15 @@ function LivenessCamera({ mode, onPass, onCancel }: LivenessFlowProps) {
       if (!loggedRef.current) {
         loggedRef.current = true;
         logEvent("liveness_pass");
+        haptics.success();
       }
-      Vibration.vibrate(40);
       badgeScale.value = withSpring(1, { damping: 11, stiffness: 140 });
     } else if (state.phase === "failed") {
       if (!loggedRef.current) {
         loggedRef.current = true;
         logEvent("liveness_fail");
+        haptics.error();
       }
-      Vibration.vibrate([0, 60, 70, 60]);
       shakeX.value = withSequence(
         withTiming(-9, { duration: 55 }),
         withTiming(9, { duration: 55 }),
@@ -100,16 +107,16 @@ function LivenessCamera({ mode, onPass, onCancel }: LivenessFlowProps) {
     }
   }, [badgeScale, logEvent, shakeX, state.phase]);
 
+  const [frameTick] = useState(() => createSynchronizable(0, { fixedType: true }));
   const frameOutput = useFrameOutput({
     pixelFormat: "yuv",
     onFrame(frame) {
       "worklet";
       try {
         if (plugin == null) return;
-        const globalState = globalThis as Record<string, unknown>;
-        const tick = ((globalState.__livenessTick as number) ?? 0) + 1;
-        globalState.__livenessTick = tick;
-        if (tick % FRAME_STRIDE === 0) {
+        const tick = (frameTick.getDirty() + 1) % FRAME_STRIDE;
+        frameTick.setDirty(tick);
+        if (tick === 0) {
           const observation = plugin.detect(frame);
           scheduleOnRN(process, observation);
         }

@@ -8,6 +8,7 @@ import { useSheets } from "@/providers/SheetProvider";
 import { useApp } from "@/providers/AppProvider";
 import { createSettingsStyles } from "./SettingsScreen.styles";
 import { AccountCard } from "./SettingsScreen.parts";
+import { useSecurityChecklist } from "@/features/security/useSecurityChecklist";
 import { DemoControls } from "./DemoControls";
 
 export function SettingsScreen() {
@@ -18,6 +19,7 @@ export function SettingsScreen() {
   const { scheme } = useThemeControls();
   const { t } = useTranslation();
   const { prefs, resetWallet, lockSession } = useApp();
+  const { score, total } = useSecurityChecklist();
 
   const confirmReset = () => {
     Alert.alert(t("settings.reset.title"), t("settings.reset.body"), [
@@ -34,7 +36,7 @@ export function SettingsScreen() {
   };
 
   return (
-    <Screen>
+    <Screen bottomInset={false}>
       <ScreenHeader title={t("settings.title")} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.body}>
@@ -67,7 +69,7 @@ export function SettingsScreen() {
             <Row
               left={<MiniIcon name="shield" />}
               title={t("settings.security.center")}
-              sub={t("settings.security.actionNeeded")}
+              sub={t("settings.security.protected", { score, total })}
               chevron
               onPress={() => router.navigate("/security")}
             />

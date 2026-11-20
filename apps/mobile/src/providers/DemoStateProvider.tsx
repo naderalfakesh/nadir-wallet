@@ -10,6 +10,7 @@ export type SendOutcome = "success" | "pending" | "failed";
 // None of this affects the local wallet, which is never "down".
 interface DemoStateValue extends DemoPrefs {
   setLiveApi: (v: boolean) => void;
+  useDemoData: () => void;
   setBackend: (v: BackendStatus) => void;
   setPrice: (v: PriceStatus) => void;
   setSendSim: (v: SendSim) => void;
@@ -38,9 +39,11 @@ export function DemoStateProvider({ initial, children }: { initial: DemoPrefs; c
   // Transient backend/price errors clear on retry; keys are local, always safe.
   const retry = useCallback(() => update({ backend: "online", price: "fresh" }), [update]);
 
+  const useDemoData = useCallback(() => update({ liveApi: false, backend: "online", price: "fresh" }), [update]);
+
   const value = useMemo<DemoStateValue>(
-    () => ({ ...state, setLiveApi, setBackend, setPrice, setSendSim, setSendOutcome, retry }),
-    [state, setLiveApi, setBackend, setPrice, setSendSim, setSendOutcome, retry],
+    () => ({ ...state, setLiveApi, setBackend, setPrice, setSendSim, setSendOutcome, retry, useDemoData }),
+    [state, setLiveApi, setBackend, setPrice, setSendSim, setSendOutcome, retry, useDemoData],
   );
 
   return <DemoStateContext.Provider value={value}>{children}</DemoStateContext.Provider>;

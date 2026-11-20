@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { haptics } from "@/services/device/haptics";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Camera, useCameraDevice, useCameraPermission, useFrameOutput } from "react-native-vision-camera";
-import { scheduleOnRN } from "react-native-worklets";
+import { createSynchronizable, scheduleOnRN } from "react-native-worklets";
 import { createCodeScanner } from "@nadir-wallet/code-scanner";
 import { CameraErrorBoundary } from "@/features/camera/CameraErrorBoundary";
 import { CameraStatusPanel } from "@/features/camera/CameraStatusPanel";
@@ -20,6 +21,12 @@ import {
 } from "./scanBridge";
 
 const SCAN_STRIDE = 4;
+
+// Reuse the detector across visits so an in-flight frame keeps a valid native object.
+let sharedScanner: ReturnType<typeof createCodeScanner> | null = null;
+function getCodeScanner() {
+  return (sharedScanner ??= tryCreateNative(createCodeScanner));
+}
 
 /**
  * Full-screen QR scanner. Reads frames through the custom ML Kit barcode Nitro
@@ -75,7 +82,7 @@ export function ScanScreen() {
 function ScanCamera({ bottomInset, onAccept }: { bottomInset: number; onAccept: (target: ScanTarget) => void }) {
   const { hasPermission, canRequestPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice("back");
-  const scanner = useMemo(() => tryCreateNative(createCodeScanner), []);
+  const [scanner] = useState(getCodeScanner);
   const [found, setFound] = useState(false);
   const [failed, setFailed] = useState(false);
   const [rejection, setRejection] = useState<ScanFeedback | null>(null);
@@ -104,6 +111,7 @@ function ScanCamera({ bottomInset, onAccept }: { bottomInset: number; onAccept: 
     for (const raw of codes) {
       const result = evaluateScan(raw);
       if (result.ok) {
+        haptics.success();
         setFound(true);
         onAccept({ recipient: result.recipient, chainId: result.chainId, tokenContract: result.tokenContract });
         return;
@@ -113,16 +121,16 @@ function ScanCamera({ bottomInset, onAccept }: { bottomInset: number; onAccept: 
     if (firstRejection) setRejection(firstRejection);
   };
 
+  const [frameTick] = useState(() => createSynchronizable(0, { fixedType: true }));
   const frameOutput = useFrameOutput({
     pixelFormat: "yuv",
     onFrame(frame) {
       "worklet";
       try {
         if (scanner == null) return;
-        const globalState = globalThis as Record<string, unknown>;
-        const tick = ((globalState.__scanTick as number) ?? 0) + 1;
-        globalState.__scanTick = tick;
-        if (tick % SCAN_STRIDE === 0) {
+        const tick = (frameTick.getDirty() + 1) % SCAN_STRIDE;
+        frameTick.setDirty(tick);
+        if (tick === 0) {
           const codes = scanner.scan(frame);
           if (codes.length > 0) scheduleOnRN(onCodes, codes);
         }

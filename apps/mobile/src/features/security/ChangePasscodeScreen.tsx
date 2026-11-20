@@ -1,7 +1,6 @@
 import React, { useRef, useState } from "react";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen, ScreenHeader, AppText, Button, Icon } from "@/components";
 import { useTheme } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -15,7 +14,6 @@ type EntryError = "incorrect" | "mismatch" | "saveFailed";
 export function ChangePasscodeScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { verifyPasscode, setPasscode, logEvent } = useApp();
   const [stage, setStage] = useState<Stage>("current");
@@ -97,7 +95,7 @@ export function ChangePasscodeScreen() {
             {t("settings.changePin.doneBody")}
           </AppText>
         </View>
-        <View style={{ paddingHorizontal: theme.spacing.pad, paddingBottom: insets.bottom + theme.spacing.pad }}>
+        <View style={{ paddingHorizontal: theme.spacing.pad, paddingBottom: theme.spacing.pad }}>
           <Button label={t("common.actions.done")} onPress={() => router.back()} />
         </View>
       </Screen>
@@ -123,7 +121,7 @@ export function ChangePasscodeScreen() {
   return (
     <Screen>
       <ScreenHeader title={t("settings.changePin.title")} onBack={back} />
-      <View style={{ flex: 1, alignItems: "center", padding: theme.spacing.pad }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: "center", padding: theme.spacing.pad }}>
         <View style={{ height: 12 }} />
         <View
           style={{
@@ -157,7 +155,7 @@ export function ChangePasscodeScreen() {
             if (!saving.current) press(key);
           }}
         />
-      </View>
+      </ScrollView>
     </Screen>
   );
 }

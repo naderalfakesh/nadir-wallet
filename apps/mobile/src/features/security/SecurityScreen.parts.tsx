@@ -69,7 +69,9 @@ export function ScoreCard({ score, total, pct, tier, backedUp }: ScoreCardProps)
             {meta.label}
           </AppText>
           <AppText size={13} muted style={styles.scoreBody}>
-            {backedUp ? t("security.score.protected") : t("security.score.finishBackup")}
+            {!backedUp
+              ? t("security.score.finishBackup")
+              : t("security.score.active", { score, total })}
           </AppText>
         </View>
       </View>
@@ -174,7 +176,7 @@ export function TxProtectionCard({ on, onToggle }: TxProtectionCardProps) {
             {t("security.txProtection.sub")}
           </AppText>
         </View>
-        <Toggle on={on} onChange={onToggle} />
+        <Toggle label={t("security.txProtection.heading")} on={on} onChange={onToggle} />
       </View>
       <View style={styles.riskDivider}>
         <AppText weight="bold" size={11.5} faint style={styles.riskHeading}>

@@ -11,12 +11,14 @@ import {
   Row,
   SectionLabel,
   Segmented,
+  Skeleton,
   Sparkline,
   TestnetBadge,
   TokenGlyph,
 } from "@/components";
 import { useTheme } from "@/theme";
-import { ACCOUNT, RANGES, SPARKLINE, chainBadgeColor } from "@/features/wallet/data";
+import { ACCOUNT, RANGES, chainBadgeColor } from "@/features/wallet/data";
+import { getDemoChart } from "@/features/wallet/chart";
 import { TransactionRow } from "@/features/wallet/TransactionRow";
 import { getTransactionTime } from "@/features/wallet/transactions";
 import { createHomeStyles } from "./HomeScreen.styles";
@@ -77,7 +79,8 @@ interface BalanceSummaryProps {
   title: string;
   unavailableLabel: string;
   testnetLabel: string;
-  todayLabel: string;
+  loading: boolean;
+  historyLabel: string;
   onRetry: () => void;
   onRangeChange: (range: BalanceSummaryState["range"]) => void;
 }
@@ -87,7 +90,8 @@ export function BalanceSummary({
   title,
   unavailableLabel,
   testnetLabel,
-  todayLabel,
+  loading,
+  historyLabel,
   onRetry,
   onRangeChange,
 }: BalanceSummaryProps) {
@@ -95,8 +99,9 @@ export function BalanceSummary({
   const styles = useMemo(() => createHomeStyles(theme), [theme]);
   const priceUnavailable = state.priceStatus === "unavailable";
   const balanceValue = getBalanceValue(state.total, state.hidden, priceUnavailable, unavailableLabel);
-  const changeValue = getBalanceChange(state.total, state.change, state.hidden);
-  const chartOpacity = state.backendStatus === "rpc_unavailable" || priceUnavailable ? 0.4 : 1;
+  const chart = getDemoChart("portfolio", state.range, state.change);
+  const changeValue = getBalanceChange(state.total, chart.change, state.hidden);
+  const chartOpacity = state.backendStatus === "rpc_unavailable" ? 0.4 : 1;
 
   return (
     <View style={styles.balanceWrap}>
@@ -106,28 +111,38 @@ export function BalanceSummary({
         </AppText>
         <TestnetBadge label={testnetLabel} />
       </View>
-      <AppText
-        weight="bold"
-        size={priceUnavailable ? 26 : 44}
-        muted={priceUnavailable}
-        tnum={!priceUnavailable}
-        style={priceUnavailable ? styles.unavailableValue : styles.balanceValue}
-      >
-        {balanceValue}
-      </AppText>
-      {!priceUnavailable && (
-        <View style={styles.changeRow}>
-          <ChangeBadge pct={state.change} />
-          <AppText size={14} muted tnum>
-            {changeValue} · {todayLabel}
+      {loading ? (
+        <Skeleton width="56%" height={52} />
+      ) : (
+        <>
+          <AppText
+            weight="bold"
+            size={priceUnavailable ? 26 : 44}
+            muted={priceUnavailable}
+            tnum={!priceUnavailable}
+            style={priceUnavailable ? styles.unavailableValue : styles.balanceValue}
+          >
+            {balanceValue}
           </AppText>
-        </View>
+          {!priceUnavailable && (
+            <View style={styles.changeRow}>
+              <ChangeBadge pct={chart.change} />
+              <AppText size={14} muted tnum>
+                {changeValue} · {historyLabel}
+              </AppText>
+            </View>
+          )}
+          <PriceFreshness status={state.priceStatus} onRetry={onRetry} />
+          {!priceUnavailable && (
+            <>
+              <View style={[styles.chartWrap, { opacity: chartOpacity }]}>
+                <Sparkline data={chart.data} up={chart.change >= 0} height={92} />
+              </View>
+              <Segmented options={RANGES} value={state.range} onChange={onRangeChange} small />
+            </>
+          )}
+        </>
       )}
-      <PriceFreshness status={state.priceStatus} onRetry={onRetry} />
-      <View style={[styles.chartWrap, { opacity: chartOpacity }]}>
-        <Sparkline data={SPARKLINE} up={state.change >= 0} height={92} />
-      </View>
-      <Segmented options={RANGES} value={state.range} onChange={onRangeChange} small />
     </View>
   );
 }
@@ -198,11 +213,13 @@ export function BackupReminder({ title, body, onPress }: BackupReminderProps) {
 interface TokenListProps {
   title: string;
   manageLabel: string;
+  onManage: () => void;
+  loading: boolean;
   state: TokenListState;
   onTokenPress: (tokenId: string) => void;
 }
 
-export function TokenList({ title, manageLabel, state, onTokenPress }: TokenListProps) {
+export function TokenList({ title, manageLabel, onManage, loading, state, onTokenPress }: TokenListProps) {
   const theme = useTheme();
   const styles = useMemo(() => createHomeStyles(theme), [theme]);
 
@@ -210,15 +227,17 @@ export function TokenList({ title, manageLabel, state, onTokenPress }: TokenList
     <View style={[styles.section, styles.tokenSection]}>
       <SectionLabel
         trailing={
-          <AppText weight="semibold" size={13} color={theme.colors.accent}>
-            {manageLabel}
-          </AppText>
+          <Pressable accessibilityRole="button" hitSlop={8} onPress={onManage}>
+            <AppText weight="semibold" size={13} color={theme.colors.accent}>
+              {manageLabel}
+            </AppText>
+          </Pressable>
         }
       >
         {title}
       </SectionLabel>
       <Card padding={0} style={styles.cardInset}>
-        {state.tokens.map((token, index) => (
+        {loading ? <Skeleton width="100%" height={115} /> : state.tokens.map((token, index) => (
           <Row
             key={token.id}
             last={index === state.tokens.length - 1}
@@ -227,7 +246,7 @@ export function TokenList({ title, manageLabel, state, onTokenPress }: TokenList
             title={token.name}
             sub={
               <AppText size={13} muted tnum>
-                {getTokenAmount(token)}
+                {getTokenAmount(token, state.hidden)}
               </AppText>
             }
             right={getTokenValue(token, state.hidden, state.priceUnavailable)}

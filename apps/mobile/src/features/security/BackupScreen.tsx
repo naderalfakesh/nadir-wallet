@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { Screen, ScreenHeader, AppText, Button, Card, Icon } from "@/components";
 import { useTheme, alpha } from "@/theme";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -18,7 +18,6 @@ type Step = "intro" | "auth" | "reveal" | "verify" | "done";
 export function BackupScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { setPref, logEvent } = useApp();
   const [step, setStep] = useState<Step>("intro");
@@ -62,7 +61,7 @@ export function BackupScreen() {
     return (
       <Screen>
         <ScreenHeader title={t("onboarding.backup.title")} onBack={() => router.back()} />
-        <View style={{ flex: 1, paddingHorizontal: pad, paddingBottom: insets.bottom + pad }}>
+        <View style={{ flex: 1, paddingHorizontal: pad, paddingBottom: pad }}>
           <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
             <View
               style={{
@@ -114,7 +113,7 @@ export function BackupScreen() {
     return (
       <Screen>
         <ScreenHeader title={t("onboarding.reveal.title")} subtitle={t("onboarding.reveal.step")} onBack={restart} />
-        <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: insets.bottom + pad }}>
+        <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: pad }}>
           <SeedReveal words={words} onContinue={() => setStep("verify")} ctaLabel={t("onboarding.reveal.cta")} />
         </ScrollView>
       </Screen>
@@ -125,7 +124,7 @@ export function BackupScreen() {
     return (
       <Screen>
         <ScreenHeader title={t("onboarding.verify.title")} subtitle={t("onboarding.verify.step")} onBack={() => setStep("reveal")} />
-        <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: insets.bottom + pad }}>
+        <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: pad }}>
           <SeedVerify words={words} onContinue={confirmBackup} />
         </ScrollView>
       </Screen>
@@ -134,7 +133,7 @@ export function BackupScreen() {
 
   return (
     <Screen>
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: pad }}>
+      <Animated.View entering={FadeIn.duration(180)} style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: pad }}>
         <View
           style={{
             width: 96,
@@ -153,8 +152,8 @@ export function BackupScreen() {
         <AppText size={14.5} muted style={{ marginTop: 10, lineHeight: 22, textAlign: "center", maxWidth: 260 }}>
           {t("onboarding.backup.doneBody")}
         </AppText>
-      </View>
-      <View style={{ paddingHorizontal: pad, paddingBottom: insets.bottom + pad }}>
+      </Animated.View>
+      <View style={{ paddingHorizontal: pad, paddingBottom: pad }}>
         <Button label={t("common.actions.done")} onPress={() => router.back()} />
       </View>
     </Screen>

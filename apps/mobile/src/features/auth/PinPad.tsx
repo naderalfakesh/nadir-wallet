@@ -1,3 +1,4 @@
+import { haptics } from "@/services/device/haptics";
 import React, { useEffect, useState } from "react";
 import { Animated, Pressable, View } from "react-native";
 import { useTheme } from "@/theme";
@@ -71,7 +72,11 @@ export function PinKeypad({
         return (
           <View key={i} style={{ width: "33.33%", padding: 5 }}>
             <Pressable
-              onPress={() => (k === "bio" ? onBiometric?.() : onKey(k))}
+              onPress={() => {
+                haptics.selection();
+                if (k === "bio") onBiometric?.();
+                else onKey(k);
+              }}
               accessibilityRole="button"
               accessibilityLabel={k === "del" ? "Delete" : k === "bio" ? t("lock.useBiometric") : k}
               style={({ pressed }) => ({

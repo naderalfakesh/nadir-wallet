@@ -2,6 +2,7 @@ import React from "react";
 import { Pressable, View } from "react-native";
 import { useTheme, alpha } from "@/theme";
 import { t } from "@/i18n";
+import { useDemoState } from "@/providers/DemoStateProvider";
 import type { BackendStatus, PriceStatus, SecurityEvent } from "@/types/status";
 import { AppText } from "./Text";
 import { Icon, type IconName } from "./Icon";
@@ -58,6 +59,7 @@ export function StatusNotice({
           {actions.map((a, i) => (
             <Pressable
               key={a.label}
+              accessibilityRole="button"
               onPress={a.onPress}
               style={{
                 height: 34,
@@ -88,6 +90,7 @@ export function BackendNotice({
   status: BackendStatus;
   onRetry?: () => void;
 }) {
+  const { useDemoData } = useDemoState();
   if (status === "api_unavailable") {
     return (
       <StatusNotice
@@ -97,7 +100,7 @@ export function BackendNotice({
         detail={t("status.backend.apiBody")}
         actions={[
           { label: t("status.backend.retry"), icon: "refresh", onPress: onRetry },
-          { label: t("status.backend.demoMode"), onPress: onRetry },
+          { label: t("status.backend.demoMode"), onPress: useDemoData },
         ]}
       />
     );
@@ -111,7 +114,7 @@ export function BackendNotice({
         detail={t("status.backend.rpcBody")}
         actions={[
           { label: t("status.backend.retry"), icon: "refresh", onPress: onRetry },
-          { label: t("status.backend.viewCached"), onPress: onRetry },
+          { label: t("status.backend.demoMode"), onPress: useDemoData },
         ]}
       />
     );
