@@ -15,7 +15,16 @@ export const ROUTE_GROUPS = {
   public: ["index", "+not-found"],
   onboarding: ["onboarding"],
   lock: ["lock"],
-  wallet: ["(tabs)", "send", "token/[id]", "backup", "reveal", "change-passcode", "liveness", "scan"],
+  wallet: [
+    "(tabs)",
+    "send",
+    "token/[id]",
+    "backup",
+    "reveal",
+    "change-passcode",
+    "liveness",
+    "scan",
+  ],
 } as const satisfies Record<RouteGroup | "public", readonly string[]>;
 
 /** The single group that is open for this session state. */

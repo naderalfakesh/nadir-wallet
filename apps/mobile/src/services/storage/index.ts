@@ -1,11 +1,16 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { hashPasscode, isPasscodeRecord } from "@nadir-wallet/crypto-core";
+import { EMPTY_LOCKOUT, sanitizeLockout, type LockoutState } from "@/services/auth/lockout";
 import type { ColorScheme } from "@/theme";
-import { EMPTY_LOCKOUT, sanitizeLockout, type LockoutState } from "@/features/auth/lockout";
-import type { BackendStatus, PriceStatus, SecurityEvent } from "@/types/status";
-import type { SendSim, SendOutcome } from "@/providers/DemoStateProvider";
-import { INTRO_SEEN_VALUE, parseIntroSeen } from "@/features/onboarding/firstRun";
+import type {
+  BackendStatus,
+  PriceStatus,
+  SecurityEvent,
+  SendOutcome,
+  SendSim,
+} from "@/types/status";
+import { INTRO_SEEN_VALUE, parseIntroSeen } from "./introSeen";
 import { deleteMnemonic, saveMnemonic } from "./mnemonic";
 
 // Centralised so screens never touch storage keys directly.
@@ -139,7 +144,8 @@ export const storage = {
   savePrefs: (prefs: Prefs) => AsyncStorage.setItem(KEYS.prefs, JSON.stringify(prefs)),
   saveTheme: (theme: ColorScheme) => AsyncStorage.setItem(KEYS.theme, theme),
   saveDemo: (demo: DemoPrefs) => AsyncStorage.setItem(KEYS.demo, JSON.stringify(demo)),
-  saveEvents: (events: SecurityEvent[]) => AsyncStorage.setItem(KEYS.events, JSON.stringify(events)),
+  saveEvents: (events: SecurityEvent[]) =>
+    AsyncStorage.setItem(KEYS.events, JSON.stringify(events)),
   saveLockout: (state: LockoutState) => AsyncStorage.setItem(KEYS.lockout, JSON.stringify(state)),
   saveIntroSeen: () => AsyncStorage.setItem(KEYS.intro, INTRO_SEEN_VALUE),
   // Only the salted hash is written; the PIN itself is never persisted.

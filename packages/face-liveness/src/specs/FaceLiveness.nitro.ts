@@ -36,8 +36,7 @@ export interface FaceObservation {
   timestampMs: number;
 }
 
-export interface FaceLiveness
-  extends HybridObject<{ ios: "swift"; android: "kotlin" }> {
+export interface FaceLiveness extends HybridObject<{ ios: "swift"; android: "kotlin" }> {
   /**
    * Runs ML Kit face detection (fast mode + eye-open classification) on the
    * frame and returns the most prominent face, or `hasFace: false`.

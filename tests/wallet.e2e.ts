@@ -48,6 +48,7 @@ test.describe("Nadir Wallet", () => {
     await expect(screen.getByText(/Risk check unavailable/)).not.toBeVisible();
 
     await recipient.fill("0x1111111111111111111111111111111111111111");
+    await expect(screen.getByText("First-time recipient", { exact: true })).toBeVisible();
     await screen.getByRole("button", "Continue", { exact: true }).tap();
 
     for (const key of ["Decimal point", "0", "1"]) {

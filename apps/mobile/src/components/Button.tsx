@@ -1,8 +1,8 @@
 import React from "react";
 import { Pressable, View, type ViewStyle, type StyleProp } from "react-native";
 import { useTheme } from "@/theme";
-import { AppText } from "./Text";
 import { Icon, type IconName } from "./Icon";
+import { AppText } from "./Text";
 
 type Variant = "primary" | "ghost" | "soft";
 

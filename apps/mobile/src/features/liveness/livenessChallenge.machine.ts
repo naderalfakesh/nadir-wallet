@@ -1,7 +1,7 @@
 import type { FaceObservation } from "@nadir-wallet/face-liveness";
 import { THRESHOLDS, YAW_USER_LEFT_SIGN } from "./config";
-import { getFaceFit, isFaceHeldInFrame, pickChallenges } from "./livenessChallenge.utils";
 import type { LivenessMachine } from "./livenessChallenge.types";
+import { getFaceFit, isFaceHeldInFrame, pickChallenges } from "./livenessChallenge.utils";
 
 const CLEARED_PROGRESS = {
   blinkClosedSeen: false,
@@ -25,7 +25,11 @@ export function createLivenessMachine(): LivenessMachine {
  * `now`, returns the next machine. Deterministic - the only randomness is the
  * challenge order chosen at creation/reset - so it can be unit-tested directly.
  */
-export function reduceLiveness(machine: LivenessMachine, obs: FaceObservation, now: number): LivenessMachine {
+export function reduceLiveness(
+  machine: LivenessMachine,
+  obs: FaceObservation,
+  now: number,
+): LivenessMachine {
   const snapshot = machine.snapshot;
   if (snapshot.phase === "passed" || snapshot.phase === "failed") return machine;
 

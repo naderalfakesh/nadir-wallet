@@ -12,7 +12,13 @@ interface SparklineProps {
 
 const WIDTH = 320;
 
-export function Sparkline({ data, up = true, height = 96, fill = true, stroke = 2.5 }: SparklineProps) {
+export function Sparkline({
+  data,
+  up = true,
+  height = 96,
+  fill = true,
+  stroke = 2.5,
+}: SparklineProps) {
   const { colors } = useTheme();
   const max = Math.max(...data);
   const min = Math.min(...data);
@@ -47,7 +53,14 @@ export function Sparkline({ data, up = true, height = 96, fill = true, stroke = 
         </LinearGradient>
       </Defs>
       {fill && <Path d={area} fill={`url(#${gid})`} />}
-      <Path d={d} fill="none" stroke={col} strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" />
+      <Path
+        d={d}
+        fill="none"
+        stroke={col}
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       <Circle cx={last[0]} cy={last[1]} r={3.5} fill={col} />
     </Svg>
   );

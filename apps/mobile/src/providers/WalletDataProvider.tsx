@@ -1,21 +1,29 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { api } from "@/services/api";
-import type { BackendStatus, PriceStatus } from "@/types/status";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   TOKENS,
   demoTransactions,
   PORTFOLIO_TOTAL,
   PORTFOLIO_CHANGE_PCT,
-  type DemoToken,
-  type DemoTransaction,
+  type PortfolioToken,
+  type PortfolioTransaction,
 } from "@/features/wallet/data";
 import { fetchLivePortfolio, type LivePortfolio } from "@/features/wallet/portfolio";
-import { useDemoState } from "./DemoStateProvider";
+import { api } from "@/services/api";
+import type { BackendStatus, PriceStatus } from "@/types/status";
 import { useApp } from "./AppProvider";
+import { useDemoState } from "./DemoStateProvider";
 
 interface WalletData {
-  tokens: DemoToken[];
-  transactions: DemoTransaction[];
+  tokens: PortfolioToken[];
+  transactions: PortfolioTransaction[];
   total: number;
   change: number;
   backend: BackendStatus;
@@ -83,7 +91,16 @@ export function WalletDataProvider({ children }: { children: React.ReactNode }) 
 
   const value = useMemo<WalletData>(() => {
     if (!liveApi) {
-      return { ...DEMO_VIEW, transactions: demoTx, backend: demoBackend, price: demoPrice, source: "demo", loading: false, initialLoading: false, refresh };
+      return {
+        ...DEMO_VIEW,
+        transactions: demoTx,
+        backend: demoBackend,
+        price: demoPrice,
+        source: "demo",
+        loading: false,
+        initialLoading: false,
+        refresh,
+      };
     }
     if (live) {
       return {

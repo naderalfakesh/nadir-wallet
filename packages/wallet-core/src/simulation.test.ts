@@ -19,10 +19,18 @@ describe("simulateTransaction", () => {
   });
 
   it("classifies calldata as a contract interaction", () => {
-    const result = simulateTransaction({ networkId: NETWORK, from: FROM, to: TO, value: "0", data: "0xabcd" });
+    const result = simulateTransaction({
+      networkId: NETWORK,
+      from: FROM,
+      to: TO,
+      value: "0",
+      data: "0xabcd",
+    });
     expect(result.preview.type).toBe("contract_interaction");
     expect(result.estimatedFee.gasLimit).toBe("120000");
-    expect(result.warnings).toContain("This is a contract interaction; review the calldata carefully");
+    expect(result.warnings).toContain(
+      "This is a contract interaction; review the calldata carefully",
+    );
   });
 
   it("warns about an invalid recipient", () => {

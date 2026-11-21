@@ -1,11 +1,6 @@
 import type { LivenessSnapshot } from "./liveness.types";
 
-export type {
-  ChallengeId,
-  FaceFit,
-  LivenessPhase,
-  LivenessSnapshot,
-} from "./liveness.types";
+export type { ChallengeId, FaceFit, LivenessPhase, LivenessSnapshot } from "./liveness.types";
 
 /**
  * The full machine state driven off the camera worklet: the user-visible

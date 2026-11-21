@@ -1,8 +1,8 @@
 import React from "react";
-import { Pressable, View } from "react-native";
-import { useTheme } from "@/theme";
-import { AppText } from "./Text";
+import { Pressable, StyleSheet, View } from "react-native";
+import { useTheme, useThemedStyles, type Theme } from "@/theme";
 import { Icon } from "./Icon";
+import { AppText } from "./Text";
 
 interface RowProps {
   left?: React.ReactNode;
@@ -17,20 +17,12 @@ interface RowProps {
 
 export function Row({ left, title, sub, right, rightSub, onPress, chevron, last }: RowProps) {
   const theme = useTheme();
+  const styles = useThemedStyles(createStyles);
 
   const content = (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 13,
-        paddingVertical: 13,
-        borderBottomWidth: last ? 0 : 1,
-        borderBottomColor: theme.colors.hairline,
-      }}
-    >
+    <View style={[styles.container, { borderBottomWidth: last ? 0 : 1 }]}>
       {left}
-      <View style={{ flex: 1, minWidth: 0 }}>
+      <View style={styles.main}>
         {typeof title === "string" ? (
           <AppText weight="semibold" size={16} numberOfLines={1}>
             {title}
@@ -40,15 +32,15 @@ export function Row({ left, title, sub, right, rightSub, onPress, chevron, last 
         )}
         {sub != null &&
           (typeof sub === "string" ? (
-            <AppText size={13} muted style={{ marginTop: 2 }}>
+            <AppText size={13} muted style={styles.subSpacing}>
               {sub}
             </AppText>
           ) : (
-            <View style={{ marginTop: 2 }}>{sub}</View>
+            <View style={styles.subSpacing}>{sub}</View>
           ))}
       </View>
       {(right != null || rightSub != null) && (
-        <View style={{ alignItems: "flex-end" }}>
+        <View style={styles.trailing}>
           {right != null &&
             (typeof right === "string" ? (
               <AppText weight="semibold" size={15.5} tnum numberOfLines={1}>
@@ -59,11 +51,11 @@ export function Row({ left, title, sub, right, rightSub, onPress, chevron, last 
             ))}
           {rightSub != null &&
             (typeof rightSub === "string" ? (
-              <AppText size={13} muted tnum numberOfLines={1} style={{ marginTop: 2 }}>
+              <AppText size={13} muted tnum numberOfLines={1} style={styles.subSpacing}>
                 {rightSub}
               </AppText>
             ) : (
-              <View style={{ marginTop: 2 }}>{rightSub}</View>
+              <View style={styles.subSpacing}>{rightSub}</View>
             ))}
         </View>
       )}
@@ -76,7 +68,7 @@ export function Row({ left, title, sub, right, rightSub, onPress, chevron, last 
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        style={({ pressed }) => pressed && { opacity: 0.6 }}
+        style={({ pressed }) => pressed && styles.pressed}
       >
         {content}
       </Pressable>
@@ -84,3 +76,18 @@ export function Row({ left, title, sub, right, rightSub, onPress, chevron, last 
   }
   return content;
 }
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 13,
+      paddingVertical: 13,
+      borderBottomColor: theme.colors.hairline,
+    },
+    main: { flex: 1, minWidth: 0 },
+    trailing: { alignItems: "flex-end" },
+    subSpacing: { marginTop: 2 },
+    pressed: { opacity: 0.6 },
+  });

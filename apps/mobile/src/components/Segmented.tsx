@@ -1,7 +1,7 @@
-import { haptics } from "@/services/device/haptics";
 import React from "react";
-import { Pressable, View } from "react-native";
-import { useTheme } from "@/theme";
+import { Pressable, StyleSheet, View } from "react-native";
+import { haptics } from "@/services/device/haptics";
+import { useTheme, useThemedStyles, type Theme } from "@/theme";
 import { AppText } from "./Text";
 
 interface SegmentedProps<T extends string> {
@@ -18,16 +18,9 @@ export function Segmented<T extends string>({
   small,
 }: SegmentedProps<T>) {
   const theme = useTheme();
+  const styles = useThemedStyles(createStyles);
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        backgroundColor: theme.colors.surface2,
-        borderRadius: 12,
-        padding: 3,
-        gap: 2,
-      }}
-    >
+    <View style={styles.container}>
       {options.map((opt) => {
         const on = opt === value;
         return (
@@ -40,14 +33,13 @@ export function Segmented<T extends string>({
               haptics.selection();
               onChange(opt);
             }}
-            style={{
-              flex: 1,
-              height: small ? 30 : 36,
-              borderRadius: 9,
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: on ? theme.colors.surface3 : "transparent",
-            }}
+            style={[
+              styles.option,
+              {
+                height: small ? 30 : 36,
+                backgroundColor: on ? theme.colors.surface3 : "transparent",
+              },
+            ]}
           >
             <AppText
               weight="semibold"
@@ -62,3 +54,20 @@ export function Segmented<T extends string>({
     </View>
   );
 }
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      backgroundColor: theme.colors.surface2,
+      borderRadius: 12,
+      padding: 3,
+      gap: 2,
+    },
+    option: {
+      flex: 1,
+      borderRadius: 9,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });

@@ -79,8 +79,10 @@ the Barcode and Face Detection frameworks. The patch reruns on every
     overrides), `WalletDataProvider` (the single data source), `SheetProvider`.
 - **`features/`**: screen logic grouped by domain (onboarding, lock, home,
   send, token, activity, security, settings, sheets, auth, wallet, liveness,
-  scan). Screens follow a consistent split: `Screen.tsx` (composition) plus
-  `.parts.tsx` / `.styles.ts` / `.types.ts` / `.utils.ts` / `use*` hooks.
+  scan). Each feature has the same shape: the screen at the root, its pieces
+  one per file in `components/` with co-located themed styles, and pure logic
+  in `.utils.ts` / `.types.ts` / `use*` hooks. Shared layers never import
+  from `features/` or `providers/` (enforced by ESLint).
 - **`components/`**: themed primitives (Text, Button, Card, Row, Icon set,
   Sparkline, QR, BottomSheet, notices, …).
 - **`services/`**: `api` (typed client), `storage` (AsyncStorage + SecureStore),

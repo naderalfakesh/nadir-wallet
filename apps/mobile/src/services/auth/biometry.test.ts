@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { t } from "@/i18n";
+import { t, type TranslationKey } from "@/i18n";
 
 const platform = vi.hoisted(() => ({ OS: "android" }));
 const la = vi.hoisted(() => ({ supportedAuthenticationTypesAsync: vi.fn() }));
@@ -75,7 +75,7 @@ describe("biometric strings", () => {
       "onboarding.backup.revealGate",
       "security.advanced.revealSub",
       "security.log.biometricOffDetail",
-    ]) {
+    ] satisfies TranslationKey[]) {
       expect(t(key)).not.toMatch(/Face ID|\{\{/);
     }
   });
@@ -111,7 +111,7 @@ describe("biometric strings", () => {
       "security.advanced.revealSub",
       "security.model.signBody",
       "sheets.howItWorks.signBody",
-    ]) {
+    ] satisfies TranslationKey[]) {
       expect(t(key)).not.toBe(key);
       expect(t(key)).toBe(t(key, { biometry: "X", Biometry: "X" }));
     }

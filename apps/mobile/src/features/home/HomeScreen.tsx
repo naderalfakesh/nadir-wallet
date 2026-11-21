@@ -1,36 +1,33 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import { RefreshControl, ScrollView } from "react-native";
+import React, { useCallback, useRef, useState } from "react";
+import { RefreshControl, ScrollView, StyleSheet } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Screen } from "@/components";
-import { useTranslation } from "@/i18n/useTranslation";
-import { useSheets } from "@/providers/SheetProvider";
-import { useApp } from "@/providers/AppProvider";
-import { useWallet } from "@/providers/WalletDataProvider";
-import { tokenById, type Range } from "@/features/wallet/data";
 import { beginScan, type ScanTarget } from "@/features/scan/scanBridge";
 import { pickTokenForScan } from "@/features/send/send.utils";
 import { handOffScanToSend } from "@/features/send/sendHandoff";
-import { createHomeStyles } from "./HomeScreen.styles";
-import {
-  AccountBar,
-  BackendStatusNotice,
-  BackupReminder,
-  BalanceSummary,
-  QuickActions,
-  RecentActivity,
-  TokenList,
-} from "./HomeScreen.parts";
-import { isPriceUnavailable } from "./home.utils";
-import type { HomeQuickAction } from "./home.types";
+import { tokenById, type Range } from "@/features/wallet/data";
+import { useTranslation } from "@/i18n/useTranslation";
+import { useApp } from "@/providers/AppProvider";
+import { useSheets } from "@/providers/SheetProvider";
+import { useWallet } from "@/providers/WalletDataProvider";
 import { useTheme } from "@/theme";
+import { AccountBar } from "./components/AccountBar";
+import { BackendStatusNotice } from "./components/BackendStatusNotice";
+import { BackupReminder } from "./components/BackupReminder";
+import { BalanceSummary } from "./components/BalanceSummary";
+import { QuickActions } from "./components/QuickActions";
+import { RecentActivity } from "./components/RecentActivity";
+import { TokenList } from "./components/TokenList";
+import type { HomeQuickAction } from "./home.types";
+import { isPriceUnavailable } from "./home.utils";
 
 export function HomeScreen() {
   const theme = useTheme();
-  const styles = useMemo(() => createHomeStyles(theme), [theme]);
   const router = useRouter();
   const { t } = useTranslation();
   const sheets = useSheets();
-  const { tokens, transactions, total, change, backend, price, refresh, loading, initialLoading } = useWallet();
+  const { tokens, transactions, total, change, backend, price, refresh, loading, initialLoading } =
+    useWallet();
   const { prefs, setPref } = useApp();
   const [range, setRange] = useState<Range>("1W");
   const hidden = prefs.hideBalances;
@@ -65,9 +62,22 @@ export function HomeScreen() {
 
   const quickActions: HomeQuickAction[] = [
     { icon: "receive", label: t("common.actions.receive"), onPress: () => sheets.open("receive") },
-    { icon: "send", label: t("common.actions.send"), primary: true, onPress: () => router.push("/send") },
-    { icon: "swap", label: t("common.actions.swap"), onPress: () => sheets.open("soon", { title: "Swap" }) },
-    { icon: "trend", label: t("common.actions.buy"), onPress: () => sheets.open("soon", { title: "Buy crypto" }) },
+    {
+      icon: "send",
+      label: t("common.actions.send"),
+      primary: true,
+      onPress: () => router.push("/send"),
+    },
+    {
+      icon: "swap",
+      label: t("common.actions.swap"),
+      onPress: () => sheets.open("soon", { title: t("common.soon.swap") }),
+    },
+    {
+      icon: "trend",
+      label: t("common.actions.buy"),
+      onPress: () => sheets.open("soon", { title: t("common.soon.buy") }),
+    },
   ];
 
   return (
@@ -75,7 +85,13 @@ export function HomeScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={loading && !initialLoading} onRefresh={refresh} tintColor={theme.colors.accent} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading && !initialLoading}
+            onRefresh={refresh}
+            tintColor={theme.colors.accent}
+          />
+        }
       >
         <AccountBar
           hidden={hidden}
@@ -87,39 +103,32 @@ export function HomeScreen() {
         <BackendStatusNotice status={backend} onRetry={refresh} />
 
         <BalanceSummary
-          state={{ hidden, priceStatus: price, backendStatus: backend, total, change, range }}
-          title={t("home.totalBalance")}
-          unavailableLabel={t("home.valueUnavailable")}
-          testnetLabel={t("common.testnet.badge")}
+          hidden={hidden}
+          priceStatus={price}
+          backendStatus={backend}
+          total={total}
+          change={change}
+          range={range}
           loading={initialLoading}
-          historyLabel={t("home.demoHistory", { range })}
           onRetry={refresh}
           onRangeChange={setRange}
         />
 
         <QuickActions actions={quickActions} />
 
-        {!prefs.backupConfirmed && (
-          <BackupReminder
-            title={t("home.backup.title")}
-            body={t("home.backup.body")}
-            onPress={() => router.push("/backup")}
-          />
-        )}
+        {!prefs.backupConfirmed && <BackupReminder onPress={() => router.push("/backup")} />}
 
         <TokenList
           loading={initialLoading}
           onManage={() => sheets.open("soon", { title: t("home.manageTokens") })}
-          title={t("home.tokens")}
-          manageLabel={t("common.actions.manage")}
-          state={{ tokens, hidden, priceUnavailable }}
+          tokens={tokens}
+          hidden={hidden}
+          priceUnavailable={priceUnavailable}
           onTokenPress={(tokenId) => router.push(`/token/${tokenId}`)}
         />
 
         <RecentActivity
-          title={t("home.recentActivity")}
-          seeAllLabel={t("common.actions.seeAll")}
-          state={{ transactions: recent }}
+          transactions={recent}
           onSeeAll={() => router.navigate("/activity")}
           onTransactionPress={(id) => sheets.open("txDetail", { id })}
         />
@@ -127,3 +136,9 @@ export function HomeScreen() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  content: {
+    paddingBottom: 16,
+  },
+});

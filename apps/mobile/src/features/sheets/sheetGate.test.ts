@@ -17,7 +17,10 @@ describe("gateSheet", () => {
       { onboarded: true, unlocked: false },
       { onboarded: false, unlocked: false },
     ]) {
-      expect(gateSheet(groupGuards(access).wallet, receive)).toEqual({ shown: null, mustClose: true });
+      expect(gateSheet(groupGuards(access).wallet, receive)).toEqual({
+        shown: null,
+        mustClose: true,
+      });
     }
   });
 
@@ -32,7 +35,9 @@ describe("SheetHost wiring", () => {
 
   it("the root layout mounts the host once, bound to the wallet group's guard", () => {
     const layout = readFileSync(join(src, "app", "_layout.tsx"), "utf8");
-    expect(layout.match(/<SheetHost\b[^>]*\/>/g)).toEqual(["<SheetHost walletOpen={guard.wallet} />"]);
+    expect(layout.match(/<SheetHost\b[^>]*\/>/g)).toEqual([
+      "<SheetHost walletOpen={guard.wallet} />",
+    ]);
   });
 
   it("the host renders nothing and closes the sheet while the wallet group is closed", () => {

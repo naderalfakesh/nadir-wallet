@@ -1,5 +1,5 @@
 import { requireOsAuth, type OsAuthFailure } from "@/services/auth/osAuth";
-import type { SendOutcome } from "@/providers/DemoStateProvider";
+import type { SendOutcome } from "@/types/status";
 
 export type ConfirmResult =
   | { ok: true; next: "pending" | "failed" }

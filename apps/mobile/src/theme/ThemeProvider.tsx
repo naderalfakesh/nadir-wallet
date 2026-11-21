@@ -1,10 +1,9 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
-import { storage } from "@/services/storage";
 import { palettes, type ColorScheme, type ThemeColors } from "./colors";
-import { spacing } from "./spacing";
 import { radius } from "./radius";
-import { fontFamily } from "./typography";
 import { makeShadows, type Shadows } from "./shadows";
+import { spacing } from "./spacing";
+import { fontFamily } from "./typography";
 
 export interface Theme {
   scheme: ColorScheme;
@@ -39,24 +38,26 @@ function buildTheme(scheme: ColorScheme): Theme {
 export function ThemeProvider({
   children,
   initialScheme = "dark",
+  onSchemeChange,
 }: {
   children: React.ReactNode;
   initialScheme?: ColorScheme;
+  /** Called with every scheme the user picks, so the app shell can persist it. */
+  onSchemeChange?: (scheme: ColorScheme) => void;
 }) {
   const [scheme, setSchemeState] = useState<ColorScheme>(initialScheme);
 
-  const setScheme = useCallback((next: ColorScheme) => {
-    setSchemeState(next);
-    void storage.saveTheme(next);
-  }, []);
+  const setScheme = useCallback(
+    (next: ColorScheme) => {
+      setSchemeState(next);
+      onSchemeChange?.(next);
+    },
+    [onSchemeChange],
+  );
 
   const toggleScheme = useCallback(
-    () => setSchemeState((s) => {
-      const next = s === "dark" ? "light" : "dark";
-      void storage.saveTheme(next);
-      return next;
-    }),
-    [],
+    () => setScheme(scheme === "dark" ? "light" : "dark"),
+    [scheme, setScheme],
   );
 
   const value = useMemo<ThemeContextValue>(

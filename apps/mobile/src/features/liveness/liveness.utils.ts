@@ -1,6 +1,5 @@
+import type { TFunction } from "@/i18n";
 import type { LivenessSnapshot } from "./liveness.types";
-
-export type LivenessTranslator = (key: string, values?: Record<string, string | number>) => string;
 
 export function isCameraActivePhase(phase: LivenessSnapshot["phase"]): boolean {
   return phase === "align" || phase === "challenge";
@@ -11,7 +10,7 @@ export function getChallengeProgress(state: LivenessSnapshot): number {
   return Math.min(state.index / state.challenges.length, 1);
 }
 
-export function getLivenessPrompt(state: LivenessSnapshot, t: LivenessTranslator): string {
+export function getLivenessPrompt(state: LivenessSnapshot, t: TFunction): string {
   if (state.phase === "align") {
     if (state.faceFit === "ok") return t("liveness.alignHold");
     return state.faceFit === "outside" ? t("liveness.align") : t("liveness.noFace");

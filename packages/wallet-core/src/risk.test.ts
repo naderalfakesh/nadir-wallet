@@ -12,23 +12,37 @@ describe("assessAddressRisk", () => {
   });
 
   it("returns low risk for a clean known address", () => {
-    const result = assessAddressRisk({ address: VALID, networkId: NETWORK, knownContact: true, amount: "1" });
+    const result = assessAddressRisk({
+      address: VALID,
+      networkId: NETWORK,
+      knownContact: true,
+      amount: "1",
+    });
     expect(result.riskLevel).toBe("low");
     expect(result.isValidAddress).toBe(true);
     expect(result.reasons).toContain("No risk signals detected");
   });
 
   it("escalates reported addresses to high", () => {
-    expect(assessAddressRisk({ address: VALID, networkId: NETWORK, isReported: true }).riskLevel).toBe("high");
+    expect(
+      assessAddressRisk({ address: VALID, networkId: NETWORK, isReported: true }).riskLevel,
+    ).toBe("high");
   });
 
   it("treats unknown contacts and large amounts as medium", () => {
-    expect(assessAddressRisk({ address: VALID, networkId: NETWORK, knownContact: false }).riskLevel).toBe("medium");
-    expect(assessAddressRisk({ address: VALID, networkId: NETWORK, amount: "9" }).riskLevel).toBe("medium");
+    expect(
+      assessAddressRisk({ address: VALID, networkId: NETWORK, knownContact: false }).riskLevel,
+    ).toBe("medium");
+    expect(assessAddressRisk({ address: VALID, networkId: NETWORK, amount: "9" }).riskLevel).toBe(
+      "medium",
+    );
   });
 
   it("flags burn-style addresses", () => {
-    const result = assessAddressRisk({ address: "0x0000000000000000000000000000000000000000", networkId: NETWORK });
+    const result = assessAddressRisk({
+      address: "0x0000000000000000000000000000000000000000",
+      networkId: NETWORK,
+    });
     expect(result.riskLevel).toBe("medium");
   });
 

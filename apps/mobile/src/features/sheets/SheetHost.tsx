@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { BottomSheet } from "@/components";
 import { useSheets, type SheetRequest } from "@/providers/SheetProvider";
+import { AccountsSheet } from "./AccountsSheet";
+import { HowItWorksSheet } from "./HowItWorksSheet";
+import { PickTokenSheet } from "./PickTokenSheet";
 import { ReceiveSheet } from "./ReceiveSheet";
-import { TxDetailSheet } from "./TxDetailSheet";
-import { AccountsSheet, PickTokenSheet } from "./WalletSheets";
-import { SoonSheet, HowItWorksSheet, ThemeSheet } from "./InfoSheets";
 import { gateSheet } from "./sheetGate";
+import { SoonSheet } from "./SoonSheet";
+import { ThemeSheet } from "./ThemeSheet";
+import { TxDetailSheet } from "./TxDetailSheet";
 
 function SheetBody({ request, close }: { request: SheetRequest; close: () => void }) {
   switch (request.name) {

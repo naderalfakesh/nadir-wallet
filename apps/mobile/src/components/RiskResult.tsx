@@ -1,9 +1,10 @@
 import React from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { useTranslation } from "@/i18n/useTranslation";
 import { useTheme, alpha } from "@/theme";
-import { AppText } from "./Text";
-import { Icon, type IconName } from "./Icon";
 import type { RiskLevel } from "@/types/status";
+import { Icon, type IconName } from "./Icon";
+import { AppText } from "./Text";
 
 const TONE: Record<RiskLevel, { key: "pos" | "warn" | "neg"; icon: IconName }> = {
   low: { key: "pos", icon: "checkCircle" },
@@ -21,38 +22,52 @@ interface RiskResultProps {
 }
 
 export function RiskResult({ level, title, detail, levelLabel, compact }: RiskResultProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const tone = TONE[level];
   const c = theme.colors[tone.key];
 
   return (
     <View
-      style={{
-        flexDirection: "row",
-        gap: 11,
-        padding: compact ? 12 : 13,
-        borderRadius: 14,
-        backgroundColor: alpha(c, 0.11),
-        borderWidth: 1,
-        borderColor: alpha(c, 0.28),
-      }}
+      style={[
+        styles.container,
+        {
+          padding: compact ? 12 : 13,
+          backgroundColor: alpha(c, 0.11),
+          borderColor: alpha(c, 0.28),
+        },
+      ]}
     >
       <Icon name={tone.icon} size={compact ? 18 : 20} color={c} />
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+      <View style={styles.body}>
+        <View style={styles.titleRow}>
           <AppText weight="bold" size={compact ? 13 : 13.5} color={c}>
             {title}
           </AppText>
-          <View style={{ backgroundColor: alpha(c, 0.16), paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
-            <AppText weight="bold" size={10.5} color={c} style={{ letterSpacing: 0.3 }}>
-              {levelLabel.toUpperCase()} RISK
+          <View style={[styles.levelPill, { backgroundColor: alpha(c, 0.16) }]}>
+            <AppText weight="bold" size={10.5} color={c} style={styles.levelLabel}>
+              {t("status.riskPill", { level: levelLabel.toUpperCase() })}
             </AppText>
           </View>
         </View>
-        <AppText size={12.5} muted style={{ lineHeight: 18, marginTop: 3 }}>
+        <AppText size={12.5} muted style={styles.detail}>
           {detail}
         </AppText>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    gap: 11,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  body: { flex: 1, minWidth: 0 },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  levelPill: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
+  levelLabel: { letterSpacing: 0.3 },
+  detail: { lineHeight: 18, marginTop: 3 },
+});

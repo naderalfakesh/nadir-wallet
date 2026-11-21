@@ -1,24 +1,36 @@
 import React, { useState } from "react";
-import { ScrollView } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { generateMnemonic } from "@nadir-wallet/crypto-core";
 import { Screen, ScreenHeader } from "@/components";
-import { useTheme } from "@/theme";
+import { useBlockScreenCapture } from "@/features/security/useBlockScreenCapture";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useApp } from "@/providers/AppProvider";
-import { generateMnemonic } from "@nadir-wallet/crypto-core";
-import { WelcomeScreen } from "./WelcomeScreen";
-import { IntroScreen } from "./IntroScreen";
+import { useThemedStyles, type Theme } from "@/theme";
+import { BiometricStep } from "./components/BiometricStep";
+import { CreatePasscode } from "./components/CreatePasscode";
+import { ExplainStep } from "./components/ExplainStep";
+import { ImportScreen } from "./components/ImportScreen";
+import { IntroScreen } from "./components/IntroScreen";
+import { ReadyStep } from "./components/ReadyStep";
+import { SeedReveal } from "./components/SeedReveal";
+import { SeedVerify } from "./components/SeedVerify";
+import { WelcomeScreen } from "./components/WelcomeScreen";
 import { initialOnboardingStep } from "./firstRun";
-import { useBlockScreenCapture } from "@/features/security/useBlockScreenCapture";
-import { ImportScreen } from "./ImportScreen";
-import { CreatePasscode } from "./CreatePasscode";
-import { SeedReveal, SeedVerify } from "./SeedComponents";
-import { BiometricStep, ExplainStep, ReadyStep } from "./OnboardingFlow.parts";
 
-type Step = "intro" | "welcome" | "explain" | "reveal" | "verify" | "import" | "passcode" | "biometric" | "ready";
+type Step =
+  | "intro"
+  | "welcome"
+  | "explain"
+  | "reveal"
+  | "verify"
+  | "import"
+  | "passcode"
+  | "biometric"
+  | "ready";
 
 export function OnboardingFlow() {
-  const theme = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { t } = useTranslation();
   const { setPref, setPasscode, logEvent, createWallet, introSeen, markIntroSeen } = useApp();
   const [step, setStep] = useState<Step>(() => initialOnboardingStep(introSeen));
@@ -41,7 +53,6 @@ export function OnboardingFlow() {
       setFinishState("failed");
     }
   };
-  const pad = theme.spacing.pad;
 
   if (step === "intro") {
     return (
@@ -72,7 +83,7 @@ export function OnboardingFlow() {
 
   if (step === "explain") {
     return (
-      <Animated.View entering={FadeIn.duration(180)} style={{ flex: 1 }}>
+      <Animated.View entering={FadeIn.duration(180)} style={styles.explain}>
         <ExplainStep onBack={() => setStep("welcome")} onContinue={() => setStep("reveal")} />
       </Animated.View>
     );
@@ -81,9 +92,17 @@ export function OnboardingFlow() {
   if (step === "reveal") {
     return (
       <Screen>
-        <ScreenHeader title={t("onboarding.reveal.title")} subtitle={t("onboarding.reveal.step")} onBack={() => setStep("explain")} />
-        <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: pad }}>
-          <SeedReveal words={words} onContinue={() => setStep("verify")} ctaLabel={t("onboarding.reveal.cta")} />
+        <ScreenHeader
+          title={t("onboarding.reveal.title")}
+          subtitle={t("onboarding.reveal.step")}
+          onBack={() => setStep("explain")}
+        />
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <SeedReveal
+            words={words}
+            onContinue={() => setStep("verify")}
+            ctaLabel={t("onboarding.reveal.cta")}
+          />
         </ScrollView>
       </Screen>
     );
@@ -92,8 +111,12 @@ export function OnboardingFlow() {
   if (step === "verify") {
     return (
       <Screen>
-        <ScreenHeader title={t("onboarding.verify.title")} subtitle={t("onboarding.verify.step")} onBack={() => setStep("reveal")} />
-        <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingBottom: pad }}>
+        <ScreenHeader
+          title={t("onboarding.verify.title")}
+          subtitle={t("onboarding.verify.step")}
+          onBack={() => setStep("reveal")}
+        />
+        <ScrollView contentContainerStyle={styles.scrollContent}>
           <SeedVerify words={words} onContinue={() => setStep("passcode")} />
         </ScrollView>
       </Screen>
@@ -157,3 +180,9 @@ export function OnboardingFlow() {
     />
   );
 }
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    explain: { flex: 1 },
+    scrollContent: { paddingHorizontal: theme.spacing.pad, paddingBottom: theme.spacing.pad },
+  });

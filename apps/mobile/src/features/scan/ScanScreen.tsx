@@ -1,16 +1,22 @@
-import { haptics } from "@/services/device/haptics";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Camera, useCameraDevice, useCameraPermission, useFrameOutput } from "react-native-vision-camera";
+import {
+  Camera,
+  useCameraDevice,
+  useCameraPermission,
+  useFrameOutput,
+} from "react-native-vision-camera";
 import { createSynchronizable, scheduleOnRN } from "react-native-worklets";
 import { createCodeScanner } from "@nadir-wallet/code-scanner";
-import { CameraErrorBoundary } from "@/features/camera/CameraErrorBoundary";
-import { CameraStatusPanel } from "@/features/camera/CameraStatusPanel";
 import { cameraStatus, tryCreateNative } from "@/features/camera/cameraStatus";
-import { scanStyles as styles } from "./ScanScreen.styles";
-import { ScanHeader, ScanHint, ScanReticle } from "./ScanScreen.parts";
+import { CameraErrorBoundary } from "@/features/camera/components/CameraErrorBoundary";
+import { CameraStatusPanel } from "@/features/camera/components/CameraStatusPanel";
+import { haptics } from "@/services/device/haptics";
+import { ScanHeader } from "./components/ScanHeader";
+import { ScanHint } from "./components/ScanHint";
+import { ScanReticle } from "./components/ScanReticle";
 import {
   currentScanSession,
   deliverScan,
@@ -63,7 +69,13 @@ export function ScanScreen() {
   return (
     <View style={styles.root}>
       <CameraErrorBoundary
-        fallback={<CameraStatusPanel feature="scan" status="unavailable" onRequestPermission={() => undefined} />}
+        fallback={
+          <CameraStatusPanel
+            feature="scan"
+            status="unavailable"
+            onRequestPermission={() => undefined}
+          />
+        }
       >
         <ScanCamera
           bottomInset={insets.bottom}
@@ -79,7 +91,13 @@ export function ScanScreen() {
   );
 }
 
-function ScanCamera({ bottomInset, onAccept }: { bottomInset: number; onAccept: (target: ScanTarget) => void }) {
+function ScanCamera({
+  bottomInset,
+  onAccept,
+}: {
+  bottomInset: number;
+  onAccept: (target: ScanTarget) => void;
+}) {
   const { hasPermission, canRequestPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice("back");
   const [scanner] = useState(getCodeScanner);
@@ -113,7 +131,11 @@ function ScanCamera({ bottomInset, onAccept }: { bottomInset: number; onAccept: 
       if (result.ok) {
         haptics.success();
         setFound(true);
-        onAccept({ recipient: result.recipient, chainId: result.chainId, tokenContract: result.tokenContract });
+        onAccept({
+          recipient: result.recipient,
+          chainId: result.chainId,
+          tokenContract: result.tokenContract,
+        });
         return;
       }
       firstRejection ??= scanFeedback(result.reason);
@@ -167,3 +189,10 @@ function ScanCamera({ bottomInset, onAccept }: { bottomInset: number; onAccept: 
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+});

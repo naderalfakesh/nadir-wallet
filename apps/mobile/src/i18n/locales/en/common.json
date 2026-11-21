@@ -31,5 +31,22 @@
   },
   "testnet": {
     "badge": "Testnet"
+  },
+  "a11y": {
+    "back": "Back",
+    "close": "Close",
+    "closeSheet": "Close sheet",
+    "scanQr": "Scan QR code",
+    "showBalances": "Show balances",
+    "hideBalances": "Hide balances",
+    "moreOptions": "More options",
+    "copyAddress": "Copy wallet address",
+    "searchActivity": "Search activity",
+    "delete": "Delete",
+    "decimalPoint": "Decimal point"
+  },
+  "soon": {
+    "swap": "Swap",
+    "buy": "Buy crypto"
   }
 }

@@ -1,19 +1,18 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Screen, AppText, Button, Icon, StatusPill } from "@/components";
-import { useTheme, alpha } from "@/theme";
-import { useTranslation } from "@/i18n/useTranslation";
-import { fmtUSD, fmtToken, shortAddr } from "@/utils/format";
-import { CHAINS, type DemoToken } from "@/features/wallet/data";
-import type { SendOutcome } from "@/providers/DemoStateProvider";
-import { LivenessFlow } from "@/features/liveness/LivenessFlow";
-import { DeviceAuthGate, type GateOutcome } from "@/features/auth/DeviceAuthGate";
-import { PasscodeUnlock } from "@/features/auth/PasscodeUnlock";
-import { useApp } from "@/providers/AppProvider";
+import { DeviceAuthGate, type GateOutcome } from "@/features/auth/components/DeviceAuthGate";
+import { PasscodeUnlock } from "@/features/auth/components/PasscodeUnlock";
 import { createStaleGuard } from "@/features/auth/staleGuard";
+import { LivenessFlow } from "@/features/liveness/LivenessFlow";
+import { CHAINS, type PortfolioToken } from "@/features/wallet/data";
+import { useTranslation } from "@/i18n/useTranslation";
+import { useApp } from "@/providers/AppProvider";
+import { useTheme, useThemedStyles, alpha, type Theme } from "@/theme";
+import type { SendOutcome } from "@/types/status";
+import { fmtUSD, fmtToken, shortAddr } from "@/utils/format";
 import { confirmSimulatedSend, nextSendPhase } from "./confirmSend";
-import { createOverlayStyles } from "./SendConfirmOverlay.styles";
 
 export type SendPhase = "liveness" | "auth" | "pending" | "success" | "failed";
 
@@ -21,7 +20,7 @@ interface OverlayProps {
   phase: SendPhase;
   setPhase: (p: SendPhase) => void;
   outcome: SendOutcome;
-  token: DemoToken;
+  token: PortfolioToken;
   amount: number;
   fiat: number;
   to: string;
@@ -30,9 +29,19 @@ interface OverlayProps {
   onCancel: () => void;
 }
 
-export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fiat, to, onRetry, onCancel }: OverlayProps) {
+export function SendConfirmOverlay({
+  phase,
+  setPhase,
+  outcome,
+  token,
+  amount,
+  fiat,
+  to,
+  onRetry,
+  onCancel,
+}: OverlayProps) {
   const theme = useTheme();
-  const styles = useMemo(() => createOverlayStyles(theme), [theme]);
+  const styles = useThemedStyles(createStyles);
   const router = useRouter();
   const { t } = useTranslation();
   const chain = CHAINS[token.chain];
@@ -121,10 +130,10 @@ export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fi
           <View style={[styles.resultBadge, { backgroundColor: alpha(theme.colors.warn, 0.16) }]}>
             <Icon name="clock" size={46} color={theme.colors.warn} />
           </View>
-          <AppText weight="bold" size={23} style={{ marginTop: 22 }}>
+          <AppText weight="bold" size={23} style={styles.resultTitle}>
             {t("send.overlay.submitted")}
           </AppText>
-          <AppText size={14} muted style={[styles.resultBody, { maxWidth: 260 }]}>
+          <AppText size={14} muted style={[styles.resultBody, styles.maxWidth260]}>
             {t("send.overlay.submittedBody", { network: chain.name })}
           </AppText>
           <View style={styles.pillGap}>
@@ -145,10 +154,10 @@ export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fi
           <View style={[styles.resultBadge, { backgroundColor: alpha(theme.colors.neg, 0.15) }]}>
             <Icon name="close" size={46} stroke={2.6} color={theme.colors.neg} />
           </View>
-          <AppText weight="bold" size={23} style={{ marginTop: 22 }}>
+          <AppText weight="bold" size={23} style={styles.resultTitle}>
             {t("send.overlay.failedTitle")}
           </AppText>
-          <AppText size={14} muted style={[styles.resultBody, { maxWidth: 270 }]}>
+          <AppText size={14} muted style={[styles.resultBody, styles.maxWidth270]}>
             {t("send.overlay.failedBody")}
           </AppText>
         </View>
@@ -166,16 +175,19 @@ export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fi
         <View style={[styles.resultBadge, { backgroundColor: theme.colors.accentDim }]}>
           <Icon name="check" size={50} stroke={2.4} color={theme.colors.accent} />
         </View>
-        <AppText weight="bold" size={23} style={{ marginTop: 24 }}>
+        <AppText weight="bold" size={23} style={styles.sentTitle}>
           {t("send.overlay.sentTitle")}
         </AppText>
-        <AppText size={16} muted tnum style={{ marginTop: 6 }}>
-          {fmtToken(amount, token.symbol)} · {fmtUSD(fiat)} demo
+        <AppText size={16} muted tnum style={styles.sentAmount}>
+          {t("send.overlay.sentSummary", {
+            amount: fmtToken(amount, token.symbol),
+            fiat: fmtUSD(fiat),
+          })}
         </AppText>
-        <AppText mono size={12.5} faint style={{ marginTop: 6 }}>
+        <AppText mono size={12.5} faint style={styles.sentTo}>
           {t("send.overlay.sentTo", { addr: shortAddr(to, 8, 6) })}
         </AppText>
-        <AppText size={13} muted style={[styles.resultBody, { maxWidth: 270 }]}>
+        <AppText size={13} muted style={[styles.resultBody, styles.maxWidth270]}>
           {t("send.overlay.sentBody", { network: chain.name })}
         </AppText>
       </View>
@@ -185,3 +197,51 @@ export function SendConfirmOverlay({ phase, setPhase, outcome, token, amount, fi
     </Screen>
   );
 }
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    centered: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      padding: theme.spacing.pad,
+    },
+    resultBadge: {
+      width: 96,
+      height: 96,
+      borderRadius: 48,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    resultTitle: {
+      marginTop: 22,
+    },
+    sentTitle: {
+      marginTop: 24,
+    },
+    sentAmount: {
+      marginTop: 6,
+    },
+    sentTo: {
+      marginTop: 6,
+    },
+    resultBody: {
+      marginTop: 8,
+      lineHeight: 21,
+      textAlign: "center",
+    },
+    maxWidth260: {
+      maxWidth: 260,
+    },
+    maxWidth270: {
+      maxWidth: 270,
+    },
+    pillGap: {
+      marginTop: 16,
+    },
+    footer: {
+      paddingHorizontal: theme.spacing.pad,
+      paddingBottom: theme.spacing.pad,
+      gap: 10,
+    },
+  });

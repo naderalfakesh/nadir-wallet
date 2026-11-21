@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Pressable, ScrollView, View, useWindowDimensions } from "react-native";
-import { GestureDetector, GestureHandlerRootView, usePanGesture } from "react-native-gesture-handler";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
+import { Modal, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from "react-native";
+import {
+  GestureDetector,
+  GestureHandlerRootView,
+  usePanGesture,
+} from "react-native-gesture-handler";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { scheduleOnRN } from "react-native-worklets";
-import { alpha, useTheme } from "@/theme";
+import { useTranslation } from "@/i18n/useTranslation";
+import { alpha, useTheme, useThemedStyles, type Theme } from "@/theme";
 
 interface BottomSheetProps {
   visible: boolean;
@@ -14,6 +24,8 @@ interface BottomSheetProps {
 
 export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
   const theme = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const [rendered, setRendered] = useState(visible);
@@ -58,33 +70,21 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
 
   return (
     <Modal transparent visible={rendered} onRequestClose={onClose} animationType="none">
-      <GestureHandlerRootView style={{ flex: 1, justifyContent: "flex-end" }}>
-        <Animated.View
-          style={[
-            { position: "absolute", inset: 0, backgroundColor: alpha("#000", 0.55) },
-            backdropStyle,
-          ]}
-        >
-          <Pressable style={{ flex: 1 }} onPress={onClose} accessibilityRole="button" accessibilityLabel="Close sheet" />
+      <GestureHandlerRootView style={styles.root}>
+        <Animated.View style={[styles.backdrop, backdropStyle]}>
+          <Pressable
+            style={styles.backdropPressable}
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel={t("common.a11y.closeSheet")}
+          />
         </Animated.View>
         <Animated.View
-          style={[
-            {
-              maxHeight: "88%",
-              backgroundColor: theme.colors.bgGrad1,
-              borderTopLeftRadius: theme.radius.sheet,
-              borderTopRightRadius: theme.radius.sheet,
-              borderTopWidth: 1,
-              borderColor: theme.colors.hairlineStrong,
-              paddingHorizontal: theme.spacing.pad,
-              paddingBottom: insets.bottom + theme.spacing.pad,
-            },
-            sheetStyle,
-          ]}
+          style={[styles.sheet, { paddingBottom: insets.bottom + theme.spacing.pad }, sheetStyle]}
         >
           <GestureDetector gesture={pan}>
-            <View style={{ height: 32, justifyContent: "center", alignItems: "center" }}>
-              <View style={{ width: 40, height: 5, borderRadius: 99, backgroundColor: theme.colors.hairlineStrong }} />
+            <View style={styles.handleArea}>
+              <View style={styles.handle} />
             </View>
           </GestureDetector>
           <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -95,3 +95,26 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
     </Modal>
   );
 }
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    root: { flex: 1, justifyContent: "flex-end" },
+    backdrop: { position: "absolute", inset: 0, backgroundColor: alpha("#000", 0.55) },
+    backdropPressable: { flex: 1 },
+    sheet: {
+      maxHeight: "88%",
+      backgroundColor: theme.colors.bgGrad1,
+      borderTopLeftRadius: theme.radius.sheet,
+      borderTopRightRadius: theme.radius.sheet,
+      borderTopWidth: 1,
+      borderColor: theme.colors.hairlineStrong,
+      paddingHorizontal: theme.spacing.pad,
+    },
+    handleArea: { height: 32, justifyContent: "center", alignItems: "center" },
+    handle: {
+      width: 40,
+      height: 5,
+      borderRadius: 99,
+      backgroundColor: theme.colors.hairlineStrong,
+    },
+  });

@@ -15,9 +15,7 @@ import type {
 } from "@nadir-wallet/types";
 import { API_BASE_URL } from "@/constants/env";
 
-export type ApiResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: ApiErrorResponse["error"] };
+export type ApiResult<T> = { ok: true; data: T } | { ok: false; error: ApiErrorResponse["error"] };
 
 const TIMEOUT_MS = 8000;
 
@@ -88,7 +86,9 @@ export const api = {
     request<WalletBalancesResponse>(`/wallet/${address}/balances`, { query: { networkId } }),
 
   walletTransactions: (address: string, networkId: NetworkId) =>
-    request<WalletTransactionsResponse>(`/wallet/${address}/transactions`, { query: { networkId } }),
+    request<WalletTransactionsResponse>(`/wallet/${address}/transactions`, {
+      query: { networkId },
+    }),
 
   simulateTransaction: (req: TransactionSimulationRequest) =>
     request<TransactionSimulationResponse>("/transaction/simulate", {

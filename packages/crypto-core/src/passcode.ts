@@ -27,7 +27,9 @@ export interface HashPasscodeOptions {
 }
 
 function serialize(record: PasscodeRecord): string {
-  return [record.scheme, record.iterations, bytesToHex(record.salt), bytesToHex(record.hash)].join("$");
+  return [record.scheme, record.iterations, bytesToHex(record.salt), bytesToHex(record.hash)].join(
+    "$",
+  );
 }
 
 /** Parses a serialized record, or returns null for anything that is not one. */
@@ -61,13 +63,22 @@ function newRecord(opts: HashPasscodeOptions): Omit<PasscodeRecord, "hash"> {
 /** Derives a fresh record for `pin`. Synchronous; prefer the async variant on the UI thread. */
 export function hashPasscode(pin: string, opts: HashPasscodeOptions = {}): string {
   const base = newRecord(opts);
-  const hash = pbkdf2(sha256, utf8ToBytes(pin), base.salt, { c: base.iterations, dkLen: KEY_BYTES });
+  const hash = pbkdf2(sha256, utf8ToBytes(pin), base.salt, {
+    c: base.iterations,
+    dkLen: KEY_BYTES,
+  });
   return serialize({ ...base, hash });
 }
 
-export async function hashPasscodeAsync(pin: string, opts: HashPasscodeOptions = {}): Promise<string> {
+export async function hashPasscodeAsync(
+  pin: string,
+  opts: HashPasscodeOptions = {},
+): Promise<string> {
   const base = newRecord(opts);
-  const hash = await pbkdf2Async(sha256, utf8ToBytes(pin), base.salt, { c: base.iterations, dkLen: KEY_BYTES });
+  const hash = await pbkdf2Async(sha256, utf8ToBytes(pin), base.salt, {
+    c: base.iterations,
+    dkLen: KEY_BYTES,
+  });
   return serialize({ ...base, hash });
 }
 
@@ -82,7 +93,10 @@ function constantTimeEqual(a: Uint8Array, b: Uint8Array): boolean {
 export function verifyPasscode(pin: string, stored: string): boolean {
   const record = parsePasscodeRecord(stored);
   if (!record) return false;
-  const hash = pbkdf2(sha256, utf8ToBytes(pin), record.salt, { c: record.iterations, dkLen: record.hash.length });
+  const hash = pbkdf2(sha256, utf8ToBytes(pin), record.salt, {
+    c: record.iterations,
+    dkLen: record.hash.length,
+  });
   return constantTimeEqual(hash, record.hash);
 }
 

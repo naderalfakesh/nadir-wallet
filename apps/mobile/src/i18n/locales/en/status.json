@@ -11,5 +11,6 @@
     "fresh": "Estimated demo value · updated 2 min ago",
     "stale": "Using cached prices · updated 1 h ago",
     "unavailable": "Price data unavailable"
-  }
+  },
+  "riskPill": "{{level}} RISK"
 }

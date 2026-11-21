@@ -1,5 +1,5 @@
-import { haptics } from "@/services/device/haptics";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { haptics } from "@/services/device/haptics";
 
 const PIN_LENGTH = 6;
 // Brief beat after the last digit so the final dot fills before we react.

@@ -1,11 +1,11 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
-import type { ChainId, DemoToken } from "@/features/wallet/types";
+import type { ChainId, PortfolioToken } from "@/features/wallet/types";
 
 export interface SheetParams {
   receive: { chain: ChainId; token: string } | undefined;
   txDetail: { id: string };
   accounts: undefined;
-  pickToken: { current?: string; onPick?: (token: DemoToken) => void } | undefined;
+  pickToken: { current?: string; onPick?: (token: PortfolioToken) => void } | undefined;
   howItWorks: undefined;
   theme: undefined;
   soon: { title?: string } | undefined;

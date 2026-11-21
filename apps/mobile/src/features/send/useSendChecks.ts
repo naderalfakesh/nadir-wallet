@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { NetworkId, TransactionSimulationResponse } from "@nadir-wallet/types";
-import { api } from "@/services/api";
 import type { AddressRisk, RiskReason } from "@/features/wallet/risk";
+import { api } from "@/services/api";
 
 // Live risk check. Sends a public recipient address + networkId only.
 export function useRiskCheck(opts: {
@@ -13,7 +13,11 @@ export function useRiskCheck(opts: {
 }): { status: "idle" | "ok" | "unavailable"; risk: AddressRisk | null } {
   const { enabled, address, networkId, amount, knownContact } = opts;
   const key = `${address}|${networkId}|${amount}|${knownContact}`;
-  const [state, setState] = useState<{ key: string; status: "idle" | "ok" | "unavailable"; risk: AddressRisk | null }>({
+  const [state, setState] = useState<{
+    key: string;
+    status: "idle" | "ok" | "unavailable";
+    risk: AddressRisk | null;
+  }>({
     key: "",
     status: "idle",
     risk: null,
@@ -39,7 +43,8 @@ export function useRiskCheck(opts: {
         return;
       }
       const level = res.data.riskLevel;
-      const reason: RiskReason = level === "high" ? "reported" : level === "low" ? "known" : "firstTime";
+      const reason: RiskReason =
+        level === "high" ? "reported" : level === "low" ? "known" : "firstTime";
       setState({ key, status: "ok", risk: { level, blocked: level === "high", reason } });
     }, 250);
     return () => {
@@ -81,9 +86,11 @@ export function useSimulation(opts: {
     void (async () => {
       const res = await api.simulateTransaction({ networkId, from, to, value });
       if (cancelled || id !== reqId.current) return;
-      setState(res.ok
-        ? { key, status: res.data.isValid ? "passed" : "failed", data: res.data }
-        : { key, status: "unavailable" });
+      setState(
+        res.ok
+          ? { key, status: res.data.isValid ? "passed" : "failed", data: res.data }
+          : { key, status: "unavailable" },
+      );
     })();
     return () => {
       cancelled = true;

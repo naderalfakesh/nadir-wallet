@@ -1,11 +1,17 @@
+import type { PortfolioToken } from "@/features/wallet/data";
+import type { PriceStatus } from "@/types/status";
 import { fmtToken, fmtUSD } from "@/utils/format";
-import type { DemoToken } from "@/features/wallet/data";
 
-export function isPriceUnavailable(price: string): boolean {
+export function isPriceUnavailable(price: PriceStatus): boolean {
   return price === "unavailable";
 }
 
-export function getBalanceValue(total: number, hidden: boolean, priceUnavailable: boolean, unavailableLabel: string): string {
+export function getBalanceValue(
+  total: number,
+  hidden: boolean,
+  priceUnavailable: boolean,
+  unavailableLabel: string,
+): string {
   if (priceUnavailable) return unavailableLabel;
   return hidden ? "••••••" : fmtUSD(total);
 }
@@ -16,13 +22,17 @@ export function getBalanceChange(total: number, change: number, hidden: boolean)
   return fmtUSD(total - previous, { sign: true });
 }
 
-export function getTokenValue(token: DemoToken, hidden: boolean, priceUnavailable: boolean): string {
+export function getTokenValue(
+  token: PortfolioToken,
+  hidden: boolean,
+  priceUnavailable: boolean,
+): string {
   if (hidden) return "••••";
   if (priceUnavailable) return "—";
   return fmtUSD(token.value);
 }
 
-export function getTokenAmount(token: DemoToken, hidden: boolean): string {
+export function getTokenAmount(token: PortfolioToken, hidden: boolean): string {
   if (hidden) return `•••• ${token.symbol}`;
   return fmtToken(token.amount, token.symbol);
 }

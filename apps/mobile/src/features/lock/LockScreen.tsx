@@ -1,23 +1,31 @@
-import { haptics } from "@/services/device/haptics";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import * as LocalAuthentication from "expo-local-authentication";
 import { Screen, Brandmark, AppText, Button, Icon } from "@/components";
-import { useTheme } from "@/theme";
-import { useTranslation } from "@/i18n/useTranslation";
-import { t as translate } from "@/i18n";
-import { useApp } from "@/providers/AppProvider";
-import { PasscodeUnlock } from "@/features/auth/PasscodeUnlock";
-import { BiometricBadge } from "@/features/auth/BiometricBadge";
+import { BiometricBadge } from "@/features/auth/components/BiometricBadge";
+import { PasscodeUnlock } from "@/features/auth/components/PasscodeUnlock";
 import { usePulse } from "@/features/auth/usePulse";
+import { t as translate } from "@/i18n";
+import { useTranslation } from "@/i18n/useTranslation";
+import { useApp } from "@/providers/AppProvider";
 import { biometryIcon } from "@/services/auth/biometry";
+import { haptics } from "@/services/device/haptics";
+import { useTheme } from "@/theme";
 
 type BioStatus = "idle" | "authenticating" | "failed" | "cancelled" | "unavailable";
 
 export function LockScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
-  const { prefs, verifyPasscode, lockout, recordUnlockFailure, clearLockout, logEvent, unlockSession } = useApp();
+  const {
+    prefs,
+    verifyPasscode,
+    lockout,
+    recordUnlockFailure,
+    clearLockout,
+    logEvent,
+    unlockSession,
+  } = useApp();
 
   const [mode, setMode] = useState<"bio" | "passcode">(prefs.biometricEnabled ? "bio" : "passcode");
   const [available, setAvailable] = useState(false);
@@ -50,7 +58,11 @@ export function LockScreen() {
     }
     if (res.success) {
       unlock(translate("security.log.unlockBiometric"));
-    } else if (res.error === "user_cancel" || res.error === "app_cancel" || res.error === "system_cancel") {
+    } else if (
+      res.error === "user_cancel" ||
+      res.error === "app_cancel" ||
+      res.error === "system_cancel"
+    ) {
       setStatus("cancelled");
     } else {
       setStatus("failed");
@@ -64,7 +76,9 @@ export function LockScreen() {
     (async () => {
       let ok = false;
       try {
-        ok = (await LocalAuthentication.hasHardwareAsync()) && (await LocalAuthentication.isEnrolledAsync());
+        ok =
+          (await LocalAuthentication.hasHardwareAsync()) &&
+          (await LocalAuthentication.isEnrolledAsync());
       } catch {
         // Treated as no biometrics: the passcode path still guards the wallet.
       }
@@ -110,24 +124,28 @@ export function LockScreen() {
 
   return (
     <Screen>
-      <View style={{ flex: 1, alignItems: "center", paddingTop: 72 }}>
+      <View style={styles.root}>
         <Brandmark size={58} />
-        <AppText weight="bold" size={22} style={{ marginTop: 18, letterSpacing: -0.4 }}>
+        <AppText weight="bold" size={22} style={styles.appName}>
           {t("common.appName")}
         </AppText>
-        <AppText size={14} muted style={{ marginTop: 6 }}>
+        <AppText size={14} muted style={styles.welcome}>
           {t("lock.welcomeBack")}
         </AppText>
 
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <View style={styles.center}>
           <BiometricBadge pulse={pulse} active={status === "authenticating"} />
-          <AppText weight="bold" size={21} style={{ marginTop: 26 }}>
+          <AppText weight="bold" size={21} style={styles.lockedTitle}>
             {t("lock.locked")}
           </AppText>
           <AppText
             size={14}
-            color={status === "failed" || status === "cancelled" ? theme.colors.warn : theme.colors.textMuted}
-            style={{ marginTop: 6, textAlign: "center", maxWidth: 280, lineHeight: 20 }}
+            color={
+              status === "failed" || status === "cancelled"
+                ? theme.colors.warn
+                : theme.colors.textMuted
+            }
+            style={styles.subtitle}
           >
             {subtitle}
           </AppText>
@@ -138,20 +156,12 @@ export function LockScreen() {
               variant="soft"
               onPress={authenticate}
               height={48}
-              style={{ marginTop: 26, paddingHorizontal: 26 }}
+              style={styles.bioButton}
             />
           )}
         </View>
 
-        <Pressable
-          onPress={() => setMode("passcode")}
-          style={{
-            paddingBottom: 24,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
+        <Pressable onPress={() => setMode("passcode")} style={styles.passcodeLink}>
           <Icon name="lock" size={17} color={theme.colors.textMuted} />
           <AppText size={14} muted>
             {t("lock.usePasscode")}
@@ -161,3 +171,19 @@ export function LockScreen() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, alignItems: "center", paddingTop: 72 },
+  appName: { marginTop: 18, letterSpacing: -0.4 },
+  welcome: { marginTop: 6 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  lockedTitle: { marginTop: 26 },
+  subtitle: { marginTop: 6, textAlign: "center", maxWidth: 280, lineHeight: 20 },
+  bioButton: { marginTop: 26, paddingHorizontal: 26 },
+  passcodeLink: {
+    paddingBottom: 24,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+});

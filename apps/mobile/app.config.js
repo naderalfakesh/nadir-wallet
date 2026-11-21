@@ -22,7 +22,10 @@ module.exports = ({ config }) => {
     plugins: config.plugins.map((plugin) => {
       if (!Array.isArray(plugin) || plugin[0] !== "expo-build-properties") return plugin;
       const [name, properties] = plugin;
-      return [name, { ...properties, android: { ...properties.android, usesCleartextTraffic: true } }];
+      return [
+        name,
+        { ...properties, android: { ...properties.android, usesCleartextTraffic: true } },
+      ];
     }),
   };
 };

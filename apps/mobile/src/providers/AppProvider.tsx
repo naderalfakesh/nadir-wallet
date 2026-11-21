@@ -1,12 +1,16 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
-import { hashPasscodeAsync, mnemonicToEvmAddress, verifyPasscodeAsync } from "@nadir-wallet/crypto-core";
-import type { SecurityEvent, SecurityEventType } from "@/types/status";
-import { storage, DEFAULT_PREFS, type Prefs, type PersistedState } from "@/services/storage";
+import {
+  hashPasscodeAsync,
+  mnemonicToEvmAddress,
+  verifyPasscodeAsync,
+} from "@nadir-wallet/crypto-core";
 import { initialSecurityEvents } from "@/features/security/data";
 import { makeSecurityEvent } from "@/features/security/events";
-import { EMPTY_LOCKOUT, recordFailure, type LockoutState } from "@/features/auth/lockout";
-import { persistNewWallet, persistPasscode } from "./walletPersistence";
 import { clearScanHandoff } from "@/features/send/sendHandoff";
+import { EMPTY_LOCKOUT, recordFailure, type LockoutState } from "@/services/auth/lockout";
+import { storage, DEFAULT_PREFS, type Prefs, type PersistedState } from "@/services/storage";
+import type { SecurityEvent, SecurityEventType } from "@/types/status";
+import { persistNewWallet, persistPasscode } from "./walletPersistence";
 
 const MAX_EVENTS = 40;
 
@@ -23,7 +27,10 @@ interface AppValue {
   /** Records a failed passcode entry and returns the new lockout state. */
   recordUnlockFailure: () => LockoutState;
   clearLockout: () => void;
-  logEvent: (type: SecurityEventType, opts?: { detail?: string; detailVars?: Record<string, string | number> }) => void;
+  logEvent: (
+    type: SecurityEventType,
+    opts?: { detail?: string; detailVars?: Record<string, string | number> },
+  ) => void;
   /** In memory only: false on every cold start until the lock screen (or onboarding) succeeds. */
   sessionUnlocked: boolean;
   unlockSession: () => void;
@@ -41,7 +48,13 @@ interface AppValue {
 const AppContext = createContext<AppValue | null>(null);
 const SecurityEventsContext = createContext<SecurityEvent[] | null>(null);
 
-export function AppProvider({ initial, children }: { initial: PersistedState; children: React.ReactNode }) {
+export function AppProvider({
+  initial,
+  children,
+}: {
+  initial: PersistedState;
+  children: React.ReactNode;
+}) {
   const [prefs, setPrefs] = useState<Prefs>(initial.prefs);
   const [passcodeHash, setPasscodeHash] = useState(initial.passcodeHash);
   const [lockout, setLockout] = useState<LockoutState>(initial.lockout);
@@ -74,7 +87,8 @@ export function AppProvider({ initial, children }: { initial: PersistedState; ch
   }, []);
 
   const verifyPasscode = useCallback(
-    (pin: string) => (passcodeHash ? verifyPasscodeAsync(pin, passcodeHash) : Promise.resolve(false)),
+    (pin: string) =>
+      passcodeHash ? verifyPasscodeAsync(pin, passcodeHash) : Promise.resolve(false),
     [passcodeHash],
   );
 

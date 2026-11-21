@@ -11,7 +11,13 @@ interface IconButtonProps {
   accessibilityLabel: string;
 }
 
-export function IconButton({ name, onPress, size = 21, color, accessibilityLabel }: IconButtonProps) {
+export function IconButton({
+  name,
+  onPress,
+  size = 21,
+  color,
+  accessibilityLabel,
+}: IconButtonProps) {
   const theme = useTheme();
   return (
     <Pressable

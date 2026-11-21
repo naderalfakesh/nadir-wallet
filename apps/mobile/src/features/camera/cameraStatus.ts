@@ -1,3 +1,5 @@
+import type { TranslationKey } from "@/i18n";
+
 /**
  * What a camera screen can show:
  * - `request`: permission not asked yet, so the system prompt can still appear
@@ -27,10 +29,10 @@ export function cameraStatus(input: CameraInputs): CameraStatus {
 export type CameraPanelAction = "request" | "settings" | null;
 
 export interface CameraPanelCopy {
-  titleKey: string;
-  bodyKey: string;
+  titleKey: TranslationKey;
+  bodyKey: TranslationKey;
   action: CameraPanelAction;
-  actionKey: string | null;
+  actionKey: TranslationKey | null;
 }
 
 /** i18n keys for the panel shown instead of the preview; the body explains what the feature needs. */

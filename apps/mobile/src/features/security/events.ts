@@ -1,22 +1,73 @@
-import { t } from "@/i18n";
+import { t, type TranslationKey } from "@/i18n";
 import type { SecurityEvent, SecurityEventSeverity, SecurityEventType } from "@/types/status";
 
-const META: Record<SecurityEventType, { sev: SecurityEventSeverity; titleKey: string; detailKey?: string }> = {
-  created: { sev: "success", titleKey: "security.log.createdTitle", detailKey: "security.log.createdDetail" },
-  imported: { sev: "success", titleKey: "security.log.importedTitle", detailKey: "security.log.importedDetail" },
+const META: Record<
+  SecurityEventType,
+  { sev: SecurityEventSeverity; titleKey: TranslationKey; detailKey?: TranslationKey }
+> = {
+  created: {
+    sev: "success",
+    titleKey: "security.log.createdTitle",
+    detailKey: "security.log.createdDetail",
+  },
+  imported: {
+    sev: "success",
+    titleKey: "security.log.importedTitle",
+    detailKey: "security.log.importedDetail",
+  },
   unlock: { sev: "info", titleKey: "security.log.unlockTitle" },
-  backup: { sev: "success", titleKey: "security.log.backupTitle", detailKey: "security.log.backupDetail" },
-  biometric_on: { sev: "success", titleKey: "security.log.biometricOnTitle", detailKey: "security.log.biometricOnDetail" },
-  biometric_off: { sev: "warning", titleKey: "security.log.biometricOffTitle", detailKey: "security.log.biometricOffDetail" },
+  backup: {
+    sev: "success",
+    titleKey: "security.log.backupTitle",
+    detailKey: "security.log.backupDetail",
+  },
+  biometric_on: {
+    sev: "success",
+    titleKey: "security.log.biometricOnTitle",
+    detailKey: "security.log.biometricOnDetail",
+  },
+  biometric_off: {
+    sev: "warning",
+    titleKey: "security.log.biometricOffTitle",
+    detailKey: "security.log.biometricOffDetail",
+  },
   risk_check: { sev: "success", titleKey: "security.log.riskCheckTitle" },
-  risk_block: { sev: "critical", titleKey: "security.log.riskBlockTitle", detailKey: "security.log.riskBlockDetail" },
-  sim_fail: { sev: "warning", titleKey: "security.log.simFailTitle", detailKey: "security.log.simFailDetail" },
-  autolock: { sev: "info", titleKey: "security.log.autolockTitle", detailKey: "security.log.autolockDetail" },
-  autolock_triggered: { sev: "info", titleKey: "security.log.autolockTriggeredTitle", detailKey: "security.log.autolockTriggeredDetail" },
+  risk_block: {
+    sev: "critical",
+    titleKey: "security.log.riskBlockTitle",
+    detailKey: "security.log.riskBlockDetail",
+  },
+  sim_fail: {
+    sev: "warning",
+    titleKey: "security.log.simFailTitle",
+    detailKey: "security.log.simFailDetail",
+  },
+  autolock: {
+    sev: "info",
+    titleKey: "security.log.autolockTitle",
+    detailKey: "security.log.autolockDetail",
+  },
+  autolock_triggered: {
+    sev: "info",
+    titleKey: "security.log.autolockTriggeredTitle",
+    detailKey: "security.log.autolockTriggeredDetail",
+  },
   device_check: { sev: "info", titleKey: "security.log.unlockTitle" },
-  passcode_changed: { sev: "success", titleKey: "security.log.passcodeChangedTitle", detailKey: "security.log.passcodeChangedDetail" },
-  liveness_pass: { sev: "success", titleKey: "security.log.livenessPassTitle", detailKey: "security.log.livenessPassDetail" },
-  liveness_fail: { sev: "warning", titleKey: "security.log.livenessFailTitle", detailKey: "security.log.livenessFailDetail" },
+  passcode_changed: {
+    sev: "success",
+    titleKey: "security.log.passcodeChangedTitle",
+    detailKey: "security.log.passcodeChangedDetail",
+  },
+  liveness_pass: {
+    sev: "success",
+    titleKey: "security.log.livenessPassTitle",
+    detailKey: "security.log.livenessPassDetail",
+  },
+  liveness_fail: {
+    sev: "warning",
+    titleKey: "security.log.livenessFailTitle",
+    detailKey: "security.log.livenessFailDetail",
+  },
 };
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -54,8 +105,7 @@ export function makeSecurityEvent(
   opts?: { detail?: string; detailVars?: Record<string, string | number> },
 ): SecurityEvent {
   const meta = META[type];
-  const detail =
-    opts?.detail ?? (meta.detailKey ? t(meta.detailKey, opts?.detailVars) : "");
+  const detail = opts?.detail ?? (meta.detailKey ? t(meta.detailKey, opts?.detailVars) : "");
   return {
     id,
     type,

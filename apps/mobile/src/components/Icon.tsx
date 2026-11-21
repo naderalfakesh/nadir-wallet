@@ -91,8 +91,12 @@ const paths: Record<string, React.ReactNode> = {
       <Path d="M12 11v5M12 8v.2" />
     </G>
   ),
-  link: <Path d="M9.5 14.5 14.5 9.5M10 7l1.5-1.5a3.5 3.5 0 0 1 5 5L15 12M14 17l-1.5 1.5a3.5 3.5 0 0 1-5-5L9 12" />,
-  external: <Path d="M14 5h5v5M19 5l-8 8M17 13.5V18a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 5 18V8.5A1.5 1.5 0 0 1 6.5 7H11" />,
+  link: (
+    <Path d="M9.5 14.5 14.5 9.5M10 7l1.5-1.5a3.5 3.5 0 0 1 5 5L15 12M14 17l-1.5 1.5a3.5 3.5 0 0 1-5-5L9 12" />
+  ),
+  external: (
+    <Path d="M14 5h5v5M19 5l-8 8M17 13.5V18a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 5 18V8.5A1.5 1.5 0 0 1 6.5 7H11" />
+  ),
   arrowDownLeft: <Path d="M16 8 8 16M8 9.5V16h6.5" />,
   arrowUpRight: <Path d="M8 16 16 8M9.5 8H16v6.5" />,
   search: (

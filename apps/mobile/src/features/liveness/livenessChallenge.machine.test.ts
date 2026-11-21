@@ -65,7 +65,11 @@ describe("alignment", () => {
 
 describe("challenges", () => {
   it("completes a blink (eyes close then open)", () => {
-    const closed = reduceLiveness(challengeMachine(["blink"]), face({ leftEyeOpen: 0.1, rightEyeOpen: 0.1 }), 100);
+    const closed = reduceLiveness(
+      challengeMachine(["blink"]),
+      face({ leftEyeOpen: 0.1, rightEyeOpen: 0.1 }),
+      100,
+    );
     expect(closed.blinkClosedSeen).toBe(true);
     expect(reduceLiveness(closed, face(), 200).snapshot.phase).toBe("passed");
   });
@@ -91,14 +95,20 @@ describe("challenges", () => {
   });
 
   it("advances through multiple challenges before passing", () => {
-    const closed = reduceLiveness(challengeMachine(["blink", "smile"]), face({ leftEyeOpen: 0.1, rightEyeOpen: 0.1 }), 100);
+    const closed = reduceLiveness(
+      challengeMachine(["blink", "smile"]),
+      face({ leftEyeOpen: 0.1, rightEyeOpen: 0.1 }),
+      100,
+    );
     const blinked = reduceLiveness(closed, face(), 200);
     expect(blinked.snapshot.phase).toBe("challenge");
     expect(blinked.snapshot.index).toBe(1);
   });
 
   it("fails when a challenge exceeds the time limit", () => {
-    expect(reduceLiveness(challengeMachine(["blink"]), face(), 10_001).snapshot.phase).toBe("failed");
+    expect(reduceLiveness(challengeMachine(["blink"]), face(), 10_001).snapshot.phase).toBe(
+      "failed",
+    );
   });
 
   it("restarts alignment when the face is lost past the grace window", () => {

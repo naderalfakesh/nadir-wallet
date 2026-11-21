@@ -1,27 +1,32 @@
-import { haptics } from "@/services/device/haptics";
 import React from "react";
-import { Pressable, View } from "react-native";
-import { AppText } from "./Text";
+import { Pressable, StyleSheet, View } from "react-native";
+import { useTranslation } from "@/i18n/useTranslation";
+import { haptics } from "@/services/device/haptics";
 import { Icon } from "./Icon";
+import { AppText } from "./Text";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "del"] as const;
 
-export function NumberPad({ onKey }: { onKey: (key: string) => void }) {
+interface NumberPadProps {
+  onKey: (key: string) => void;
+}
+
+export function NumberPad({ onKey }: NumberPadProps) {
+  const { t } = useTranslation();
   return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+    <View style={styles.grid}>
       {KEYS.map((k) => (
         <Pressable
           key={k}
-          onPress={() => { haptics.selection(); onKey(k); }}
+          onPress={() => {
+            haptics.selection();
+            onKey(k);
+          }}
           accessibilityRole="button"
-          accessibilityLabel={k === "del" ? "Delete" : k === "." ? "Decimal point" : k}
-          style={({ pressed }) => ({
-            width: "33.33%",
-            height: 58,
-            alignItems: "center",
-            justifyContent: "center",
-            opacity: pressed ? 0.5 : 1,
-          })}
+          accessibilityLabel={
+            k === "del" ? t("common.a11y.delete") : k === "." ? t("common.a11y.decimalPoint") : k
+          }
+          style={({ pressed }) => [styles.key, { opacity: pressed ? 0.5 : 1 }]}
         >
           {k === "del" ? (
             <Icon name="chevronL" size={24} />
@@ -35,3 +40,13 @@ export function NumberPad({ onKey }: { onKey: (key: string) => void }) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  grid: { flexDirection: "row", flexWrap: "wrap" },
+  key: {
+    width: "33.33%",
+    height: 58,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

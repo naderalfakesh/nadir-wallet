@@ -1,6 +1,6 @@
-import { haptics } from "@/services/device/haptics";
 import { Share } from "react-native";
 import * as Clipboard from "expo-clipboard";
+import { haptics } from "@/services/device/haptics";
 
 export async function copyText(text: string): Promise<void> {
   if (await Clipboard.setStringAsync(text)) haptics.success();

@@ -73,7 +73,7 @@ The 6-digit PIN is the fallback for biometrics and the gate for changing itself.
 - A 6-digit keyspace is tiny, so the hash is defense in depth against a leaked
   keychain item rather than a substitute for the OS gate. Brute force through
   the UI is what the lockout is for.
-- **Lockout** is a pure, tested policy (`features/auth/lockout.ts`): every fifth
+- **Lockout** is a pure, tested policy (`services/auth/lockout.ts`): every fifth
   consecutive failure locks the keypad, each lock doubles (30s, 60s, 120s, ...)
   up to an hour, and the counter is persisted so a relaunch does not reset it.
   A successful unlock clears it.

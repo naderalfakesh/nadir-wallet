@@ -1,4 +1,4 @@
-import type { GateOutcome } from "@/features/auth/DeviceAuthGate";
+import type { GateOutcome } from "@/features/auth/components/DeviceAuthGate";
 import type { StaleGuard } from "@/features/auth/staleGuard";
 import type { RevealResult } from "@/services/storage/mnemonic";
 

@@ -64,14 +64,20 @@ describe("entryHref", () => {
 describe("deep links into protected routes", () => {
   const wallet = ROUTE_GROUPS.wallet as readonly string[];
 
-  it.each(["send", "scan", "reveal", "backup", "change-passcode", "liveness", "token/[id]", "(tabs)"])(
-    "%s is closed on a cold start and while locked",
-    (route) => {
-      expect(wallet).toContain(route);
-      expect(groupGuards({ onboarded: true, unlocked: false }).wallet).toBe(false);
-      expect(groupGuards({ onboarded: false, unlocked: false }).wallet).toBe(false);
-    },
-  );
+  it.each([
+    "send",
+    "scan",
+    "reveal",
+    "backup",
+    "change-passcode",
+    "liveness",
+    "token/[id]",
+    "(tabs)",
+  ])("%s is closed on a cold start and while locked", (route) => {
+    expect(wallet).toContain(route);
+    expect(groupGuards({ onboarded: true, unlocked: false }).wallet).toBe(false);
+    expect(groupGuards({ onboarded: false, unlocked: false }).wallet).toBe(false);
+  });
 
   it("onboarding can't be reopened over an existing wallet, locked or not", () => {
     expect(groupGuards({ onboarded: true, unlocked: false }).onboarding).toBe(false);
@@ -88,7 +94,11 @@ describe("route registry matches src/app", () => {
 
   it("registers each guarded group's screens inside its own Stack.Protected block", () => {
     const layout = readFileSync(join(APP_DIR, "_layout.tsx"), "utf8");
-    const blocks = [...layout.matchAll(/<Stack\.Protected guard=\{guard\.(\w+)\}>([\s\S]*?)<\/Stack\.Protected>/g)];
+    const blocks = [
+      ...layout.matchAll(
+        /<Stack\.Protected guard=\{guard\.(\w+)\}>([\s\S]*?)<\/Stack\.Protected>/g,
+      ),
+    ];
     const registered: Record<string, string[]> = {};
     for (const [, group, body] of blocks) {
       registered[group] = [...body.matchAll(/<Stack\.Screen name="([^"]+)"/g)].map((m) => m[1]);
@@ -107,7 +117,7 @@ describe("route registry matches src/app", () => {
   it("keeps public routes free of wallet content (they only redirect)", () => {
     for (const route of ROUTE_GROUPS.public) {
       const source = readFileSync(join(APP_DIR, `${route}.tsx`), "utf8");
-      expect(source).toMatch(/<Redirect /);
+      expect(source).toMatch(/<Redirect\s/);
       expect(source).not.toMatch(/features\/(send|scan|security|liveness|home|token)/);
     }
   });

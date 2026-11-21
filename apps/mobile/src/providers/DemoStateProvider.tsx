@@ -1,9 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
-import type { BackendStatus, PriceStatus } from "@/types/status";
 import { storage, type DemoPrefs } from "@/services/storage";
-
-export type SendSim = "pass" | "fail";
-export type SendOutcome = "success" | "pending" | "failed";
+import type { BackendStatus, PriceStatus, SendOutcome, SendSim } from "@/types/status";
 
 // Showcase-only switches that let a reviewer exercise every backend/price/send
 // state from the running app - the equivalent of the design's tweak panel.
@@ -20,7 +17,13 @@ interface DemoStateValue extends DemoPrefs {
 
 const DemoStateContext = createContext<DemoStateValue | null>(null);
 
-export function DemoStateProvider({ initial, children }: { initial: DemoPrefs; children: React.ReactNode }) {
+export function DemoStateProvider({
+  initial,
+  children,
+}: {
+  initial: DemoPrefs;
+  children: React.ReactNode;
+}) {
   const [state, setState] = useState<DemoPrefs>(initial);
 
   const update = useCallback((partial: Partial<DemoPrefs>) => {
@@ -35,14 +38,29 @@ export function DemoStateProvider({ initial, children }: { initial: DemoPrefs; c
   const setBackend = useCallback((backend: BackendStatus) => update({ backend }), [update]);
   const setPrice = useCallback((price: PriceStatus) => update({ price }), [update]);
   const setSendSim = useCallback((sendSim: SendSim) => update({ sendSim }), [update]);
-  const setSendOutcome = useCallback((sendOutcome: SendOutcome) => update({ sendOutcome }), [update]);
+  const setSendOutcome = useCallback(
+    (sendOutcome: SendOutcome) => update({ sendOutcome }),
+    [update],
+  );
   // Transient backend/price errors clear on retry; keys are local, always safe.
   const retry = useCallback(() => update({ backend: "online", price: "fresh" }), [update]);
 
-  const useDemoData = useCallback(() => update({ liveApi: false, backend: "online", price: "fresh" }), [update]);
+  const useDemoData = useCallback(
+    () => update({ liveApi: false, backend: "online", price: "fresh" }),
+    [update],
+  );
 
   const value = useMemo<DemoStateValue>(
-    () => ({ ...state, setLiveApi, setBackend, setPrice, setSendSim, setSendOutcome, retry, useDemoData }),
+    () => ({
+      ...state,
+      setLiveApi,
+      setBackend,
+      setPrice,
+      setSendSim,
+      setSendOutcome,
+      retry,
+      useDemoData,
+    }),
     [state, setLiveApi, setBackend, setPrice, setSendSim, setSendOutcome, retry, useDemoData],
   );
 

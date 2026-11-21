@@ -13,13 +13,6 @@ export const INTRO_STEPS = [
 
 export type IntroStepId = (typeof INTRO_STEPS)[number]["id"];
 
-// Stored on its own key (not in wallet prefs) so a wallet reset doesn't replay it.
-export const INTRO_SEEN_VALUE = "1";
-
-export function parseIntroSeen(raw: string | null | undefined): boolean {
-  return raw === INTRO_SEEN_VALUE;
-}
-
 export function initialOnboardingStep(introSeen: boolean): "intro" | "welcome" {
   return introSeen ? "welcome" : "intro";
 }

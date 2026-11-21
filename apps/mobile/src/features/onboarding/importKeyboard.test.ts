@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 // The test runner has no native renderer, so these pin the layout props that
 // keep the Import button reachable while the autofocused keyboard is up.
-const source = readFileSync(join(__dirname, "ImportScreen.tsx"), "utf8");
+const source = readFileSync(join(__dirname, "components", "ImportScreen.tsx"), "utf8");
 const flow = readFileSync(join(__dirname, "OnboardingFlow.tsx"), "utf8");
 
 describe("Import wallet keyboard handling", () => {

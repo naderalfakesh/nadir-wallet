@@ -1,4 +1,8 @@
-import { english, generateMnemonic as viemGenerateMnemonic, mnemonicToAccount } from "viem/accounts";
+import {
+  english,
+  generateMnemonic as viemGenerateMnemonic,
+  mnemonicToAccount,
+} from "viem/accounts";
 import { validateMnemonic } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
 

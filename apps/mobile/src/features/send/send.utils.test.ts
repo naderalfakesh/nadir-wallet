@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { RECIPIENTS, TOKENS, tokenById, type DemoToken } from "@/features/wallet/data";
+import { RECIPIENTS, TOKENS, tokenById, type PortfolioToken } from "@/features/wallet/data";
 import {
   checkScanForToken,
   getBalanceAfter,
@@ -14,8 +14,18 @@ import {
 
 const t = (key: string) => key;
 
-function token(id: string): DemoToken {
-  return { id, symbol: id.toUpperCase(), name: id, chain: "ethereum", amount: 1, price: 1, change: 0, color: "#fff", value: 1 };
+function token(id: string): PortfolioToken {
+  return {
+    id,
+    symbol: id.toUpperCase(),
+    name: id,
+    chain: "ethereum",
+    amount: 1,
+    price: 1,
+    change: 0,
+    color: "#fff",
+    value: 1,
+  };
 }
 
 describe("getRecipientValidation", () => {
@@ -52,14 +62,20 @@ describe("getRiskCopy", () => {
     expect(copy.title).toBe("send.risk.reportedTitle");
     expect(copy.levelLabel).toBe("send.risk.levelHigh");
 
-    expect(getRiskCopy({ level: "low", blocked: false, reason: "known" }, t).levelLabel).toBe("send.risk.levelLow");
-    expect(getRiskCopy({ level: "medium", blocked: false, reason: "firstTime" }, t).title).toBe("send.risk.firstTimeTitle");
+    expect(getRiskCopy({ level: "low", blocked: false, reason: "known" }, t).levelLabel).toBe(
+      "send.risk.levelLow",
+    );
+    expect(getRiskCopy({ level: "medium", blocked: false, reason: "firstTime" }, t).title).toBe(
+      "send.risk.firstTimeTitle",
+    );
   });
 });
 
 describe("simulation status mapping", () => {
   it("marks local simulation unavailable when checks are down", () => {
-    expect(getLocalSimulationStatus({ checksAvailable: false, sendSim: "pass" })).toBe("unavailable");
+    expect(getLocalSimulationStatus({ checksAvailable: false, sendSim: "pass" })).toBe(
+      "unavailable",
+    );
     expect(getLocalSimulationStatus({ checksAvailable: true, sendSim: "fail" })).toBe("failed");
     expect(getLocalSimulationStatus({ checksAvailable: true, sendSim: "pass" })).toBe("passed");
   });
@@ -112,7 +128,9 @@ describe("checkScanForToken", () => {
   });
 
   it("rejects a non-native token on the scanned network", () => {
-    expect(checkScanForToken(native(SEPOLIA), { ...tokenById("eth"), symbol: "USDC" })).toBe("asset-mismatch");
+    expect(checkScanForToken(native(SEPOLIA), { ...tokenById("eth"), symbol: "USDC" })).toBe(
+      "asset-mismatch",
+    );
   });
 
   it("rejects mainnet chain ids even if they slipped past the parser", () => {
@@ -121,8 +139,12 @@ describe("checkScanForToken", () => {
   });
 
   it("refuses ERC-20 transfer requests regardless of network", () => {
-    expect(checkScanForToken({ chainId: SEPOLIA, tokenContract: TOKEN }, tokenById("eth"))).toBe("token-request");
-    expect(checkScanForToken({ chainId: AMOY, tokenContract: TOKEN }, tokenById("pol"))).toBe("token-request");
+    expect(checkScanForToken({ chainId: SEPOLIA, tokenContract: TOKEN }, tokenById("eth"))).toBe(
+      "token-request",
+    );
+    expect(checkScanForToken({ chainId: AMOY, tokenContract: TOKEN }, tokenById("pol"))).toBe(
+      "token-request",
+    );
   });
 });
 
@@ -133,7 +155,10 @@ describe("pickTokenForScan", () => {
   const eth = tokenById("eth");
 
   it("picks the native token of the scanned network", () => {
-    expect(pickTokenForScan({ chainId: SEPOLIA, tokenContract: null }, TOKENS, eth)).toEqual({ ok: true, token: eth });
+    expect(pickTokenForScan({ chainId: SEPOLIA, tokenContract: null }, TOKENS, eth)).toEqual({
+      ok: true,
+      token: eth,
+    });
     expect(pickTokenForScan({ chainId: AMOY, tokenContract: null }, TOKENS, eth)).toEqual({
       ok: true,
       token: tokenById("pol"),
@@ -145,7 +170,10 @@ describe("pickTokenForScan", () => {
       ok: true,
       token: TOKENS[0],
     });
-    expect(pickTokenForScan({ chainId: null, tokenContract: null }, [], eth)).toEqual({ ok: true, token: eth });
+    expect(pickTokenForScan({ chainId: null, tokenContract: null }, [], eth)).toEqual({
+      ok: true,
+      token: eth,
+    });
   });
 
   it("refuses token payment requests", () => {

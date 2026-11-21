@@ -31,7 +31,9 @@ describe("validateMnemonicPhrase", () => {
   });
 
   it("rejects valid words with a bad checksum", () => {
-    const result = validateMnemonicPhrase("test test test test test test test test test test test test");
+    const result = validateMnemonicPhrase(
+      "test test test test test test test test test test test test",
+    );
     expect(result.wordCountValid).toBe(true);
     expect(result.invalidWord).toBeNull();
     expect(result.checksumValid).toBe(false);

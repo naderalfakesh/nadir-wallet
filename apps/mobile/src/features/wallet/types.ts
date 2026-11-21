@@ -11,7 +11,7 @@ export interface Chain {
   explorerHost: string;
 }
 
-export interface DemoToken {
+export interface PortfolioToken {
   id: string;
   symbol: string;
   name: string;
@@ -25,7 +25,7 @@ export interface DemoToken {
 
 export type TxType = "send" | "receive" | "swap";
 
-export interface DemoTransaction {
+export interface PortfolioTransaction {
   id: string;
   type: TxType;
   token: string;

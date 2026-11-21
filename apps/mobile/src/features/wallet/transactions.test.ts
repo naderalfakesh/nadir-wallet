@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { Theme } from "@/theme";
-import type { DemoTransaction, TxType } from "./types";
 import { getTransactionAmount, getTransactionTime, getTransactionVerbs } from "./transactions";
+import type { PortfolioTransaction, TxType } from "./types";
 
 const theme = { colors: { text: "text", textFaint: "faint", pos: "pos" } } as unknown as Theme;
 const t = (key: string) => key;
 
-function tx(overrides: Partial<DemoTransaction> = {}): DemoTransaction {
+function tx(overrides: Partial<PortfolioTransaction> = {}): PortfolioTransaction {
   return {
     id: "t1",
     type: "receive",

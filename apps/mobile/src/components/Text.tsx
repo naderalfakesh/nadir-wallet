@@ -42,11 +42,7 @@ export function AppText({
   return (
     <RNText
       {...rest}
-      style={[
-        { fontFamily: family, fontSize: size, color: resolved },
-        tnum && styles.tnum,
-        style,
-      ]}
+      style={[{ fontFamily: family, fontSize: size, color: resolved }, tnum && styles.tnum, style]}
     />
   );
 }

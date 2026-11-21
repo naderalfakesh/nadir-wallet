@@ -1,11 +1,10 @@
 import type { TextStyle } from "react-native";
+import type { TFunction } from "@/i18n";
 import type { Theme } from "@/theme";
 import { fmtToken } from "@/utils/format";
-import type { DemoTransaction, TxType } from "./types";
+import type { PortfolioTransaction, TxType } from "./types";
 
-type Translate = (key: string, values?: Record<string, string | number>) => string;
-
-export function getTransactionVerbs(t: Translate): Record<TxType, string> {
+export function getTransactionVerbs(t: TFunction): Record<TxType, string> {
   return {
     receive: t("activity.verb.receive"),
     send: t("activity.verb.send"),
@@ -20,16 +19,22 @@ export interface TransactionAmount {
   style?: TextStyle;
 }
 
-export function getTransactionAmount(tx: DemoTransaction, theme: Theme): TransactionAmount {
+export function getTransactionAmount(tx: PortfolioTransaction, theme: Theme): TransactionAmount {
   const incoming = tx.type === "receive";
-  const color = tx.status === "failed" ? theme.colors.textFaint : incoming ? theme.colors.pos : theme.colors.text;
+  const color =
+    tx.status === "failed"
+      ? theme.colors.textFaint
+      : incoming
+        ? theme.colors.pos
+        : theme.colors.text;
   const prefix = incoming ? "+" : tx.type === "send" ? "−" : "";
-  const style = tx.status === "failed" ? { textDecorationLine: "line-through" as const } : undefined;
+  const style =
+    tx.status === "failed" ? { textDecorationLine: "line-through" as const } : undefined;
   return { color, prefix, text: fmtToken(tx.amount, tx.token), style };
 }
 
 /** The time portion of a "Today · 2:14 PM" timestamp, falling back to the whole label. */
-export function getTransactionTime(tx: DemoTransaction): string {
+export function getTransactionTime(tx: PortfolioTransaction): string {
   return tx.when.split(" · ")[1] ?? tx.when;
 }
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useTheme, alpha } from "@/theme";
 import { Icon, type IconName } from "./Icon";
 
@@ -10,8 +10,7 @@ interface MiniIconProps {
 }
 
 export function MiniIcon({ name, tone = "neutral" }: MiniIconProps) {
-  const theme = useTheme();
-  const { colors } = theme;
+  const { colors } = useTheme();
 
   const toneColor =
     tone === "accent"
@@ -24,20 +23,22 @@ export function MiniIcon({ name, tone = "neutral" }: MiniIconProps) {
             ? colors.neg
             : colors.text;
 
-  const bg = tone === "neutral" ? colors.surface2 : alpha(toneColor, tone === "accent" ? 0.15 : 0.16);
+  const bg =
+    tone === "neutral" ? colors.surface2 : alpha(toneColor, tone === "accent" ? 0.15 : 0.16);
 
   return (
-    <View
-      style={{
-        width: 38,
-        height: 38,
-        borderRadius: 12,
-        backgroundColor: bg,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <View style={[styles.container, { backgroundColor: bg }]}>
       <Icon name={name} size={20} color={tone === "neutral" ? colors.text : toneColor} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

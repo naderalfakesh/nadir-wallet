@@ -1,25 +1,37 @@
-import { haptics } from "@/services/device/haptics";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Camera, useCameraDevice, useCameraPermission, useFrameOutput } from "react-native-vision-camera";
+import {
+  Camera,
+  useCameraDevice,
+  useCameraPermission,
+  useFrameOutput,
+} from "react-native-vision-camera";
 import { createSynchronizable, scheduleOnRN } from "react-native-worklets";
-import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from "react-native-reanimated";
 import { createFaceLiveness } from "@nadir-wallet/face-liveness";
 import { AppText, Icon } from "@/components";
+import { cameraStatus, tryCreateNative } from "@/features/camera/cameraStatus";
+import { CameraErrorBoundary } from "@/features/camera/components/CameraErrorBoundary";
+import { CameraStatusPanel } from "@/features/camera/components/CameraStatusPanel";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useApp } from "@/providers/AppProvider";
+import { haptics } from "@/services/device/haptics";
 import { useTheme } from "@/theme";
-import { CameraErrorBoundary } from "@/features/camera/CameraErrorBoundary";
-import { CameraStatusPanel } from "@/features/camera/CameraStatusPanel";
-import { cameraStatus, tryCreateNative } from "@/features/camera/cameraStatus";
-import { FaceMaskOverlay } from "./FaceMaskOverlay";
-import { useLivenessChallenge } from "./useLivenessChallenge";
+import { BottomPromptPanel } from "./components/BottomPromptPanel";
+import { FaceMaskOverlay } from "./components/FaceMaskOverlay";
+import { LivenessHeader } from "./components/LivenessHeader";
+import { ResultBadge } from "./components/ResultBadge";
 import { FRAME_STRIDE } from "./config";
-import { BottomPromptPanel, LivenessHeader, ResultBadge } from "./LivenessFlow.parts";
-import { livenessStyles as styles } from "./LivenessFlow.styles";
-import { getChallengeProgress, getLivenessPrompt, isCameraActivePhase } from "./liveness.utils";
 import type { LivenessFlowProps } from "./liveness.types";
+import { getChallengeProgress, getLivenessPrompt, isCameraActivePhase } from "./liveness.utils";
+import { useLivenessChallenge } from "./useLivenessChallenge";
 
 // Reuse the detector across visits so an in-flight frame keeps a valid native object.
 let sharedPlugin: ReturnType<typeof createFaceLiveness> | null = null;
@@ -43,7 +55,11 @@ function LivenessUnavailable({ onCancel }: { onCancel: () => void }) {
   const insets = useSafeAreaInsets();
   return (
     <View style={styles.root}>
-      <CameraStatusPanel feature="liveness" status="unavailable" onRequestPermission={() => undefined} />
+      <CameraStatusPanel
+        feature="liveness"
+        status="unavailable"
+        onRequestPermission={() => undefined}
+      />
       <LivenessHeader topInset={insets.top} phase="align" index={0} total={0} onCancel={onCancel} />
     </View>
   );
@@ -163,7 +179,9 @@ function LivenessCamera({ mode, onPass, onCancel }: LivenessFlowProps) {
         />
       )}
 
-      {ready && <FaceMaskOverlay fit={state.faceFit} phase={state.phase} progress={challengeProgress} />}
+      {ready && (
+        <FaceMaskOverlay fit={state.faceFit} phase={state.phase} progress={challengeProgress} />
+      )}
 
       <ResultBadge visible={hasPassed}>
         <Animated.View style={[styles.badge, { backgroundColor: colors.pos }, badgeStyle]}>
@@ -200,3 +218,20 @@ function LivenessCamera({ mode, onPass, onCancel }: LivenessFlowProps) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  badge: {
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  prompt: {
+    textAlign: "center",
+  },
+});

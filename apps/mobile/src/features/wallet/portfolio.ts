@@ -2,8 +2,13 @@ import type { NetworkId, TokenBalance, WalletTransaction } from "@nadir-wallet/t
 import { api } from "@/services/api";
 import type { PriceStatus } from "@/types/status";
 import { shortAddr } from "@/utils/format";
+import {
+  NETWORK_TO_CHAIN,
+  type PortfolioToken,
+  type PortfolioTransaction,
+  type TxType,
+} from "./data";
 import { formatWhenDay } from "./when";
-import { NETWORK_TO_CHAIN, type DemoToken, type DemoTransaction, type TxType } from "./data";
 
 const NETWORKS: NetworkId[] = ["ethereum-sepolia", "polygon-amoy"];
 
@@ -23,7 +28,7 @@ const SYMBOL_CHANGE: Record<string, number> = {
 const colorFor = (s: string) => SYMBOL_COLOR[s] ?? "#8A93A6";
 const changeFor = (s: string) => SYMBOL_CHANGE[s] ?? 0;
 
-function toDemoToken(balance: TokenBalance): DemoToken {
+function toPortfolioToken(balance: TokenBalance): PortfolioToken {
   const chain = NETWORK_TO_CHAIN[balance.token.networkId];
   const amount = Number(balance.formatted) || 0;
   return {
@@ -39,8 +44,13 @@ function toDemoToken(balance: TokenBalance): DemoToken {
   };
 }
 
-function toDemoTransaction(tx: WalletTransaction, priceMap: Record<string, number>, now: Date): DemoTransaction {
-  const type: TxType = tx.type === "receive" ? "receive" : tx.type === "contract_interaction" ? "swap" : "send";
+function toPortfolioTransaction(
+  tx: WalletTransaction,
+  priceMap: Record<string, number>,
+  now: Date,
+): PortfolioTransaction {
+  const type: TxType =
+    tx.type === "receive" ? "receive" : tx.type === "contract_interaction" ? "swap" : "send";
   const incoming = type === "receive";
   const amount = Number(tx.valueFormatted) || 0;
   const { day, when } = formatWhenDay(tx.timestamp, now);
@@ -62,8 +72,8 @@ function toDemoTransaction(tx: WalletTransaction, priceMap: Record<string, numbe
 }
 
 export interface LivePortfolio {
-  tokens: DemoToken[];
-  transactions: DemoTransaction[];
+  tokens: PortfolioToken[];
+  transactions: PortfolioTransaction[];
   total: number;
   change: number;
   priceStatus: PriceStatus;
@@ -102,7 +112,7 @@ export async function fetchLivePortfolio(address: string): Promise<LivePortfolio
   }
 
   const tokens = balances.map((b) => {
-    const token = toDemoToken(b);
+    const token = toPortfolioToken(b);
     token.price = priceMap[token.symbol] ?? 0;
     token.value = token.amount * token.price;
     return token;
@@ -112,7 +122,7 @@ export async function fetchLivePortfolio(address: string): Promise<LivePortfolio
   const rawTx = perNetwork
     .flatMap((n) => n.transactions ?? [])
     .sort((a, b) => b.timestamp - a.timestamp);
-  const transactions = rawTx.map((tx) => toDemoTransaction(tx, priceMap, now));
+  const transactions = rawTx.map((tx) => toPortfolioTransaction(tx, priceMap, now));
 
   const total = tokens.reduce((s, t) => s + t.value, 0);
   const change = total > 0 ? tokens.reduce((s, t) => s + t.change * t.value, 0) / total : 0;

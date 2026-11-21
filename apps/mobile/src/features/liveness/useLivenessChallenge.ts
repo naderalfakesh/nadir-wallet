@@ -4,7 +4,12 @@ import { createLivenessMachine, reduceLiveness } from "./livenessChallenge.machi
 import type { LivenessSnapshot } from "./livenessChallenge.types";
 
 function sameSnapshot(a: LivenessSnapshot, b: LivenessSnapshot): boolean {
-  return a.phase === b.phase && a.faceFit === b.faceFit && a.index === b.index && a.challenges === b.challenges;
+  return (
+    a.phase === b.phase &&
+    a.faceFit === b.faceFit &&
+    a.index === b.index &&
+    a.challenges === b.challenges
+  );
 }
 
 export function useLivenessChallenge() {

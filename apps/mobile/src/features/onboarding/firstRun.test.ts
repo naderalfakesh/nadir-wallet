@@ -2,9 +2,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import onboarding from "@/i18n/locales/en/onboarding.json";
 import { ROUTE_GROUPS, groupGuards } from "@/features/lock/routeAccess";
-import { INTRO_SEEN_VALUE, INTRO_STEPS, initialOnboardingStep, nextIntroIndex, parseIntroSeen } from "./firstRun";
+import onboarding from "@/i18n/locales/en/onboarding.json";
+import { INTRO_SEEN_VALUE, parseIntroSeen } from "@/services/storage/introSeen";
+import { INTRO_STEPS, initialOnboardingStep, nextIntroIndex } from "./firstRun";
 
 const secure = vi.hoisted(() => ({
   getItemAsync: vi.fn(),

@@ -88,8 +88,13 @@ src/
 plugins/        Expo config plugins (ML Kit simulator fix)
 ```
 
-Screens follow one split: `Screen.tsx` composes `.parts.tsx`, `.styles.ts`,
-`.types.ts`, `.utils.ts`, and `use*` hooks. Pure logic in `features/` has
+Each feature folder follows one shape: the screen (`HomeScreen.tsx`) at the
+root composes one-component-per-file pieces from `components/`, with pure
+logic beside it in `.utils.ts`, `.types.ts`, `.constants.ts` and `use*` hooks.
+Styles sit at the bottom of the file that uses them, as a `createStyles(theme)`
+factory read through `useThemedStyles`. Translation keys are type-checked, and
+ESLint keeps the shared layers (`components`, `services`, `theme`, `utils`,
+`i18n`) from importing features or providers. Pure logic in `features/` has
 Vitest coverage from the repo root (`pnpm test`).
 
 ## Demo controls

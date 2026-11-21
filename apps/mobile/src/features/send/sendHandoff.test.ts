@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
 import { clearScanHandoff, handOffScanToSend, takeScanHandoff } from "./sendHandoff";
 
 const target = {
@@ -32,7 +32,10 @@ describe("sendHandoff", () => {
   });
 
   it("is cleared when the session locks or the wallet resets", () => {
-    const source = readFileSync(new URL("../../providers/AppProvider.tsx", import.meta.url), "utf8");
+    const source = readFileSync(
+      new URL("../../providers/AppProvider.tsx", import.meta.url),
+      "utf8",
+    );
     expect(source).toMatch(/const lockSession = useCallback\(\(\) => \{\s*clearScanHandoff\(\);/);
     expect(source).toMatch(/clearWallet\(\);\s*clearScanHandoff\(\);/);
   });

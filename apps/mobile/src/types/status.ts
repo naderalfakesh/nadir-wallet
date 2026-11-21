@@ -8,6 +8,11 @@ export type BackendStatus = "online" | "api_unavailable" | "rpc_unavailable";
 export type PriceStatus = "fresh" | "stale" | "unavailable";
 export type SimulationStatus = "passed" | "failed" | "unavailable";
 
+// Showcase switches for the simulated send: how the simulation and the final
+// outcome should turn out.
+export type SendSim = "pass" | "fail";
+export type SendOutcome = "success" | "pending" | "failed";
+
 export type RiskLevel = AddressRiskLevel;
 
 export type SecurityEventType =

@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { RefreshControl, ScrollView, View } from "react-native";
+import React, { useState } from "react";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import {
   Screen,
   ScreenHeader,
@@ -8,21 +8,21 @@ import {
   IconButton,
   SectionLabel,
   EmptyState,
-  BackendNotice,
 } from "@/components";
-import { useTheme } from "@/theme";
+import { BackendNotice } from "@/features/wallet/components/BackendNotice";
+import { TransactionRow } from "@/features/wallet/components/TransactionRow";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useSheets } from "@/providers/SheetProvider";
 import { useWallet } from "@/providers/WalletDataProvider";
-import { TransactionRow } from "@/features/wallet/TransactionRow";
-import { createActivityStyles } from "./ActivityScreen.styles";
-import { ActivitySubtitle, FilterChip } from "./ActivityScreen.parts";
-import { filterTransactions, getActivityDays } from "./activity.utils";
+import { useTheme, useThemedStyles, type Theme } from "@/theme";
 import type { ActivityFilter, ActivityFilterOption } from "./activity.types";
+import { filterTransactions, getActivityDays } from "./activity.utils";
+import { ActivitySubtitle } from "./components/ActivitySubtitle";
+import { FilterChip } from "./components/FilterChip";
 
 export function ActivityScreen() {
   const theme = useTheme();
-  const styles = useMemo(() => createActivityStyles(theme), [theme]);
+  const styles = useThemedStyles(createStyles);
   const { t } = useTranslation();
   const sheets = useSheets();
   const { transactions, backend, refresh, loading } = useWallet();
@@ -45,8 +45,8 @@ export function ActivityScreen() {
           <IconButton
             name="search"
             size={20}
-            accessibilityLabel="Search activity"
-            onPress={() => sheets.open("soon", { title: "Search activity" })}
+            accessibilityLabel={t("common.a11y.searchActivity")}
+            onPress={() => sheets.open("soon", { title: t("common.a11y.searchActivity") })}
           />
         }
       />
@@ -57,14 +57,25 @@ export function ActivityScreen() {
       )}
       <View style={styles.filters}>
         {filters.map((f) => (
-          <FilterChip key={f.value} label={f.label} active={filter === f.value} onPress={() => setFilter(f.value)} />
+          <FilterChip
+            key={f.value}
+            label={f.label}
+            active={filter === f.value}
+            onPress={() => setFilter(f.value)}
+          />
         ))}
       </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.list}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={theme.colors.accent} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={refresh}
+            tintColor={theme.colors.accent}
+          />
+        }
       >
         {rows.length === 0 ? (
           <EmptyState
@@ -104,3 +115,35 @@ export function ActivityScreen() {
     </Screen>
   );
 }
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    notice: {
+      paddingHorizontal: theme.spacing.pad,
+      paddingBottom: 4,
+    },
+    filters: {
+      flexDirection: "row",
+      gap: 8,
+      paddingHorizontal: theme.spacing.pad,
+      paddingBottom: 4,
+    },
+    list: {
+      paddingBottom: 24,
+    },
+    listInner: {
+      paddingHorizontal: theme.spacing.pad,
+      paddingTop: 8,
+    },
+    daySection: {
+      marginBottom: 6,
+    },
+    dayCard: {
+      paddingHorizontal: 16,
+      marginBottom: 14,
+    },
+    footer: {
+      alignItems: "center",
+      paddingVertical: 4,
+    },
+  });

@@ -1,18 +1,11 @@
 // Note: the crypto.getRandomValues polyfill is loaded in the app entry
 // (index.js), which must run before any module that reads crypto at import time.
 import React, { useEffect, useState } from "react";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { NavigationBar } from "expo-navigation-bar";
-import * as SplashScreen from "expo-splash-screen";
-import { AppProvider, useApp } from "@/providers/AppProvider";
-import { WalletDataProvider } from "@/providers/WalletDataProvider";
-import { AutoLock } from "@/features/lock/AutoLock";
-import { groupGuards } from "@/features/lock/routeAccess";
-import { loadPersistedState, type PersistedState } from "@/services/storage";
-import { loadBiometryKind } from "@/services/auth/biometry";
+import {
+  IBMPlexMono_400Regular,
+  IBMPlexMono_500Medium,
+  IBMPlexMono_600SemiBold,
+} from "@expo-google-fonts/ibm-plex-mono";
 import {
   useFonts,
   PlusJakartaSans_400Regular,
@@ -20,17 +13,26 @@ import {
   PlusJakartaSans_600SemiBold,
   PlusJakartaSans_700Bold,
 } from "@expo-google-fonts/plus-jakarta-sans";
-import {
-  IBMPlexMono_400Regular,
-  IBMPlexMono_500Medium,
-  IBMPlexMono_600SemiBold,
-} from "@expo-google-fonts/ibm-plex-mono";
-import { ThemeProvider, useThemeControls } from "@/theme";
+import { NavigationBar } from "expo-navigation-bar";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { AutoLock } from "@/features/lock/components/AutoLock";
+import { groupGuards } from "@/features/lock/routeAccess";
+import { SheetHost } from "@/features/sheets/SheetHost";
+import { AppProvider, useApp } from "@/providers/AppProvider";
 import { DemoStateProvider } from "@/providers/DemoStateProvider";
 import { SheetProvider } from "@/providers/SheetProvider";
-import { SheetHost } from "@/features/sheets/SheetHost";
+import { WalletDataProvider } from "@/providers/WalletDataProvider";
+import { loadBiometryKind } from "@/services/auth/biometry";
+import { loadPersistedState, storage, type PersistedState } from "@/services/storage";
+import { ThemeProvider, useThemeControls, type ColorScheme } from "@/theme";
 
 SplashScreen.preventAutoHideAsync();
+
+const persistScheme = (scheme: ColorScheme) => void storage.saveTheme(scheme);
 
 // The in-app theme can differ from the system one, so both system bars follow
 // it: dark icons on the light theme, light icons on the dark theme.
@@ -109,7 +111,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <AppProvider initial={boot}>
-          <ThemeProvider initialScheme={boot.theme}>
+          <ThemeProvider initialScheme={boot.theme} onSchemeChange={persistScheme}>
             <DemoStateProvider initial={boot.demo}>
               <WalletDataProvider>
                 <SheetProvider>

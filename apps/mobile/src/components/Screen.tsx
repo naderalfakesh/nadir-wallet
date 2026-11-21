@@ -1,7 +1,7 @@
 import React from "react";
-import { KeyboardAvoidingView, View } from "react-native";
+import { KeyboardAvoidingView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "@/theme";
+import { useThemedStyles, type Theme } from "@/theme";
 
 interface ScreenProps {
   children: React.ReactNode;
@@ -11,27 +11,36 @@ interface ScreenProps {
 }
 
 export function Screen({ children, bottomInset = true, avoidKeyboard = false }: ScreenProps) {
-  const theme = useTheme();
+  const styles = useThemedStyles(createStyles);
   const insets = useSafeAreaInsets();
 
   const content = (
     <View
-      style={{
-        flex: 1,
-        backgroundColor: theme.colors.bg,
-        paddingTop: insets.top,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-        paddingBottom: bottomInset ? insets.bottom : 0,
-      }}
+      style={[
+        styles.content,
+        {
+          paddingTop: insets.top,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+          paddingBottom: bottomInset ? insets.bottom : 0,
+        },
+      ]}
     >
       {children}
     </View>
   );
 
   return avoidKeyboard ? (
-    <KeyboardAvoidingView behavior="padding" style={{ flex: 1, backgroundColor: theme.colors.bg }}>
+    <KeyboardAvoidingView behavior="padding" style={styles.keyboardAvoiding}>
       {content}
     </KeyboardAvoidingView>
-  ) : content;
+  ) : (
+    content
+  );
 }
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    content: { flex: 1, backgroundColor: theme.colors.bg },
+    keyboardAvoiding: { flex: 1, backgroundColor: theme.colors.bg },
+  });

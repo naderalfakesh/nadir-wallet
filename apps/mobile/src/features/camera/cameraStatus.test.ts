@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { t } from "@/i18n";
 import { parseLivenessTarget } from "@/features/liveness/livenessGate";
+import { t } from "@/i18n";
 import { cameraPanelCopy, cameraStatus, tryCreateNative, type CameraInputs } from "./cameraStatus";
 
 const READY: CameraInputs = {
@@ -17,11 +17,15 @@ describe("cameraStatus", () => {
   });
 
   it("asks for permission while it is still undetermined", () => {
-    expect(cameraStatus({ ...READY, hasPermission: false, canRequestPermission: true })).toBe("request");
+    expect(cameraStatus({ ...READY, hasPermission: false, canRequestPermission: true })).toBe(
+      "request",
+    );
   });
 
   it("sends a denied or restricted permission to Settings", () => {
-    expect(cameraStatus({ ...READY, hasPermission: false, canRequestPermission: false })).toBe("settings");
+    expect(cameraStatus({ ...READY, hasPermission: false, canRequestPermission: false })).toBe(
+      "settings",
+    );
   });
 
   it("reports a missing camera (e.g. simulator) after permission", () => {
@@ -29,9 +33,14 @@ describe("cameraStatus", () => {
   });
 
   it("is unavailable when the native module is missing, before touching permission", () => {
-    expect(cameraStatus({ ...READY, nativeReady: false, hasPermission: false, canRequestPermission: true })).toBe(
-      "unavailable",
-    );
+    expect(
+      cameraStatus({
+        ...READY,
+        nativeReady: false,
+        hasPermission: false,
+        canRequestPermission: true,
+      }),
+    ).toBe("unavailable");
   });
 
   it("stays unavailable after a camera or frame-worklet error, whatever else holds", () => {
@@ -49,7 +58,7 @@ describe("tryCreateNative", () => {
   it("returns null when Nitro can't find the hybrid object", () => {
     expect(
       tryCreateNative(() => {
-        throw new Error("HybridObject \"FaceLiveness\" has not been registered");
+        throw new Error('HybridObject "FaceLiveness" has not been registered');
       }),
     ).toBeNull();
   });
@@ -61,7 +70,9 @@ describe("cameraPanelCopy", () => {
   it.each(["scan", "liveness"] as const)("every %s panel string exists", (feature) => {
     for (const status of statuses) {
       const copy = cameraPanelCopy(feature, status);
-      for (const key of [copy.titleKey, copy.bodyKey, copy.actionKey].filter(Boolean) as string[]) {
+      for (const key of [copy.titleKey, copy.bodyKey, copy.actionKey].filter(
+        (key) => key !== null,
+      )) {
         expect(t(key)).not.toBe(key);
       }
     }

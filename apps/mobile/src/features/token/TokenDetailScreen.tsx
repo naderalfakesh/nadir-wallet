@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { RefreshControl, ScrollView, View } from "react-native";
+import React, { useState } from "react";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
   Screen,
@@ -9,20 +9,21 @@ import {
   SectionLabel,
   Segmented,
   Sparkline,
-  BackendNotice,
 } from "@/components";
-import { useTheme } from "@/theme";
-import { useTranslation } from "@/i18n/useTranslation";
-import { useWallet } from "@/providers/WalletDataProvider";
-import { useSheets } from "@/providers/SheetProvider";
-import { CHAINS, tokenById, RANGES, type Range } from "@/features/wallet/data";
 import { getDemoChart } from "@/features/wallet/chart";
-import { createTokenDetailStyles } from "./TokenDetailScreen.styles";
-import { MarketCard, RecentTransactions, TokenHero } from "./TokenDetailScreen.parts";
+import { BackendNotice } from "@/features/wallet/components/BackendNotice";
+import { CHAINS, tokenById, RANGES, type Range } from "@/features/wallet/data";
+import { useTranslation } from "@/i18n/useTranslation";
+import { useSheets } from "@/providers/SheetProvider";
+import { useWallet } from "@/providers/WalletDataProvider";
+import { useTheme, useThemedStyles, type Theme } from "@/theme";
+import { MarketCard } from "./components/MarketCard";
+import { RecentTransactions } from "./components/RecentTransactions";
+import { TokenHero } from "./components/TokenHero";
 
 export function TokenDetailScreen({ id }: { id: string }) {
   const theme = useTheme();
-  const styles = useMemo(() => createTokenDetailStyles(theme), [theme]);
+  const styles = useThemedStyles(createStyles);
   const router = useRouter();
   const { t } = useTranslation();
   const { tokens, transactions, backend, price, refresh, loading } = useWallet();
@@ -46,7 +47,7 @@ export function TokenDetailScreen({ id }: { id: string }) {
           <IconButton
             name="more"
             size={20}
-            accessibilityLabel="More options"
+            accessibilityLabel={t("common.a11y.moreOptions")}
             onPress={() => sheets.open("soon", { title: token.symbol })}
           />
         }
@@ -54,7 +55,13 @@ export function TokenDetailScreen({ id }: { id: string }) {
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={theme.colors.accent} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={refresh}
+            tintColor={theme.colors.accent}
+          />
+        }
       >
         {backend !== "online" && (
           <View style={styles.notice}>
@@ -102,7 +109,10 @@ export function TokenDetailScreen({ id }: { id: string }) {
           {txs.length > 0 && (
             <>
               <View style={styles.spacer} />
-              <RecentTransactions transactions={txs} onTransactionPress={(txId) => sheets.open("txDetail", { id: txId })} />
+              <RecentTransactions
+                transactions={txs}
+                onTransactionPress={(txId) => sheets.open("txDetail", { id: txId })}
+              />
             </>
           )}
         </View>
@@ -110,3 +120,32 @@ export function TokenDetailScreen({ id }: { id: string }) {
     </Screen>
   );
 }
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    content: {
+      paddingBottom: 24,
+    },
+    notice: {
+      paddingHorizontal: theme.spacing.pad,
+      paddingBottom: 4,
+    },
+    body: {
+      paddingHorizontal: theme.spacing.pad,
+    },
+    chartWrap: {
+      marginTop: 20,
+      marginBottom: 12,
+    },
+    actions: {
+      flexDirection: "row",
+      gap: 10,
+      marginTop: 20,
+    },
+    actionButton: {
+      flex: 1,
+    },
+    spacer: {
+      height: 22,
+    },
+  });

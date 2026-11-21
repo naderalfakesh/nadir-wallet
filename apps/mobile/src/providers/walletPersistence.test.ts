@@ -48,12 +48,16 @@ describe("persistPasscode", () => {
 
   it("rejects when storing fails, so the caller keeps the old PIN", async () => {
     const save = vi.fn().mockRejectedValue(new Error("write failed"));
-    await expect(persistPasscode("123456", async () => "rec", save)).rejects.toThrow("write failed");
+    await expect(persistPasscode("123456", async () => "rec", save)).rejects.toThrow(
+      "write failed",
+    );
   });
 
   it("rejects end to end through the real storage when the keychain throws", async () => {
     secure.setItemAsync.mockRejectedValue(new Error("errSecInteractionNotAllowed"));
-    await expect(persistPasscode("123456", async () => "rec", storage.savePasscodeHash)).rejects.toThrow();
+    await expect(
+      persistPasscode("123456", async () => "rec", storage.savePasscodeHash),
+    ).rejects.toThrow();
   });
 });
 
@@ -78,8 +82,17 @@ describe("persistNewWallet", () => {
   });
 
   it("an import is not marked as backed up", async () => {
-    const writes = { saveMnemonic: vi.fn(async () => undefined), savePrefs: vi.fn(async () => undefined) };
-    const next = await persistNewWallet(PHRASE, ADDRESS, DEFAULT_PREFS, { imported: true, now: 1 }, writes);
+    const writes = {
+      saveMnemonic: vi.fn(async () => undefined),
+      savePrefs: vi.fn(async () => undefined),
+    };
+    const next = await persistNewWallet(
+      PHRASE,
+      ADDRESS,
+      DEFAULT_PREFS,
+      { imported: true, now: 1 },
+      writes,
+    );
     expect(next.backupConfirmed).toBe(false);
   });
 
@@ -88,13 +101,17 @@ describe("persistNewWallet", () => {
       saveMnemonic: vi.fn().mockRejectedValue(new Error("keychain")),
       savePrefs: vi.fn(async () => undefined),
     };
-    await expect(persistNewWallet(PHRASE, ADDRESS, DEFAULT_PREFS, opts, writes)).rejects.toThrow("keychain");
+    await expect(persistNewWallet(PHRASE, ADDRESS, DEFAULT_PREFS, opts, writes)).rejects.toThrow(
+      "keychain",
+    );
     expect(writes.savePrefs).not.toHaveBeenCalled();
   });
 
   it("rejects when the prefs write fails, so the UI can't claim the wallet is set up", async () => {
     asyncStorage.setItem.mockRejectedValue(new Error("disk full"));
-    await expect(persistNewWallet(PHRASE, ADDRESS, DEFAULT_PREFS, opts, storage)).rejects.toThrow("disk full");
+    await expect(persistNewWallet(PHRASE, ADDRESS, DEFAULT_PREFS, opts, storage)).rejects.toThrow(
+      "disk full",
+    );
     expect(secure.setItemAsync).toHaveBeenCalledTimes(1);
   });
 });
