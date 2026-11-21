@@ -1,4 +1,5 @@
-import type { Range } from "./data";
+export const RANGES = ["1H", "1D", "1W", "1M", "1Y", "All"] as const;
+export type Range = (typeof RANGES)[number];
 
 const RANGE_SCALE: Record<Range, number> = {
   "1H": 0.18,

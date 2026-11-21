@@ -80,7 +80,8 @@ src/
   app/          expo-router routes (thin)
   features/     screen logic by domain: onboarding, lock, home, send, token,
                 activity, security, settings, sheets, auth, wallet, liveness, scan
-  components/   themed primitives (text, buttons, cards, icons, bottom sheet)
+  components/   themed primitives (text, buttons, cards, bottom sheet); `icons/` holds one
+                glyph per file, registered in `icons/index.ts` and drawn by `Icon`
   providers/    App, Theme, DemoState, WalletData, Sheet contexts
   services/     api client, storage (SecureStore + AsyncStorage), device helpers
   theme/        design tokens, dark and light palettes

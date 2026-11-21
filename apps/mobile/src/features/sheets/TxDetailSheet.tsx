@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { SheetHeader, AppText, Card, Row, Icon, TxIcon, StatusPill } from "@/components";
-import { CHAINS } from "@/features/wallet/data";
+import { CHAINS } from "@/features/wallet/chains";
 import { getTransactionAmount, getTransactionVerbs } from "@/features/wallet/transactions";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useWallet } from "@/providers/WalletDataProvider";

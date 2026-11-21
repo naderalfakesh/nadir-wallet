@@ -1,14 +1,9 @@
 import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { AppText, Card, Row, Icon, TokenGlyph, RiskResult, TrustNote } from "@/components";
-import {
-  CHAINS,
-  chainBadgeColor,
-  type Chain,
-  type ChainId,
-  type PortfolioToken,
-} from "@/features/wallet/data";
+import { CHAINS, chainBadgeColor } from "@/features/wallet/chains";
 import type { AddressRisk } from "@/features/wallet/risk";
+import type { Chain, ChainId, PortfolioToken } from "@/features/wallet/types";
 import { useTranslation } from "@/i18n/useTranslation";
 import { alpha, useTheme, useThemedStyles, type Theme } from "@/theme";
 import type { SimulationStatus } from "@/types/status";

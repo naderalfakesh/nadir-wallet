@@ -2,12 +2,8 @@ import type { NetworkId, TokenBalance, WalletTransaction } from "@nadir-wallet/t
 import { api } from "@/services/api";
 import type { PriceStatus } from "@/types/status";
 import { shortAddr } from "@/utils/format";
-import {
-  NETWORK_TO_CHAIN,
-  type PortfolioToken,
-  type PortfolioTransaction,
-  type TxType,
-} from "./data";
+import { NETWORK_TO_CHAIN } from "./chains";
+import type { PortfolioToken, PortfolioTransaction, TxType } from "./types";
 import { formatWhenDay } from "./when";
 
 const NETWORKS: NetworkId[] = ["ethereum-sepolia", "polygon-amoy"];

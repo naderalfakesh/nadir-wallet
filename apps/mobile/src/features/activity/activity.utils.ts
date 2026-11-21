@@ -1,5 +1,5 @@
-import type { PortfolioTransaction } from "@/features/wallet/data";
 import { getTransactionTime } from "@/features/wallet/transactions";
+import type { PortfolioTransaction } from "@/features/wallet/types";
 import type { TFunction } from "@/i18n";
 import type { ActivityFilter } from "./activity.types";
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { RECIPIENTS, TOKENS, tokenById, type PortfolioToken } from "@/features/wallet/data";
+import { RECIPIENTS, TOKENS, tokenById } from "@/features/wallet/demoData";
+import type { PortfolioToken } from "@/features/wallet/types";
 import {
   checkScanForToken,
   getBalanceAfter,

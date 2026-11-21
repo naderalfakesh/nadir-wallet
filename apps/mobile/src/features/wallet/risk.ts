@@ -1,5 +1,6 @@
 import type { RiskLevel } from "@/types/status";
-import { RECIPIENTS, type ChainId } from "./data";
+import { RECIPIENTS } from "./demoData";
+import type { ChainId } from "./types";
 
 export type RiskReason = "reported" | "known" | "firstTime";
 

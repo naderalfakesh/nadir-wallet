@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet } from "react-native";
 import { AppText, Card, ChangeBadge, Row } from "@/components";
-import type { PortfolioToken } from "@/features/wallet/data";
+import type { PortfolioToken } from "@/features/wallet/types";
 import { useTranslation } from "@/i18n/useTranslation";
 import { fmtUSD } from "@/utils/format";
 

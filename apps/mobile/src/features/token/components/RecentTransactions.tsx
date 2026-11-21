@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet } from "react-native";
 import { Card, SectionLabel } from "@/components";
 import { TransactionRow } from "@/features/wallet/components/TransactionRow";
-import type { PortfolioTransaction } from "@/features/wallet/data";
+import type { PortfolioTransaction } from "@/features/wallet/types";
 import { useTranslation } from "@/i18n/useTranslation";
 
 interface RecentTransactionsProps {

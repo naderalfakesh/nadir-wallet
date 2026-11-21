@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { AppText, Icon, IconButton } from "@/components";
-import { ACCOUNT } from "@/features/wallet/data";
+import { ACCOUNT } from "@/features/wallet/demoData";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useTheme, useThemedStyles, type Theme } from "@/theme";
 

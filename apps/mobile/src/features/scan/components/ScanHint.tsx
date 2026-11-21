@@ -3,7 +3,7 @@ import { AccessibilityInfo, Platform, StyleSheet, View } from "react-native";
 import { AppText } from "@/components";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useTheme } from "@/theme";
-import type { ScanFeedback } from "../scanBridge";
+import type { ScanFeedback } from "../scanFeedback";
 
 interface ScanHintProps {
   bottomInset: number;

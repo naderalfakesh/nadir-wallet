@@ -1,7 +1,8 @@
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { AppText, Card, ChangeBadge, Row, SectionLabel, Skeleton, TokenGlyph } from "@/components";
-import { chainBadgeColor, type PortfolioToken } from "@/features/wallet/data";
+import { chainBadgeColor } from "@/features/wallet/chains";
+import type { PortfolioToken } from "@/features/wallet/types";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useTheme, useThemedStyles, type Theme } from "@/theme";
 import { getTokenAmount, getTokenValue } from "../home.utils";

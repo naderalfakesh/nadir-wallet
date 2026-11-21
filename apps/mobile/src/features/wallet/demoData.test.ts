@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { demoTransactions } from "./data";
+import { demoTransactions } from "./demoData";
 
 describe("demo transactions", () => {
   // Just after midnight, the case where a fixed "Today · 2:14 PM" label would be in the future.

@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { AppText, Button, Icon, TokenGlyph, NumberPad } from "@/components";
-import type { PortfolioToken } from "@/features/wallet/data";
+import type { PortfolioToken } from "@/features/wallet/types";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useTheme, useThemedStyles, type Theme } from "@/theme";
 import { fmtUSD, fmtToken } from "@/utils/format";

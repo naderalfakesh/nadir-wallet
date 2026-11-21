@@ -4,15 +4,13 @@ import {
   mnemonicToEvmAddress,
   verifyPasscodeAsync,
 } from "@nadir-wallet/crypto-core";
-import { initialSecurityEvents } from "@/features/security/data";
-import { makeSecurityEvent } from "@/features/security/events";
 import { clearScanHandoff } from "@/features/send/sendHandoff";
-import { EMPTY_LOCKOUT, recordFailure, type LockoutState } from "@/services/auth/lockout";
+import type { LockoutState } from "@/services/auth/lockout";
 import { storage, DEFAULT_PREFS, type Prefs, type PersistedState } from "@/services/storage";
-import type { SecurityEvent, SecurityEventType } from "@/types/status";
+import type { SecurityEvent } from "@/types/status";
+import { useLockoutState } from "./useLockoutState";
+import { useSecurityEventLog, type LogSecurityEvent } from "./useSecurityEventLog";
 import { persistNewWallet, persistPasscode } from "./walletPersistence";
-
-const MAX_EVENTS = 40;
 
 interface AppValue {
   prefs: Prefs;
@@ -27,10 +25,7 @@ interface AppValue {
   /** Records a failed passcode entry and returns the new lockout state. */
   recordUnlockFailure: () => LockoutState;
   clearLockout: () => void;
-  logEvent: (
-    type: SecurityEventType,
-    opts?: { detail?: string; detailVars?: Record<string, string | number> },
-  ) => void;
+  logEvent: LogSecurityEvent;
   /** In memory only: false on every cold start until the lock screen (or onboarding) succeeds. */
   sessionUnlocked: boolean;
   unlockSession: () => void;
@@ -57,18 +52,14 @@ export function AppProvider({
 }) {
   const [prefs, setPrefs] = useState<Prefs>(initial.prefs);
   const [passcodeHash, setPasscodeHash] = useState(initial.passcodeHash);
-  const [lockout, setLockout] = useState<LockoutState>(initial.lockout);
-  // Seed the log with demo history on first launch so the screen isn't empty.
-  const [events, setEvents] = useState<SecurityEvent[]>(() =>
-    initialSecurityEvents(initial.events, new Date()),
+  const { lockout, recordUnlockFailure, clearLockout, resetLockout } = useLockoutState(
+    initial.lockout,
   );
+  const { events, logEvent, clearEvents } = useSecurityEventLog(initial.events);
   const [sessionUnlocked, setSessionUnlocked] = useState(false);
   const [introSeen, setIntroSeen] = useState(initial.introSeen);
-  const counter = useRef(0);
   // Mirror of prefs so createWallet can persist the exact object it commits.
   const prefsRef = useRef(initial.prefs);
-  // Mirror of the lockout state for synchronous reads inside callbacks.
-  const lockoutRef = useRef(initial.lockout);
 
   const setPref = useCallback(<K extends keyof Prefs>(key: K, value: Prefs[K]) => {
     setPrefs((prev) => {
@@ -91,34 +82,6 @@ export function AppProvider({
       passcodeHash ? verifyPasscodeAsync(pin, passcodeHash) : Promise.resolve(false),
     [passcodeHash],
   );
-
-  const commitLockout = useCallback((next: LockoutState) => {
-    lockoutRef.current = next;
-    setLockout(next);
-    void storage.saveLockout(next);
-  }, []);
-
-  const recordUnlockFailure = useCallback(() => {
-    const next = recordFailure(lockoutRef.current, Date.now());
-    commitLockout(next);
-    return next;
-  }, [commitLockout]);
-
-  const clearLockout = useCallback(() => {
-    if (lockoutRef.current.failures === 0 && lockoutRef.current.lockedUntil === 0) return;
-    commitLockout(EMPTY_LOCKOUT);
-  }, [commitLockout]);
-
-  const logEvent = useCallback<AppValue["logEvent"]>((type, opts) => {
-    counter.current += 1;
-    const id = `e-${Date.now()}-${counter.current}`;
-    const event = makeSecurityEvent(id, type, new Date(), opts);
-    setEvents((prev) => {
-      const next = [event, ...prev].slice(0, MAX_EVENTS);
-      void storage.saveEvents(next);
-      return next;
-    });
-  }, []);
 
   const createWallet = useCallback<AppValue["createWallet"]>(
     async (mnemonic, opts) => {
@@ -146,10 +109,9 @@ export function AppProvider({
     prefsRef.current = DEFAULT_PREFS;
     setPrefs(DEFAULT_PREFS);
     setPasscodeHash(null);
-    lockoutRef.current = EMPTY_LOCKOUT;
-    setLockout(EMPTY_LOCKOUT);
-    setEvents([]);
-  }, []);
+    resetLockout();
+    clearEvents();
+  }, [resetLockout, clearEvents]);
 
   // A failed write only means the intro shows once more next launch, so the
   // user is never held on it.

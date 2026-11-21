@@ -1,4 +1,4 @@
-import type { ChainId } from "@/features/wallet/data";
+import type { ChainId } from "@/features/wallet/types";
 import type { SendStep } from "./send.types";
 
 export const GAS_SYMBOL: Record<ChainId, string> = {

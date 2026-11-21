@@ -1,4 +1,4 @@
-import type { ScanTarget } from "@/features/scan/scanBridge";
+import type { ScanTarget } from "@/features/scan/scanPayload";
 
 /**
  * One-shot hand-off of a target scanned outside Send (the Home scan button).

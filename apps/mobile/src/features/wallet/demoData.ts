@@ -1,74 +1,8 @@
-import type { NetworkId } from "@nadir-wallet/types";
-import type { Chain, ChainId, PortfolioToken, PortfolioTransaction, SavedRecipient } from "./types";
+import type { PortfolioToken, PortfolioTransaction, SavedRecipient } from "./types";
 import { formatWhenDay } from "./when";
-
-export type {
-  Chain,
-  ChainId,
-  PortfolioToken,
-  PortfolioTransaction,
-  SavedRecipient,
-  TxType,
-} from "./types";
-
-// Maps the mobile's chain ids to the two API-supported testnet networks.
-export const CHAIN_TO_NETWORK: Partial<Record<ChainId, NetworkId>> = {
-  ethereum: "ethereum-sepolia",
-  polygon: "polygon-amoy",
-};
-export const NETWORK_TO_CHAIN: Record<NetworkId, ChainId> = {
-  "ethereum-sepolia": "ethereum",
-  "polygon-amoy": "polygon",
-};
-export function chainToNetworkId(chain: ChainId): NetworkId | null {
-  return CHAIN_TO_NETWORK[chain] ?? null;
-}
 
 // Testnet-only demo data. Balances, prices and values are estimated and hold
 // no real-world worth — they exist to validate the UI, not to track funds.
-
-export const CHAINS: Record<ChainId, Chain> = {
-  ethereum: {
-    id: "ethereum",
-    name: "Ethereum Sepolia",
-    short: "Sepolia",
-    color: "#7C93F0",
-    explorerName: "Sepolia Etherscan",
-    explorerHost: "sepolia.etherscan.io",
-  },
-  base: {
-    id: "base",
-    name: "Base Sepolia",
-    short: "BaseSep",
-    color: "#3B7BFF",
-    explorerName: "Base Sepolia Scan",
-    explorerHost: "sepolia.basescan.org",
-  },
-  arbitrum: {
-    id: "arbitrum",
-    name: "Arbitrum Sepolia",
-    short: "ArbSep",
-    color: "#3AA0F0",
-    explorerName: "Arbiscan Sepolia",
-    explorerHost: "sepolia.arbiscan.io",
-  },
-  optimism: {
-    id: "optimism",
-    name: "OP Sepolia",
-    short: "OPSep",
-    color: "#FF5A6E",
-    explorerName: "OP Sepolia Scan",
-    explorerHost: "sepolia-optimism.etherscan.io",
-  },
-  polygon: {
-    id: "polygon",
-    name: "Polygon Amoy",
-    short: "Amoy",
-    color: "#A573FF",
-    explorerName: "Amoy Polygonscan",
-    explorerHost: "amoy.polygonscan.com",
-  },
-};
 
 const rawTokens: Omit<PortfolioToken, "value">[] = [
   {
@@ -129,9 +63,6 @@ export const PORTFOLIO_TOTAL = TOKENS.reduce((s, t) => s + t.value, 0);
 export const PORTFOLIO_CHANGE_PCT =
   TOKENS.reduce((s, t) => s + t.change * t.value, 0) / PORTFOLIO_TOTAL;
 export const PORTFOLIO_CHANGE_ABS = PORTFOLIO_TOTAL * (PORTFOLIO_CHANGE_PCT / 100);
-
-export const RANGES = ["1H", "1D", "1W", "1M", "1Y", "All"] as const;
-export type Range = (typeof RANGES)[number];
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -282,9 +213,4 @@ export const ACCOUNT = {
 
 export function tokenById(id: string): PortfolioToken {
   return TOKENS.find((t) => t.id === id) ?? TOKENS[0];
-}
-
-export function chainBadgeColor(chain: ChainId): string | undefined {
-  // The primary network (Sepolia) shows no chain badge in the design.
-  return chain === "ethereum" ? undefined : CHAINS[chain].color;
 }

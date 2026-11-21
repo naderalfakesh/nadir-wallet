@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { SheetHeader, AppText, Button, Card, Row, Icon } from "@/components";
-import { ACCOUNT } from "@/features/wallet/data";
+import { ACCOUNT } from "@/features/wallet/demoData";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useApp } from "@/providers/AppProvider";
 import { useSheets } from "@/providers/SheetProvider";

@@ -10,9 +10,11 @@ import {
   Segmented,
   Sparkline,
 } from "@/components";
+import { CHAINS } from "@/features/wallet/chains";
 import { getDemoChart } from "@/features/wallet/chart";
+import { RANGES, type Range } from "@/features/wallet/chart";
 import { BackendNotice } from "@/features/wallet/components/BackendNotice";
-import { CHAINS, tokenById, RANGES, type Range } from "@/features/wallet/data";
+import { tokenById } from "@/features/wallet/demoData";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useSheets } from "@/providers/SheetProvider";
 import { useWallet } from "@/providers/WalletDataProvider";

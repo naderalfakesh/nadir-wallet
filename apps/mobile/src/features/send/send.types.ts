@@ -13,3 +13,5 @@ export interface RiskCopy {
   detail: string;
   levelLabel: string;
 }
+
+export type SendPhase = "liveness" | "auth" | "pending" | "success" | "failed";

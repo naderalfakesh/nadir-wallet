@@ -10,7 +10,7 @@ import {
   TestnetBadge,
 } from "@/components";
 import { getDemoChart } from "@/features/wallet/chart";
-import { RANGES, type Range } from "@/features/wallet/data";
+import { RANGES, type Range } from "@/features/wallet/chart";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useThemedStyles, type Theme } from "@/theme";
 import type { BackendStatus, PriceStatus } from "@/types/status";

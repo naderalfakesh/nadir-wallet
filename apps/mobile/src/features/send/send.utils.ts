@@ -1,7 +1,8 @@
 import { getNetwork, isEvmAddress } from "@nadir-wallet/crypto-core";
-import type { ScanRejectReason, ScanTarget } from "@/features/scan/scanBridge";
-import { chainToNetworkId, type PortfolioToken } from "@/features/wallet/data";
+import type { ScanRejectReason, ScanTarget } from "@/features/scan/scanPayload";
+import { chainToNetworkId } from "@/features/wallet/chains";
 import type { AddressRisk } from "@/features/wallet/risk";
+import type { PortfolioToken } from "@/features/wallet/types";
 import type { TFunction } from "@/i18n";
 import type { SimulationStatus } from "@/types/status";
 import { fmtToken } from "@/utils/format";

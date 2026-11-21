@@ -1,15 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { AppState, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
-import {
-  generateMnemonic,
-  suggestBip39Words,
-  validateMnemonicPhrase,
-} from "@nadir-wallet/crypto-core";
+import React from "react";
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { ScreenHeader, AppText, Button, Icon } from "@/components";
-import { createStaleGuard } from "@/features/auth/staleGuard";
 import { useTranslation } from "@/i18n/useTranslation";
-import { readClipboardText } from "@/services/device";
 import { useTheme, useThemedStyles, type Theme } from "@/theme";
+import { useMnemonicInput } from "../useMnemonicInput";
 
 interface ImportScreenProps {
   onBack: () => void;
@@ -22,47 +16,23 @@ export function ImportScreen({ onBack, onDone }: ImportScreenProps) {
   const theme = useTheme();
   const styles = useThemedStyles(createStyles);
   const { t } = useTranslation();
-  const [value, setValue] = useState("");
-  const [clipboardEmpty, setClipboardEmpty] = useState(false);
-  const [pasteGuard] = useState(createStaleGuard);
-  useEffect(() => {
-    const subscription = AppState.addEventListener("change", (state) => {
-      if (state === "background") {
-        pasteGuard.invalidate();
-        setValue("");
-        setClipboardEmpty(false);
-      }
-    });
-    return () => {
-      subscription.remove();
-      pasteGuard.invalidate();
-    };
-  }, [pasteGuard]);
-
-  const editValue = (text: string) => {
-    pasteGuard.invalidate();
-    setClipboardEmpty(false);
-    setValue(text);
-  };
-  const paste = async () => {
-    pasteGuard.invalidate();
-    const { current, value: text } = await pasteGuard.run(readClipboardText);
-    if (!current) return;
-    if (text) editValue(text);
-    else setClipboardEmpty(true);
-  };
-
-  const result = validateMnemonicPhrase(value);
-  const prefix = value.match(/(?:^|\s)([a-z]+)$/i)?.[1] ?? "";
-  const suggestions = result.valid ? [] : suggestBip39Words(prefix);
+  const {
+    value,
+    clipboardEmpty,
+    editValue,
+    paste,
+    result,
+    suggestions,
+    normalized,
+    applySuggestion,
+    fillSample,
+  } = useMnemonicInput();
   const error =
     result.invalidWord != null
       ? t("onboarding.import.invalidWord", { word: result.invalidWord })
       : result.wordCountValid && !result.checksumValid
         ? t("onboarding.import.invalidChecksum")
         : null;
-
-  const normalized = value.trim().toLowerCase().split(/\s+/).filter(Boolean).join(" ");
 
   return (
     <>
@@ -104,11 +74,7 @@ export function ImportScreen({ onBack, onDone }: ImportScreenProps) {
               {t("onboarding.import.paste")}
             </AppText>
           </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => editValue(generateMnemonic())}
-            style={styles.sampleButton}
-          >
+          <Pressable accessibilityRole="button" onPress={fillSample} style={styles.sampleButton}>
             <AppText weight="semibold" size={13} color={theme.colors.accent}>
               {t("onboarding.import.sample")}
             </AppText>
@@ -129,7 +95,7 @@ export function ImportScreen({ onBack, onDone }: ImportScreenProps) {
               <Pressable
                 key={word}
                 accessibilityRole="button"
-                onPress={() => editValue(value.slice(0, -prefix.length) + word + " ")}
+                onPress={() => applySuggestion(word)}
                 style={styles.suggestion}
               >
                 <AppText mono size={13}>

@@ -12,10 +12,9 @@ import {
   demoTransactions,
   PORTFOLIO_TOTAL,
   PORTFOLIO_CHANGE_PCT,
-  type PortfolioToken,
-  type PortfolioTransaction,
-} from "@/features/wallet/data";
+} from "@/features/wallet/demoData";
 import { fetchLivePortfolio, type LivePortfolio } from "@/features/wallet/portfolio";
+import type { PortfolioToken, PortfolioTransaction } from "@/features/wallet/types";
 import { api } from "@/services/api";
 import type { BackendStatus, PriceStatus } from "@/types/status";
 import { useApp } from "./AppProvider";

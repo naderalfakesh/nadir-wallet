@@ -1,4 +1,4 @@
-import type { PortfolioToken } from "@/features/wallet/data";
+import type { PortfolioToken } from "@/features/wallet/types";
 import type { PriceStatus } from "@/types/status";
 import { fmtToken, fmtUSD } from "@/utils/format";
 

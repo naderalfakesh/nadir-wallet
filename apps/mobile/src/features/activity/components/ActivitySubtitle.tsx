@@ -1,7 +1,7 @@
 import React from "react";
 import { AppText } from "@/components";
-import type { PortfolioTransaction } from "@/features/wallet/data";
 import { getTransactionTime } from "@/features/wallet/transactions";
+import type { PortfolioTransaction } from "@/features/wallet/types";
 import { useTranslation } from "@/i18n/useTranslation";
 import { getActivitySubtitle } from "../activity.utils";
 

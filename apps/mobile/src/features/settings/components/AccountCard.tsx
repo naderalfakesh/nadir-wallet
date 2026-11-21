@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { AppText, Card, IconButton, TestnetBadge } from "@/components";
-import { ACCOUNT } from "@/features/wallet/data";
+import { ACCOUNT } from "@/features/wallet/demoData";
 import { useTranslation } from "@/i18n/useTranslation";
 import { copyText } from "@/services/device";
 import { displayAddress } from "@/services/wallet/account";

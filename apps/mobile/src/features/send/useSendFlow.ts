@@ -1,14 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import { beginScan } from "@/features/scan/scanBridge";
-import {
-  CHAINS,
-  RECIPIENTS,
-  chainToNetworkId,
-  tokenById,
-  type PortfolioToken,
-} from "@/features/wallet/data";
+import { CHAINS, chainToNetworkId } from "@/features/wallet/chains";
+import { RECIPIENTS, tokenById } from "@/features/wallet/demoData";
 import { assessRecipient, recipientNetwork, type AddressRisk } from "@/features/wallet/risk";
+import type { PortfolioToken } from "@/features/wallet/types";
 import { useApp } from "@/providers/AppProvider";
 import { useDemoState } from "@/providers/DemoStateProvider";
 import { useSheets } from "@/providers/SheetProvider";
@@ -17,7 +13,7 @@ import { haptics } from "@/services/device/haptics";
 import type { SimulationStatus } from "@/types/status";
 import { shortAddr } from "@/utils/format";
 import { FEE_NATIVE, GAS_SYMBOL, HIGH_VALUE_USD, SEND_STEPS } from "./send.constants";
-import type { SendStep } from "./send.types";
+import type { SendPhase, SendStep } from "./send.types";
 import {
   checkScanForToken,
   getBalanceAfter,
@@ -29,7 +25,6 @@ import {
   pickTokenForScan,
   type SendFee,
 } from "./send.utils";
-import type { SendPhase } from "./SendConfirmOverlay";
 import { takeScanHandoff } from "./sendHandoff";
 import { useRiskCheck, useSimulation } from "./useSendChecks";
 

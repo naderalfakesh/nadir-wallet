@@ -2,8 +2,8 @@ import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { AppText, Card, SectionLabel } from "@/components";
 import { TransactionRow } from "@/features/wallet/components/TransactionRow";
-import type { PortfolioTransaction } from "@/features/wallet/data";
 import { getTransactionTime } from "@/features/wallet/transactions";
+import type { PortfolioTransaction } from "@/features/wallet/types";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useTheme, useThemedStyles, type Theme } from "@/theme";
 

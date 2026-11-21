@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { AppText, ChangeBadge, PriceFreshness, TokenGlyph } from "@/components";
-import type { PortfolioToken } from "@/features/wallet/data";
+import type { PortfolioToken } from "@/features/wallet/types";
 import type { PriceStatus } from "@/types/status";
 import { fmtToken, fmtUSD } from "@/utils/format";
 
