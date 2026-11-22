@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseThemePreference, resolveScheme } from "./themePreference";
+import { nativeColorScheme, parseThemePreference, resolveScheme } from "./themePreference";
 
 describe("resolveScheme", () => {
   it("honours an explicit preference regardless of the device", () => {
@@ -31,5 +31,16 @@ describe("parseThemePreference", () => {
     expect(parseThemePreference(null)).toBe("system");
     expect(parseThemePreference("")).toBe("system");
     expect(parseThemePreference("sepia")).toBe("system");
+  });
+});
+
+describe("nativeColorScheme", () => {
+  it("forces system-drawn UI to the explicit in-app theme", () => {
+    expect(nativeColorScheme("light")).toBe("light");
+    expect(nativeColorScheme("dark")).toBe("dark");
+  });
+
+  it("removes the override when the app follows the device", () => {
+    expect(nativeColorScheme("system")).toBe("auto");
   });
 });

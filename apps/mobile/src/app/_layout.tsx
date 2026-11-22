@@ -14,7 +14,12 @@ import {
   PlusJakartaSans_700Bold,
 } from "@expo-google-fonts/plus-jakarta-sans";
 import { NavigationBar } from "expo-navigation-bar";
-import { Stack } from "expo-router";
+import {
+  DarkTheme,
+  DefaultTheme,
+  Stack,
+  ThemeProvider as NavigationThemeProvider,
+} from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -28,7 +33,13 @@ import { SheetProvider } from "@/providers/SheetProvider";
 import { WalletDataProvider } from "@/providers/WalletDataProvider";
 import { loadBiometryKind } from "@/services/auth/biometry";
 import { loadPersistedState, storage, type PersistedState } from "@/services/storage";
-import { ThemeProvider, useThemeControls, type ThemePreference } from "@/theme";
+import {
+  navigationColors,
+  ThemeProvider,
+  useTheme,
+  useThemeControls,
+  type ThemePreference,
+} from "@/theme";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -54,9 +65,11 @@ function ThemedSystemBars() {
 function RootStack() {
   const { prefs, sessionUnlocked } = useApp();
   const guard = groupGuards({ onboarded: prefs.onboardingCompleted, unlocked: sessionUnlocked });
+  const theme = useTheme();
+  const base = theme.scheme === "dark" ? DarkTheme : DefaultTheme;
 
   return (
-    <>
+    <NavigationThemeProvider value={{ ...base, ...navigationColors(theme.colors, theme.scheme) }}>
       <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="+not-found" />
@@ -78,7 +91,7 @@ function RootStack() {
         </Stack.Protected>
       </Stack>
       <SheetHost walletOpen={guard.wallet} />
-    </>
+    </NavigationThemeProvider>
   );
 }
 

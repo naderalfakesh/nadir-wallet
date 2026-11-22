@@ -1,10 +1,10 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
-import { useColorScheme } from "react-native";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { Appearance, useColorScheme } from "react-native";
 import { palettes, type ColorScheme, type ThemeColors } from "./colors";
 import { radius } from "./radius";
 import { makeShadows, type Shadows } from "./shadows";
 import { spacing } from "./spacing";
-import { resolveScheme, type ThemePreference } from "./themePreference";
+import { nativeColorScheme, resolveScheme, type ThemePreference } from "./themePreference";
 import { fontFamily } from "./typography";
 
 export interface Theme {
@@ -52,6 +52,12 @@ export function ThemeProvider({
   // Re-renders when the device switches between light and dark.
   const system = useColorScheme();
   const scheme = resolveScheme(preference, system);
+
+  // Without this the keyboard and system prompts keep the device appearance
+  // when the user picks the opposite theme in the app.
+  useEffect(() => {
+    Appearance.setColorScheme(nativeColorScheme(preference));
+  }, [preference]);
 
   const setPreference = useCallback(
     (next: ThemePreference) => {

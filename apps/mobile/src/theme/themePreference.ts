@@ -18,3 +18,11 @@ export function resolveScheme(preference: ThemePreference, system: unknown): Col
   if (preference !== "system") return preference;
   return system === "light" || system === "dark" ? system : FALLBACK_SCHEME;
 }
+
+/**
+ * The override handed to the OS so system-drawn UI (keyboard, alerts, the
+ * biometric prompt) matches the in-app theme. "auto" removes the override.
+ */
+export function nativeColorScheme(preference: ThemePreference): ColorScheme | "auto" {
+  return preference === "system" ? "auto" : preference;
+}
