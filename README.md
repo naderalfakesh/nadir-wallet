@@ -2,289 +2,185 @@
 
 [![CI](https://github.com/naderalfakesh/nadir-wallet/actions/workflows/ci.yml/badge.svg)](https://github.com/naderalfakesh/nadir-wallet/actions/workflows/ci.yml)
 
-A **local-first, non-custodial, testnet-only** wallet built with React Native, Expo and Hono. Sends are simulated, and balances, prices and history use sample data.
+**A self-custody crypto wallet for practising on test networks: your keys stay on your phone, every send is checked before it leaves, and no real money is involved.**
 
-<p>
-  <img src="images/pixel-9-home.webp" width="230" alt="Nadir Wallet home with demo balances, a price chart and wallet actions" />
-  <img src="images/pixel-9-send-review.webp" width="230" alt="Send review with an address risk check, network fee and transaction simulation" />
-  <img src="images/pixel-9-security-light.webp" width="230" alt="Security Center in light mode with the security score, trust model and wallet protections" />
+Nadir Wallet is a portfolio project by [Nadir Alfakesh](https://naderalfakesh.com):
+one person taking a product from design to a tested, working app on iPhone and
+Android. It is testnet-only, sends are simulated, and balances, prices and
+history are sample data.
+
+<p align="center">
+  <img src="docs/nadir-wallet-loop.gif" alt="Animated tour: scrubbing the portfolio chart, a reported address being blocked, a send reviewed and confirmed with Face ID, the security score, and switching to the light theme" width="760" />
 </p>
 
-## What you can try
+<p align="center">
+  <a href="docs/nadir-wallet-promo.mp4"><strong>▶ Watch the 80-second walkthrough with sound</strong></a>
+</p>
 
-- Create or import a test wallet, set an app passcode, and unlock with the passcode or device biometrics.
-- Scan a payment QR or enter a recipient. Review address risk and the estimated fee before confirming a simulated send.
-- Pass an on-device face-liveness identity check during setup, then manage backup, biometrics and transaction protection in the Security tab.
-- Use **Settings → Demo controls** to try API outages and different send outcomes.
+## At a glance
 
-## Engineering highlights
+- **A complete product, not a screen mock-up.** Creating or importing a wallet,
+  backing it up, locking it, sending, receiving and browsing history all work
+  end to end.
+- **Safe to try.** It runs on test networks only and sends are simulated, so
+  nothing in it can move real money.
+- **Security comes first.** The recovery phrase never leaves the phone, the app
+  locks behind a passcode and Face ID or fingerprint, and risky recipients are
+  blocked before a send.
+- **Real native engineering.** The QR scanner and the face check are
+  hand-written camera modules in Swift and Kotlin, not off-the-shelf plugins.
+- **Tested like production software.** 401 automated tests run on every change,
+  plus an end-to-end suite that drives the Android app.
+- **One codebase, two platforms.** The same React Native code ships to iOS and
+  Android.
 
-- **Native camera processing.** Two Swift and Kotlin Nitro modules run Google ML Kit on the VisionCamera frame thread. [Face liveness](packages/face-liveness) and [QR scanning](packages/code-scanner).
-- **Active liveness.** The face check advances through randomized prompts with a deterministic reducer. [Challenge state machine](apps/mobile/src/features/liveness/livenessChallenge.machine.ts).
-- **Native build fixes.** A config plugin patches ML Kit's Mach-O load commands for Apple Silicon simulators. Android release builds preserve the Nitro JNI classes and ML Kit registrar constructors through R8. [Simulator patch](apps/mobile/plugins/mlkit-sim-patch.py) and [Android build notes](docs/verification/expo-sdk-58.md#r8-keep-rules).
-- **Local key custody.** BIP39 phrases are generated or imported on-device and stored in SecureStore. The API receives public addresses, network IDs and unsigned transaction drafts. [Security model](docs/security-model.md).
+## Screens
 
-## Demo
+| Welcome                                                                                                                         | Portfolio                                                                                                                               | Send review                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="docs/images/readme/welcome.png" alt="Welcome screen with options to create a new wallet or import one" width="250" /> | <img src="docs/images/readme/home.png" alt="Home screen with the total balance, a price chart, quick actions and tokens" width="250" /> | <img src="docs/images/readme/send-review.png" alt="Send review with the recipient, network fee, a passed risk check and a passed simulation" width="250" /> |
 
-<details>
-  <summary>Watch the Android Send review</summary>
-  <img src="images/pixel-9-send-demo.gif" width="300" alt="Entering a demo amount on the Pixel 9 and reviewing the address risk check, fee and simulation" />
-</details>
+| Security Center                                                                                                                                           | Receive                                                                                                                                | Light theme                                                                                      |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| <img src="docs/images/readme/security.png" alt="Security Center with a security score and protections such as backup and biometric unlock" width="250" /> | <img src="docs/images/readme/receive.png" alt="Receive sheet with a payment QR code and a choice of five test networks" width="250" /> | <img src="docs/images/readme/light-home.png" alt="Home screen in the light theme" width="250" /> |
 
-The iOS Simulator supports the portfolio, onboarding, lock, and simulated-send flows. The live QR scanner and face-liveness challenges require a physical device with a camera. See the [Pixel 9 device results](docs/verification/device-pixel9-android.md).
+## What you can do in it
 
-## Tech stack
+- **Set up a wallet** — create a new one or import a 12 or 24-word recovery
+  phrase, verify your backup, and choose a passcode.
+- **Explore your portfolio** — scrub the balance chart, switch time ranges, and
+  open any token for its details.
+- **Send with a safety net** — pick or scan a recipient, see an address risk
+  check and a simulation of the transaction, then confirm with Face ID or
+  fingerprint. Reported addresses are blocked.
+- **Receive** — show a payment QR code for any of five test networks, or copy
+  and share the address.
+- **Find a transaction** — search activity by name, token or address and
+  filter by type.
+- **Stay protected** — a security score, auto-lock, biometric unlock, and an
+  optional on-device face check for sensitive actions.
+- **Make it yours** — dark or light theme, display currency, hidden balances,
+  and demo controls that let a reviewer try outages and failed sends.
 
-| Area    | Choices                                                                                                                                                                     |
-| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mobile  | React Native 0.88 (Expo SDK 58), expo-router, TypeScript, react-native-svg                                                                                                  |
-| Crypto  | `viem/accounts` (generation/derivation), `@scure/bip39` (validation), `@noble/hashes` (PIN hashing), `react-native-get-random-values`                                       |
-| Storage | `expo-secure-store` (secrets), `@react-native-async-storage/async-storage` (prefs)                                                                                          |
-| Device  | `expo-local-authentication`, `expo-clipboard`, `expo-haptics`, `react-native-qrcode-svg`                                                                                |
-| Native  | Two custom VisionCamera V5 frame-processor plugins (Nitro Modules, Swift/Kotlin) over Google ML Kit: `face-liveness` (Face Detection) and `code-scanner` (Barcode Scanning) |
-| Backend | Hono + `@hono/node-server`, libsql + Drizzle ORM, Zod, viem                                                                                                                 |
-| Shared  | `@nadir-wallet/{types,crypto-core,wallet-core,config}`                                                                                                                      |
-| Tooling | Turborepo, pnpm 11, Vitest, GitHub Actions                                                                                                                                  |
+The QR scanner and the face check need a real camera, so they run on a
+physical device; everything else also runs in the iOS Simulator.
 
-## Monorepo structure
+## How it is built
 
+For engineers: the short version of what is under the hood.
+
+| Area     | Choice                                                                                   |
+| -------- | ---------------------------------------------------------------------------------------- |
+| App      | React Native 0.88, React 19, Expo SDK 58, TypeScript (strict)                            |
+| Routing  | Expo Router with typed routes                                                            |
+| Native   | Two VisionCamera 5 frame-processor plugins (Nitro Modules, Swift and Kotlin) over ML Kit |
+| Crypto   | `viem`, `@scure/bip39`, `@noble/hashes`; secrets in `expo-secure-store`                  |
+| Backend  | Hono on Node, libsql with Drizzle ORM, Zod validation                                    |
+| Monorepo | pnpm workspaces and Turborepo, with shared `types`, `crypto-core` and `wallet-core`      |
+| Quality  | Vitest, an Android end-to-end suite, ESLint, Prettier, GitHub Actions                    |
+
+```mermaid
+flowchart LR
+    Screens["Expo Router screens"] --> Features["Feature screens and hooks"]
+    Features --> Providers["Providers: app, theme, wallet data"]
+    Providers --> Device["Device services: keychain, biometrics, camera"]
+    Device --> Native["Nitro plugins: ML Kit face and QR"]
+    Providers --> API["Hono API: prices, risk check, simulation"]
+    API --> Shared["Shared packages: types, crypto-core, wallet-core"]
+    Features --> Shared
 ```
-apps/
-  mobile/                # React Native app (Expo SDK 58, expo-router)
-  api/                   # Hono backend API (libsql + Drizzle)
-packages/
-  types/                 # @nadir-wallet/types: shared response/domain types
-  crypto-core/           # @nadir-wallet/crypto-core: address, BIP39, and passcode helpers
-  wallet-core/           # @nadir-wallet/wallet-core: risk, simulation, portfolio logic
-  face-liveness/         # @nadir-wallet/face-liveness: native ML Kit Face Detection plugin (Nitro)
-  code-scanner/          # @nadir-wallet/code-scanner: native ML Kit Barcode Scanning plugin (Nitro)
-  config/                # @nadir-wallet/config: shared tsconfig / eslint / prettier
-docs/
-  security-model.md      # trust boundary, what is and is never sent to the API
-  architecture.md        # layers, data flow, design decisions
-  api.md                 # endpoint request/response reference
+
+Decisions worth a look:
+
+- **Keys never leave the device.** BIP39 phrases are generated or imported
+  on-device and kept in the keychain. The API only ever receives public
+  addresses, network IDs and unsigned drafts
+  ([security model](docs/security-model.md)).
+- **Camera work on the frame thread.** Two hand-written native modules run
+  Google ML Kit inside the camera pipeline: [face liveness](packages/face-liveness)
+  and [QR scanning](packages/code-scanner).
+- **A face check you can test.** The liveness challenge (blink, turn, nod,
+  smile, in random order) is a pure reducer, so every path has a unit test
+  ([state machine](apps/mobile/src/features/liveness/livenessChallenge.machine.ts)).
+- **Sensitive actions sit behind the OS.** Revealing the phrase requires Face
+  ID, fingerprint or the device passcode and fails closed; the app passcode is
+  a salted PBKDF2 hash with an escalating lockout that survives a relaunch.
+- **Layering is enforced.** Each feature owns its screens, hooks and tests, and
+  an ESLint rule stops shared layers from importing features, providers or
+  routes ([architecture](docs/architecture.md)).
+- **Native build fixes.** A config plugin patches ML Kit so simulator builds
+  work on Apple Silicon, and Android release builds keep the classes R8 would
+  strip ([build notes](docs/verification/expo-sdk-58.md)).
+
+**Tests:** `pnpm test` runs 40 Vitest files with 401 tests over the wallet
+logic, the security flows and the shared packages. CI runs the format check,
+lint, type check and tests on every push to `main` and every pull request. A
+separate end-to-end suite of three tests drives a release build on Android, and
+the release APK was checked by hand on a
+[Pixel 9](docs/verification/device-pixel9-android.md).
+
+```text
+apps/mobile/             React Native app (Expo Router, feature folders)
+apps/api/                Hono API (libsql + Drizzle)
+packages/types/          Shared request, response and domain types
+packages/crypto-core/    Address, BIP39 and passcode helpers
+packages/wallet-core/    Risk scoring, simulation, portfolio logic
+packages/face-liveness/  Native ML Kit face detection plugin (Nitro)
+packages/code-scanner/   Native ML Kit barcode scanning plugin (Nitro)
+docs/                    Security model, architecture, API reference
 ```
 
-Mobile follows a feature-based layout under `apps/mobile/src` (`app/` routes,
-`features/`, `components/`, `providers/`, `services/`, `theme/`, `i18n/`).
+## Run it locally
 
-## Requirements
-
-- Node.js >= 22.13
-- pnpm 11
-- Xcode 27 and/or Android Studio for native builds
-
-## Getting started
+No accounts or keys are needed; the API serves sample data.
 
 ```sh
 pnpm install
+
+# Terminal 1: the API on http://localhost:8787
+pnpm dev:api
+
+# Terminal 2: build and run the app
+pnpm --filter @nadir-wallet/mobile ios      # or: android
 ```
 
-### Run the API
+<details>
+<summary>Prerequisites, environment notes and commands</summary>
 
-```sh
-pnpm dev:api          # http://localhost:8787, runs migrations + seeds on boot
-```
+- Node.js 22.13 or newer and pnpm 11.
+- iOS: Xcode 27 with CocoaPods. Android: Android Studio with an SDK and a
+  JDK 17.
+- Expo Go is not supported; the app uses development builds because of its
+  native camera modules.
+- If the API is not running, the app falls back to bundled sample data. You
+  can also switch the data source in Settings, under Demo controls.
+- On a physical device `localhost` does not resolve. Copy
+  `apps/mobile/.env.example` to `apps/mobile/.env` and set
+  `EXPO_PUBLIC_API_URL` to your computer's LAN address.
+- Server-only settings live in `apps/api/.env` (see `apps/api/.env.example`).
+  Never put an RPC key in an `EXPO_PUBLIC_*` variable; those ship inside the
+  app bundle.
 
-### Run the mobile app
+| Command          | Purpose                                     |
+| ---------------- | ------------------------------------------- |
+| `pnpm dev:api`   | Run the API with migrations and seed data   |
+| `pnpm test`      | Run the unit tests                          |
+| `pnpm lint`      | Lint every workspace                        |
+| `pnpm typecheck` | Type-check every workspace                  |
+| `pnpm test:e2e`  | Run the Android end-to-end suite (QA build) |
 
-```sh
-pnpm --filter @nadir-wallet/mobile start   # then press i (iOS) / a (Android)
-```
+What it does not do yet: real signing or broadcast, mainnet, live prices or an
+on-chain indexer, WalletConnect and swaps. The face check is challenge-based
+only and is documented as a threat model, not as production-grade
+anti-spoofing.
 
-Run the API first so the app can fetch live public data. If it is down, the app
-quietly falls back to bundled sample data (choose the data source in Settings,
-Demo controls).
+End-to-end setup (QA build, device, API port) is in the
+[mobile README](apps/mobile/README.md#end-to-end-tests). More detail: the
+[API README](apps/api/README.md), the [API reference](docs/api.md) and the
+[architecture notes](docs/architecture.md).
 
-The camera features need a development build (`pnpm --filter
-@nadir-wallet/mobile ios` or `android`); everything else also runs in the iOS
-Simulator (on Xcode 27, Expo CLI opens it in Device Hub). ML Kit does not ship
-an arm64 simulator slice, so a small config plugin
-(`apps/mobile/plugins/withMlkitSimulatorFix.js`) patches the pods after each
-install to keep simulator builds working on Apple Silicon with Xcode 26 and
-later.
-See the [mobile README](apps/mobile/README.md) for details.
+</details>
 
-## Environment setup
+## License
 
-Copy the example files (sensible defaults are built in, so this is optional for
-local dev):
-
-```sh
-cp apps/api/.env.example apps/api/.env
-cp apps/mobile/.env.example apps/mobile/.env
-```
-
-**API (`apps/api/.env`)**, server-only and never bundled into the app:
-
-```env
-PORT=8787
-DATABASE_URL=file:./local.db
-RPC_URL_ETHEREUM_SEPOLIA=
-RPC_URL_POLYGON_AMOY=
-```
-
-**Mobile (`apps/mobile/.env`)**, public config only (`EXPO_PUBLIC_*` is embedded
-in the JS bundle):
-
-```env
-EXPO_PUBLIC_API_URL=http://localhost:8787
-APPLE_TEAM_ID=            # optional, used by app.config.js for device signing
-```
-
-On a **physical device** `localhost` won't resolve, so set `EXPO_PUBLIC_API_URL`
-to the dev machine's LAN address (e.g. `http://192.168.1.20:8787`).
-
-### Adding Alchemy / RPC URLs (backend only)
-
-Real RPC is **not wired up yet**: the API serves deterministic mock balances,
-prices, and history (see the roadmap). When real RPC is added, provider URLs go
-**only** in `apps/api/.env`:
-
-```env
-RPC_URL_ETHEREUM_SEPOLIA=https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY
-RPC_URL_POLYGON_AMOY=https://polygon-amoy.g.alchemy.com/v2/YOUR_KEY
-```
-
-> **Never** put an RPC/Alchemy key in an `EXPO_PUBLIC_*` variable. Those ship
-> inside the mobile bundle and are public. RPC keys stay server-side, behind the
-> API, by design.
-
-## Current MVP features
-
-- On-device **BIP39** wallet generation and import with real word/checksum
-  validation; EVM address derived at `m/44'/60'/0'/0/0`.
-- Recovery phrase stored only in the device keychain (SecureStore); revealing or
-  backing it up requires OS authentication (Face ID / Touch ID, Android
-  biometrics, or the device passcode as the system fallback) and fails closed
-  when none is set up. Simulated sends ask for the same confirmation, and fall
-  back to the app passcode only on a device with no screen lock at all; passing
-  it does not sign or broadcast anything.
-- Onboarding, biometric/passcode lock with auto-lock on background, and a local
-  append-only security event log. The app-lock PIN is stored as a salted
-  PBKDF2 hash, and failed attempts trigger an escalating lockout that survives
-  a relaunch.
-- Home dashboard, token detail, activity, receive (real QR), send flow with
-  backend-backed **address risk check** and **transaction simulation**, security
-  center, and settings.
-- Live API wiring with graceful demo-data fallback; clipboard and share
-  actions.
-- Dark + light themes, persisted preferences, English i18n scaffold.
-- **Active face-liveness check**: randomized blink / turn / nod / smile
-  challenges verified in real time by a hand-written native frame-processor
-  plugin (`packages/face-liveness`) running ML Kit on the camera worklet thread,
-  with a live face-in-oval gate, fully on-device (see `docs/security-model.md`
-  for the threat model). It can optionally **gate revealing the recovery phrase
-  and high-value sends** (toggles in the Security Center).
-- **QR address scanner** in the send flow, backed by a second hand-written
-  native plugin (`packages/code-scanner`) wrapping ML Kit Barcode Scanning.
-
-## Testing & quality
-
-Unit tests (Vitest) target the logic where a regression would be silent:
-
-- the **face-liveness challenge state machine** (`reduceLiveness`, a pure
-  reducer): alignment gating, every challenge type, timeouts, and face-loss
-  restarts
-- **BIP39** word/checksum validation, EVM address derivation, and the
-  **passcode hashing** record format (`crypto-core`)
-- **address-risk scoring** and **transaction simulation** (`wallet-core`)
-- the **passcode lockout policy**, QR address extraction, and the one-shot scan
-  channel
-- the **OS authentication gate** (mocked): the phrase is read only after a
-  successful prompt; cancel, failure, lockout and missing enrolment never read it
-- send input validation, simulation-status mapping, security score tiers, and
-  transaction display helpers
-
-```sh
-pnpm test
-```
-
-GitHub Actions runs lint, typecheck, and the test suite on every push.
-
-Vitest covers shared logic and mocks device APIs. The Android e2e suite
-covers passcode unlock after restart, Send review with a backend fee, and
-switching to demo data and changing the Receive QR network. It uses the
-separate **Nadir Wallet QA** app and clears its data between tests.
-
-The e2e suite requires Node 22.22.3+ on the 22.x line or Node 24.8+. Build the
-QA variant from the repository root.
-
-```sh
-NADIR_E2E=1 pnpm --filter @nadir-wallet/mobile exec expo prebuild --platform android --no-install
-NADIR_E2E=1 apps/mobile/android/gradlew -p apps/mobile/android assembleRelease -PreactNativeArchitectures=arm64-v8a
-```
-
-Run `pnpm dev:api` in a separate terminal. With the Pixel connected, set
-`ANDROID_SERIAL` to its ADB transport, install the QA build, and forward the
-app's default API port to the Mac.
-
-```sh
-adb -s "$ANDROID_SERIAL" reverse tcp:8787 tcp:8787
-agent-device install apps/mobile/android/app/build/outputs/apk/release/app-release.apk --serial "$ANDROID_SERIAL"
-agent-device close
-pnpm test:e2e
-```
-
-Use `agent-device reinstall com.nadiralfakesh.nadirwallet.qa <apk>` for
-later builds. Set `NADIR_E2E_DEVICE` to select another Android device by name.
-For an emulator, build with its ABI and configure the app's API URL.
-
-The Android release APK passed the previous physical-device run on a [Pixel 9](docs/verification/device-pixel9-android.md). Physical iPhone camera verification is pending.
-
-## Current limitations
-
-- **Testnet-only** (Ethereum Sepolia, Polygon Amoy); no mainnet.
-- **No real signing or broadcast.** The send flow simulates and shows
-  pending/success/failed outcomes via a demo control; nothing is signed or
-  broadcast, and no transaction hash is shown for a simulated send.
-- Balances, prices, and history are **deterministic mock data** from the API (no
-  real RPC/indexer yet). History entries carry sample hashes, are labelled as
-  sample data, and have no block-explorer link.
-- Liveness is **active-only** (challenge-response); no passive anti-spoofing.
-  This is documented as a threat model, not claimed as production-grade.
-- No WalletConnect, no swaps.
-- SecureStore protects secrets with the OS keychain/Keystore but adds no extra
-  app-level encryption. The reveal prompt is enforced by the app, not bound to
-  the keychain item (see `docs/security-model.md`).
-- The face-liveness and QR-scanner features need a **development build** and a
-  real camera, so they only run on a physical device.
-
-## Roadmap
-
-- Real testnet transaction signing (on-device, from the stored mnemonic)
-- Optional testnet broadcast
-- Real price API + real transaction indexer (Alchemy/RPC)
-- Passive anti-spoofing (PAD) layered under the active liveness check
-- Stronger encrypted-vault model
-- WalletConnect
-
-## Docs
-
-- [`docs/security-model.md`](docs/security-model.md): trust boundary & secrets
-- [`docs/architecture.md`](docs/architecture.md): layers & data flow
-- [`docs/api.md`](docs/api.md): endpoint reference
-- [`apps/mobile/README.md`](apps/mobile/README.md): running and building the app
-- [`apps/api/README.md`](apps/api/README.md): API specifics
-- [`packages/face-liveness/README.md`](packages/face-liveness/README.md): native ML Kit liveness plugin (Nitro)
-- [`packages/code-scanner/README.md`](packages/code-scanner/README.md): native ML Kit QR scanner plugin (Nitro)
-
-## Workspace scripts
-
-```sh
-pnpm dev            # turbo run dev across all apps
-pnpm dev:api        # backend only
-pnpm dev:mobile     # mobile only
-pnpm lint           # turbo run lint
-pnpm typecheck      # turbo run typecheck (all packages + apps)
-pnpm test           # vitest run (packages + app logic)
-pnpm format         # prettier across the repo
-```
-
-## Notes
-
-- pnpm uses a hoisted `node_modules` (`nodeLinker` in `pnpm-workspace.yaml`) so
-  React Native native modules resolve correctly in the monorepo.
-- The `@nadir-wallet/*` packages export raw `.ts`; Metro is configured to watch
-  the repo root and resolve package exports (`apps/mobile/metro.config.js`), and
-  the API bundles them into its dist with tsup.
+[MIT](LICENSE).

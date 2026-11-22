@@ -103,3 +103,33 @@ Vitest coverage from the repo root (`pnpm test`).
 Settings has a "Demo controls" card that flips the backend, price, simulation,
 and send-outcome states so every UI state can be shown without a real chain.
 Choosing "Sample data" as the data source switches the whole app to bundled data.
+
+## End-to-end tests
+
+The Android e2e suite ([`tests/wallet.e2e.ts`](../../tests/wallet.e2e.ts)) covers
+passcode unlock after restart, Send review with a backend fee, and switching to
+demo data and changing the Receive QR network. It uses the separate **Nadir
+Wallet QA** app and clears its data between tests.
+
+The e2e suite requires Node 22.22.3+ on the 22.x line or Node 24.8+. Build the
+QA variant from the repository root.
+
+```sh
+NADIR_E2E=1 pnpm --filter @nadir-wallet/mobile exec expo prebuild --platform android --no-install
+NADIR_E2E=1 apps/mobile/android/gradlew -p apps/mobile/android assembleRelease -PreactNativeArchitectures=arm64-v8a
+```
+
+Run `pnpm dev:api` in a separate terminal. With the Pixel connected, set
+`ANDROID_SERIAL` to its ADB transport, install the QA build, and forward the
+app's default API port to the Mac.
+
+```sh
+adb -s "$ANDROID_SERIAL" reverse tcp:8787 tcp:8787
+agent-device install apps/mobile/android/app/build/outputs/apk/release/app-release.apk --serial "$ANDROID_SERIAL"
+agent-device close
+pnpm test:e2e
+```
+
+Use `agent-device reinstall com.nadiralfakesh.nadirwallet.qa <apk>` for
+later builds. Set `NADIR_E2E_DEVICE` to select another Android device by name.
+For an emulator, build with its ABI and configure the app's API URL.
