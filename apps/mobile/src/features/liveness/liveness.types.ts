@@ -1,4 +1,4 @@
-export type LivenessMode = "standalone" | "gate";
+export type LivenessMode = "standalone" | "gate" | "onboarding";
 
 export interface LivenessFlowProps {
   mode: LivenessMode;

@@ -5,9 +5,8 @@
     "accounts": "Wallets & accounts",
     "accountsSub": "1 wallet",
     "networks": "Networks",
-    "networksSub": "5 testnets enabled",
-    "currency": "Display currency",
-    "currencyValue": "USD · demo"
+    "networksSub": "{{enabled}} of {{total}} enabled",
+    "currency": "Display currency"
   },
   "preferences": {
     "section": "Preferences",
@@ -15,20 +14,17 @@
     "dark": "Dark",
     "light": "Light",
     "privacy": "Privacy",
-    "privacySub": "Hide balances"
+    "privacySub": "Balances, screenshots, usage data",
+    "system": "System",
+    "notifications": "Notifications",
+    "notificationsSub": "Transfers, security, prices"
   },
   "security": {
     "section": "Security",
-    "center": "Security Center",
-    "protected": "{{score}}/{{total}} protections active",
-    "recovery": "Recovery phrase",
-    "notifications": "Notifications"
+    "recovery": "Recovery phrase"
   },
   "about": {
     "section": "About",
-    "howItWorks": "How this demo works",
-    "howItWorksSub": "Security model & testnet",
-    "help": "Help & support",
     "version": "About Nadir Wallet"
   },
   "changePin": {
@@ -47,27 +43,30 @@
   },
   "demo": {
     "section": "Demo controls",
-    "note": "Showcase only — flip these to preview backend, price and send states. They don't affect your local wallet.",
-    "liveApi": "Live API data",
-    "liveOn": "Querying the local API for public data",
-    "liveOff": "Using bundled demo data",
-    "apiOnline": "API reachable",
-    "apiOffline": "API unreachable — showing demo data",
-    "backend": "Backend",
-    "backendOnline": "Online",
-    "backendApi": "API down",
-    "backendRpc": "RPC down",
-    "price": "Prices",
-    "priceFresh": "Fresh",
-    "priceStale": "Stale",
-    "priceNone": "None",
-    "sim": "Send simulation",
+    "note": "These switches let a reviewer see every state of the app; none of them touch the wallet keys.",
+    "dataSource": "Data source",
+    "sampleData": "Sample data",
+    "liveApi": "Live API",
+    "statusConnected": "Connected to the API",
+    "statusUnreachable": "API not reachable, showing sample data",
+    "statusSample": "Using bundled sample data",
+    "simulate": "Simulate",
+    "sim": "Send check",
     "simPass": "Pass",
     "simFail": "Fail",
-    "outcome": "Send outcome",
+    "outcome": "Send result",
     "outcomeSuccess": "Success",
     "outcomePending": "Pending",
-    "outcomeFailed": "Failed"
+    "outcomeFailed": "Failed",
+    "outages": "Simulate outages",
+    "backend": "Network outage",
+    "backendOnline": "None",
+    "backendApi": "API down",
+    "backendRpc": "RPC down",
+    "price": "Price state",
+    "priceFresh": "Fresh",
+    "priceStale": "Stale",
+    "priceNone": "None"
   },
   "reset": {
     "section": "Developer",
@@ -80,5 +79,13 @@
   },
   "lockWallet": "Lock wallet",
   "footerName": "Nadir Wallet · Non-custodial · v1.0.0",
-  "footerNote": "Testnet-only demo — no real funds. Keys never leave this device."
+  "footerNote": "Testnet-only demo — no real funds. Keys never leave this device.",
+  "currencies": {
+    "USD": "US Dollar",
+    "EUR": "Euro",
+    "GBP": "British Pound",
+    "AED": "UAE Dirham",
+    "TRY": "Turkish Lira",
+    "JPY": "Japanese Yen"
+  }
 }

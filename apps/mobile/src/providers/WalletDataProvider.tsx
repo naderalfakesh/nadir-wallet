@@ -28,6 +28,8 @@ interface WalletData {
   backend: BackendStatus;
   price: PriceStatus;
   source: "live" | "demo";
+  /** Whether the live API answered: null while the first load is in flight or live mode is off. */
+  apiReachable: boolean | null;
   loading: boolean;
   initialLoading: boolean;
   refresh: () => void;
@@ -96,6 +98,7 @@ export function WalletDataProvider({ children }: { children: React.ReactNode }) 
         backend: demoBackend,
         price: demoPrice,
         source: "demo",
+        apiReachable: null,
         loading: false,
         initialLoading: false,
         refresh,
@@ -110,18 +113,21 @@ export function WalletDataProvider({ children }: { children: React.ReactNode }) 
         backend: "online",
         price: live.priceStatus,
         source: "live",
+        apiReachable: true,
         loading,
         initialLoading: false,
         refresh,
       };
     }
-    // Live mode but no data yet: keep demo data visible and surface API status.
+    // Live mode without a portfolio (still loading, or the API is unreachable): show the
+    // bundled sample data as if healthy. Only Demo controls report the real connection.
     return {
       ...DEMO_VIEW,
       transactions: demoTx,
-      backend: initialLoading || !address ? "online" : "api_unavailable",
-      price: initialLoading ? demoPrice : "unavailable",
+      backend: "online",
+      price: "fresh",
       source: "demo",
+      apiReachable: initialLoading || !address ? null : false,
       loading,
       initialLoading,
       refresh,

@@ -17,6 +17,7 @@ export { TxIcon } from "./TxIcon";
 export { MiniIcon } from "./MiniIcon";
 export { Brandmark } from "./Brandmark";
 export { Sparkline } from "./Sparkline";
+export { ScrubbableChart } from "./ScrubbableChart";
 export { Screen } from "./Screen";
 export { ScreenHeader } from "./ScreenHeader";
 export { StatusNotice } from "./StatusNotice";

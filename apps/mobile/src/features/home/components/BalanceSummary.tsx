@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import {
   AppText,
@@ -6,11 +6,18 @@ import {
   PriceFreshness,
   Segmented,
   Skeleton,
-  Sparkline,
+  ScrubbableChart,
   TestnetBadge,
 } from "@/components";
-import { getDemoChart } from "@/features/wallet/chart";
-import { RANGES, type Range } from "@/features/wallet/chart";
+import {
+  RANGES,
+  changeAtPoint,
+  formatChartTime,
+  getChartTimestamps,
+  getDemoChart,
+  valueAtPoint,
+  type Range,
+} from "@/features/wallet/chart";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useThemedStyles, type Theme } from "@/theme";
 import type { BackendStatus, PriceStatus } from "@/types/status";
@@ -42,9 +49,25 @@ export function BalanceSummary({
   const styles = useThemedStyles(createStyles);
   const { t } = useTranslation();
   const priceUnavailable = priceStatus === "unavailable";
-  const balanceValue = getBalanceValue(total, hidden, priceUnavailable, t("home.valueUnavailable"));
   const chart = getDemoChart("portfolio", range, change);
-  const changeValue = getBalanceChange(total, chart.change, hidden);
+  const [scrub, setScrub] = useState<{ range: Range; index: number; now: number } | null>(null);
+  const active = scrub && scrub.range === range ? scrub : null;
+  const shownTotal = active ? valueAtPoint(total, chart.data, active.index) : total;
+  const shownPct = active ? changeAtPoint(chart.data, active.index) : chart.change;
+  const historyLabel = active
+    ? formatChartTime(
+        getChartTimestamps(range, chart.data.length, active.now)[active.index],
+        range,
+        new Date(active.now),
+      )
+    : t("home.demoHistory", { range });
+  const balanceValue = getBalanceValue(
+    shownTotal,
+    hidden,
+    priceUnavailable,
+    t("home.valueUnavailable"),
+  );
+  const changeValue = getBalanceChange(shownTotal, shownPct, hidden);
   const chartOpacity = backendStatus === "rpc_unavailable" ? 0.4 : 1;
 
   return (
@@ -70,9 +93,9 @@ export function BalanceSummary({
           </AppText>
           {!priceUnavailable && (
             <View style={styles.changeRow}>
-              <ChangeBadge pct={chart.change} />
+              <ChangeBadge pct={shownPct} />
               <AppText size={14} muted tnum>
-                {changeValue} · {t("home.demoHistory", { range })}
+                {changeValue} · {historyLabel}
               </AppText>
             </View>
           )}
@@ -80,7 +103,14 @@ export function BalanceSummary({
           {!priceUnavailable && (
             <>
               <View style={[styles.chartWrap, { opacity: chartOpacity }]}>
-                <Sparkline data={chart.data} up={chart.change >= 0} height={92} />
+                <ScrubbableChart
+                  data={chart.data}
+                  up={chart.change >= 0}
+                  height={92}
+                  onScrub={(index) =>
+                    setScrub(index === null ? null : { range, index, now: Date.now() })
+                  }
+                />
               </View>
               <Segmented options={RANGES} value={range} onChange={onRangeChange} small />
             </>

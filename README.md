@@ -14,7 +14,7 @@ A **local-first, non-custodial, testnet-only** wallet built with React Native, E
 
 - Create or import a test wallet, set an app passcode, and unlock with the passcode or device biometrics.
 - Scan a payment QR or enter a recipient. Review address risk and the estimated fee before confirming a simulated send.
-- Explore the Security Center, including recovery phrase backup and optional face-liveness challenges.
+- Pass an on-device face-liveness identity check during setup, then manage backup, biometrics and transaction protection in the Security tab.
 - Use **Settings → Demo controls** to try API outages and different send outcomes.
 
 ## Engineering highlights
@@ -93,8 +93,8 @@ pnpm --filter @nadir-wallet/mobile start   # then press i (iOS) / a (Android)
 ```
 
 Run the API first so the app can fetch live public data. If it is down, the app
-falls back to bundled demo data (toggle "Live API data" in Settings, Demo
-controls).
+quietly falls back to bundled sample data (choose the data source in Settings,
+Demo controls).
 
 The camera features need a development build (`pnpm --filter
 @nadir-wallet/mobile ios` or `android`); everything else also runs in the iOS

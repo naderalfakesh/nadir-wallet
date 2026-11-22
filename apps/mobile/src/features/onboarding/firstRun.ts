@@ -21,3 +21,8 @@ export function initialOnboardingStep(introSeen: boolean): "intro" | "welcome" {
 export function nextIntroIndex(index: number): number | null {
   return index + 1 < INTRO_STEPS.length ? index + 1 : null;
 }
+
+/** The step after the identity check: the phrase explainer when creating, the phrase entry when importing. */
+export function stepAfterIdentity(viaImport: boolean): "explain" | "import" {
+  return viaImport ? "import" : "explain";
+}

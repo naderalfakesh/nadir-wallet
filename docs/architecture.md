@@ -140,8 +140,8 @@ Designed so the app never looks broken:
   unavailable" indicator.
 - If risk/simulation fails, the send flow shows the existing "unavailable" UI;
   the simulated send (nothing is signed) remains available.
-- A **"Live API data"** toggle (Settings, Demo controls) switches between live
-  data and fully manual demo overrides for backend/price/simulation states.
+- A **Data source** choice (Settings, Demo controls) switches between the live
+  API and bundled sample data with manual backend/price/simulation overrides.
 
 ## How the derived address flows
 

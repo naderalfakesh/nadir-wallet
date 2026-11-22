@@ -6,7 +6,10 @@ export interface SheetParams {
   txDetail: { id: string };
   accounts: undefined;
   pickToken: { current?: string; onPick?: (token: PortfolioToken) => void } | undefined;
-  howItWorks: undefined;
+  networks: undefined;
+  currency: undefined;
+  privacy: undefined;
+  notifications: undefined;
   theme: undefined;
   soon: { title?: string } | undefined;
 }

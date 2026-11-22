@@ -29,9 +29,9 @@ export function BottomPromptPanel({
   const { t } = useTranslation();
   const resultBody = hasPassed ? t("liveness.passedBody") : t("liveness.failedTimeout");
   const primaryLabel = hasPassed
-    ? mode === "gate"
-      ? t("liveness.continue")
-      : t("liveness.done")
+    ? mode === "standalone"
+      ? t("liveness.done")
+      : t("liveness.continue")
     : t("liveness.cancel");
 
   return (

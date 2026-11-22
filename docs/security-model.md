@@ -246,7 +246,7 @@ trust boundary.
 
 ## Face liveness check (active challenge-response)
 
-The Security Center includes an on-device **active liveness check**: the front
+Onboarding and the Security tab include an on-device **active liveness check**: the front
 camera runs through a custom VisionCamera V5 frame-processor plugin
 (`@nadir-wallet/face-liveness`, a Nitro module wrapping Google ML Kit Face
 Detection), and a randomized challenge sequence (blink, turn left/right, nod,
@@ -280,9 +280,9 @@ plugin's frame pipeline is the natural insertion point for such a model: it
 would slot in as a second on-device inference pass without changing the trust
 boundary above.
 
-**Step-up gating.** Beyond the standalone Security Center demo, the liveness
+**Step-up gating.** Beyond the identity check in onboarding, the liveness
 check can be required as an extra gate before two sensitive actions (toggles in
-the Security Center, off by default):
+the Security tab, off by default):
 
 - **Revealing the recovery phrase.** Runs in front of the OS authentication
   prompt, so the keychain read still requires OS authentication regardless;

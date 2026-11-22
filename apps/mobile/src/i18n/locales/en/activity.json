@@ -13,11 +13,18 @@
   },
   "from": "From ",
   "to": "To ",
+  "search": {
+    "placeholder": "Search by name, token or address",
+    "clear": "Clear search",
+    "close": "Close search"
+  },
   "footer": "Showing recent activity",
   "empty": {
     "title": "No activity yet",
     "body": "Your transactions will appear here once you send or receive crypto.",
     "filteredTitle": "No transactions",
-    "filteredBody": "Try a different filter to see more of your history."
+    "filteredBody": "Try a different filter to see more of your history.",
+    "searchTitle": "No results for “{{query}}”",
+    "searchBody": "Check the spelling, or search by name, token or address."
   }
 }

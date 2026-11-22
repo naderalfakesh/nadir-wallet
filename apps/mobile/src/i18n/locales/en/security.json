@@ -8,53 +8,28 @@
     "active": "{{score}} of {{total}} protections active.",
     "finishBackup": "Finish your backup to fully protect your funds."
   },
-  "model": {
-    "title": "Security model",
-    "keysTitle": "Keys stay on this device",
-    "keysBody": "Your recovery phrase and private keys are generated and stored only on this device — never uploaded.",
-    "signTitle": "No signing in this demo",
-    "signBody": "Sends are simulated: nothing is signed or broadcast. Confirming one still asks for your biometrics or device passcode, or your app passcode on a device with no screen lock.",
-    "backendTitle": "Backend sees public data only",
-    "backendBody": "Only your public address is shared — for cached prices, address risk checks and transaction simulation."
-  },
   "protection": {
     "title": "Protection",
     "backup": "Recovery phrase backup",
     "backupDone": "Backed up & verified",
     "backupTodo": "Not backed up yet",
+    "identity": "Identity check",
+    "identityDone": "Verified on {{date}}",
+    "identityTodo": "Not verified",
     "biometric": "Biometric unlock",
     "biometricSub": "{{Biometry}}",
-    "pin": "App passcode",
-    "pinSub": "6-digit code",
     "autolock": "Auto-lock",
     "autolockSub": "After {{min}} min",
-    "signing": "Send confirmation",
-    "signingSub": "Device authentication · simulated sends",
-    "on": "On",
-    "off": "Off"
+    "changePasscode": "Change passcode"
   },
-  "device": {
-    "title": "Device security",
-    "secure": "This device is secure",
-    "lastChecked": "Last checked just now",
-    "checks": {
-      "screenLock": "Screen lock enabled",
-      "notRooted": "Not rooted / jailbroken",
-      "latestVersion": "Latest app version",
-      "secureEnclave": "Secure enclave available"
-    }
-  },
-  "txProtection": {
-    "title": "Transaction protection",
-    "heading": "Suspicious activity protection",
-    "sub": "Checks recipients and blocks high-risk addresses when enabled",
-    "riskLevels": "RISK LEVELS",
-    "low": "Low",
-    "lowBody": "Known address, verified contract — safe to proceed.",
-    "caution": "Caution",
-    "cautionBody": "New address or unverified contract — review carefully.",
-    "high": "High",
-    "highBody": "Flagged for scams or drains — sending is blocked."
+  "transactions": {
+    "title": "Transactions",
+    "protection": "Transaction protection",
+    "protectionSub": "Checks recipients and blocks high-risk addresses when enabled",
+    "faceSend": "Face check for large sends",
+    "faceSendSub": "Require a face check to confirm sends over $1,000",
+    "faceReveal": "Face check for recovery phrase",
+    "faceRevealSub": "Require a face check before showing the recovery phrase"
   },
   "events": {
     "title": "Recent security activity"
@@ -90,22 +65,5 @@
     "livenessFailDetail": "Challenges timed out",
     "passcodeChangedTitle": "Passcode changed",
     "passcodeChangedDetail": "New app-lock passcode saved to the keychain"
-  },
-  "advanced": {
-    "title": "Advanced",
-    "reveal": "Reveal recovery phrase",
-    "revealSub": "Requires your biometrics or device passcode",
-    "connected": "Connected apps",
-    "connectedSub": "2 dApps connected",
-    "changePin": "Change passcode",
-    "liveness": "Face liveness check",
-    "livenessSub": "Verify a live person holds this device"
-  },
-  "stepup": {
-    "title": "Step-up verification",
-    "revealLabel": "Liveness before reveal",
-    "revealSub": "Require a face liveness check before showing the recovery phrase",
-    "sendLabel": "Liveness on high-value send",
-    "sendSub": "Require a liveness check to confirm sends over $1,000"
   }
 }

@@ -2,8 +2,11 @@ import React, { useEffect, useState } from "react";
 import { BottomSheet } from "@/components";
 import { useSheets, type SheetRequest } from "@/providers/SheetProvider";
 import { AccountsSheet } from "./AccountsSheet";
-import { HowItWorksSheet } from "./HowItWorksSheet";
+import { CurrencySheet } from "./CurrencySheet";
+import { NetworksSheet } from "./NetworksSheet";
+import { NotificationsSheet } from "./NotificationsSheet";
 import { PickTokenSheet } from "./PickTokenSheet";
+import { PrivacySheet } from "./PrivacySheet";
 import { ReceiveSheet } from "./ReceiveSheet";
 import { gateSheet } from "./sheetGate";
 import { SoonSheet } from "./SoonSheet";
@@ -22,8 +25,14 @@ function SheetBody({ request, close }: { request: SheetRequest; close: () => voi
       return <PickTokenSheet params={request.params} close={close} />;
     case "soon":
       return <SoonSheet params={request.params} close={close} />;
-    case "howItWorks":
-      return <HowItWorksSheet close={close} />;
+    case "networks":
+      return <NetworksSheet close={close} />;
+    case "currency":
+      return <CurrencySheet close={close} />;
+    case "privacy":
+      return <PrivacySheet close={close} />;
+    case "notifications":
+      return <NotificationsSheet close={close} />;
     case "theme":
       return <ThemeSheet close={close} />;
   }

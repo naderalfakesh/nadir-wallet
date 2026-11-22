@@ -1,12 +1,14 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { Card, AppText, Icon, Toggle } from "@/components";
+import { Card, AppText, Icon } from "@/components";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useDemoState } from "@/providers/DemoStateProvider";
 import { useWallet } from "@/providers/WalletDataProvider";
 import { useTheme, alpha } from "@/theme";
 import type { BackendStatus, PriceStatus, SendOutcome, SendSim } from "@/types/status";
 import { Choice } from "./Choice";
+
+type DataSource = "sample" | "live";
 
 export function DemoControls() {
   const theme = useTheme();
@@ -23,8 +25,13 @@ export function DemoControls() {
     setSendSim,
     setSendOutcome,
   } = useDemoState();
-  const { backend: liveBackend } = useWallet();
-  const apiOnline = liveBackend === "online";
+  const { apiReachable } = useWallet();
+
+  const status = !liveApi
+    ? { text: t("settings.demo.statusSample"), color: theme.colors.textFaint, neutral: true }
+    : apiReachable === false
+      ? { text: t("settings.demo.statusUnreachable"), color: theme.colors.warn, neutral: false }
+      : { text: t("settings.demo.statusConnected"), color: theme.colors.pos, neutral: false };
 
   return (
     <Card padding={16}>
@@ -35,46 +42,57 @@ export function DemoControls() {
         </AppText>
       </View>
 
-      <View style={styles.liveRow}>
-        <View style={styles.liveInfo}>
-          <AppText weight="semibold" size={14}>
-            {t("settings.demo.liveApi")}
-          </AppText>
-          <AppText size={12} muted style={styles.liveSub}>
-            {liveApi ? t("settings.demo.liveOn") : t("settings.demo.liveOff")}
-          </AppText>
-        </View>
-        <Toggle
-          testID="live-api-data"
-          label={t("settings.demo.liveApi")}
-          on={liveApi}
-          onChange={() => setLiveApi(!liveApi)}
+      <Choice<DataSource>
+        label={t("settings.demo.dataSource")}
+        value={liveApi ? "live" : "sample"}
+        onChange={(source) => setLiveApi(source === "live")}
+        options={[
+          { value: "sample", label: t("settings.demo.sampleData"), testID: "live-api-data" },
+          { value: "live", label: t("settings.demo.liveApi"), testID: "live-api-on" },
+        ]}
+      />
+      <View
+        style={[
+          styles.status,
+          { backgroundColor: alpha(status.color, status.neutral ? 0.08 : 0.12) },
+        ]}
+      >
+        <View style={[styles.statusDot, { backgroundColor: status.color }]} />
+        <AppText size={12} color={status.color} weight="semibold" style={styles.statusText}>
+          {status.text}
+        </AppText>
+      </View>
+
+      <View style={styles.group}>
+        <AppText weight="bold" size={13}>
+          {t("settings.demo.simulate")}
+        </AppText>
+        <Choice<SendSim>
+          label={t("settings.demo.sim")}
+          value={sendSim}
+          onChange={setSendSim}
+          options={[
+            { value: "pass", label: t("settings.demo.simPass") },
+            { value: "fail", label: t("settings.demo.simFail") },
+          ]}
+        />
+        <Choice<SendOutcome>
+          label={t("settings.demo.outcome")}
+          value={sendOutcome}
+          onChange={setSendOutcome}
+          options={[
+            { value: "success", label: t("settings.demo.outcomeSuccess") },
+            { value: "pending", label: t("settings.demo.outcomePending") },
+            { value: "failed", label: t("settings.demo.outcomeFailed") },
+          ]}
         />
       </View>
 
-      {liveApi ? (
-        <View
-          style={[
-            styles.apiStatus,
-            { backgroundColor: alpha(apiOnline ? theme.colors.pos : theme.colors.warn, 0.12) },
-          ]}
-        >
-          <View
-            style={[
-              styles.apiDot,
-              { backgroundColor: apiOnline ? theme.colors.pos : theme.colors.warn },
-            ]}
-          />
-          <AppText
-            size={12}
-            color={apiOnline ? theme.colors.pos : theme.colors.warn}
-            weight="semibold"
-          >
-            {apiOnline ? t("settings.demo.apiOnline") : t("settings.demo.apiOffline")}
+      {!liveApi && (
+        <View style={styles.group}>
+          <AppText weight="bold" size={13}>
+            {t("settings.demo.outages")}
           </AppText>
-        </View>
-      ) : (
-        <View style={styles.simulated}>
           <Choice<BackendStatus>
             label={t("settings.demo.backend")}
             value={backend}
@@ -95,30 +113,8 @@ export function DemoControls() {
               { value: "unavailable", label: t("settings.demo.priceNone") },
             ]}
           />
-          <Choice<SendSim>
-            label={t("settings.demo.sim")}
-            value={sendSim}
-            onChange={setSendSim}
-            options={[
-              { value: "pass", label: t("settings.demo.simPass") },
-              { value: "fail", label: t("settings.demo.simFail") },
-            ]}
-          />
         </View>
       )}
-
-      <View style={styles.outcome}>
-        <Choice<SendOutcome>
-          label={t("settings.demo.outcome")}
-          value={sendOutcome}
-          onChange={setSendOutcome}
-          options={[
-            { value: "success", label: t("settings.demo.outcomeSuccess") },
-            { value: "pending", label: t("settings.demo.outcomePending") },
-            { value: "failed", label: t("settings.demo.outcomeFailed") },
-          ]}
-        />
-      </View>
     </Card>
   );
 }
@@ -133,35 +129,24 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 17,
   },
-  liveRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  liveInfo: {
-    flex: 1,
-  },
-  liveSub: {
-    marginTop: 1,
-  },
-  apiStatus: {
+  status: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginTop: 12,
+    marginTop: 10,
     padding: 10,
     borderRadius: 12,
   },
-  apiDot: {
+  statusDot: {
     width: 7,
     height: 7,
     borderRadius: 4,
   },
-  simulated: {
-    gap: 14,
-    marginTop: 16,
+  statusText: {
+    flex: 1,
   },
-  outcome: {
-    marginTop: 16,
+  group: {
+    gap: 12,
+    marginTop: 20,
   },
 });

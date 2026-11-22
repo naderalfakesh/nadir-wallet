@@ -26,6 +26,18 @@
     "trustKeys": "Your recovery phrase stays on this device. The backend only ever sees public wallet addresses.",
     "trustTestnet": "Testnet-only demo — balances and prices are estimated and hold no real value."
   },
+  "identity": {
+    "title": "Verify it's you",
+    "sub": "A quick face check",
+    "personTitle": "A real person sets this up",
+    "personBody": "A short check confirms a live person, not a photo or a script, is creating this wallet.",
+    "deviceTitle": "Runs on this device",
+    "deviceBody": "The check happens fully on your phone. Nothing is sent to a server.",
+    "privateTitle": "No photo or video kept",
+    "privateBody": "Nothing from the camera is stored or shared, and only the result is remembered.",
+    "start": "Start face check",
+    "skip": "Not now"
+  },
   "explain": {
     "title": "Self-custody",
     "sub": "What that means",

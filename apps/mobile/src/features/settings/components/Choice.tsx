@@ -6,7 +6,7 @@ import { useTheme, useThemedStyles, type Theme } from "@/theme";
 interface ChoiceProps<T extends string> {
   label: string;
   value: T;
-  options: { value: T; label: string }[];
+  options: { value: T; label: string; testID?: string }[];
   onChange: (v: T) => void;
 }
 
@@ -25,6 +25,9 @@ export function Choice<T extends string>({ label, value, options, onChange }: Ch
             <Pressable
               key={o.value}
               onPress={() => onChange(o.value)}
+              testID={o.testID}
+              accessibilityRole="button"
+              accessibilityState={{ selected: on }}
               style={[
                 styles.option,
                 { backgroundColor: on ? theme.colors.surface3 : "transparent" },

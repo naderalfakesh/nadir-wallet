@@ -1,6 +1,7 @@
 import { getTransactionTime } from "@/features/wallet/transactions";
-import type { PortfolioTransaction } from "@/features/wallet/types";
+import type { PortfolioToken, PortfolioTransaction, TxType } from "@/features/wallet/types";
 import type { TFunction } from "@/i18n";
+import { fmtToken } from "@/utils/format";
 import type { ActivityFilter } from "./activity.types";
 
 export function filterTransactions(
@@ -20,4 +21,42 @@ export function getActivitySubtitle(tx: PortfolioTransaction, t: TFunction): str
       ? tx.party
       : `${tx.type === "receive" ? t("activity.from") : t("activity.to")}${tx.party}`;
   return `${party}  ·  ${getTransactionTime(tx)}`;
+}
+
+export interface SearchContext {
+  typeLabels: Record<TxType, string>;
+  tokens: Pick<PortfolioToken, "symbol" | "name">[];
+}
+
+/** Case-insensitive match over party, token symbol and name, type label, amount, hash and chain. */
+export function matchesSearch(
+  tx: PortfolioTransaction,
+  query: string,
+  context: SearchContext,
+): boolean {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return true;
+  const tokenName = context.tokens.find((token) => token.symbol === tx.token)?.name ?? "";
+  const haystack = [
+    tx.party,
+    tx.token,
+    tokenName,
+    tx.type,
+    context.typeLabels[tx.type],
+    fmtToken(tx.amount, tx.token),
+    String(tx.amount),
+    tx.hash,
+    tx.chain,
+  ];
+  return haystack.some((value) => value.toLowerCase().includes(needle));
+}
+
+export function searchTransactions(
+  transactions: PortfolioTransaction[],
+  query: string,
+  context: SearchContext,
+): PortfolioTransaction[] {
+  return query.trim()
+    ? transactions.filter((tx) => matchesSearch(tx, query, context))
+    : transactions;
 }

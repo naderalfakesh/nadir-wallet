@@ -13,26 +13,52 @@
     "body": "\"{{title}}\" is planned for a future version.",
     "close": "Close"
   },
-  "howItWorks": {
-    "title": "How this demo works",
-    "sub": "Security model & testnet",
-    "badge": "Testnet-only · no real funds",
-    "localTitle": "Local-first & non-custodial",
-    "localBody": "Your recovery phrase and private keys are created and stored on this device only. They are never uploaded or backed up to a server.",
-    "signTitle": "No signing in this demo",
-    "signBody": "Sends are simulated and nothing is signed or broadcast. Confirming one asks for your biometrics or device passcode, or your app passcode on a device with no screen lock.",
-    "backendTitle": "Public-address-only backend",
-    "backendBody": "The backend receives just your public address — to fetch cached prices, run address risk checks and simulate transactions. It cannot move your funds.",
-    "testnetTitle": "Testnet-only",
-    "testnetBody": "Nadir runs on test networks only. Live data covers Ethereum Sepolia and Polygon Amoy; the other networks show demo data. Balances and prices are estimates and hold no real-world worth.",
-    "gotIt": "Got it"
-  },
   "theme": {
     "title": "Theme",
     "sub": "Choose how Nadir looks",
     "dark": "Dark",
-    "darkSub": "Default · easy on the eyes",
+    "darkSub": "Easy on the eyes",
     "light": "Light",
-    "lightSub": "Bright · high contrast"
+    "lightSub": "Bright · high contrast",
+    "system": "System",
+    "systemSub": "Match device setting"
+  },
+  "networks": {
+    "title": "Networks",
+    "sub": "Choose which test networks to show",
+    "testnet": "Testnet",
+    "minOne": "At least one network stays enabled.",
+    "note": "Display setting only. Balances and activity still come from every supported network."
+  },
+  "currency": {
+    "title": "Display currency",
+    "sub": "Choose how values are labeled",
+    "selected": "Selected",
+    "note": "Label preference only. Amounts are not converted in this demo."
+  },
+  "privacy": {
+    "title": "Privacy",
+    "sub": "Control what this app shows and shares",
+    "hideBalances": "Hide balances",
+    "hideBalancesSub": "Mask amounts on Home and token screens",
+    "screenshots": "Block screenshots on sensitive screens",
+    "screenshotsSub": "Always on. Recovery phrase screens block capture.",
+    "usage": "Share anonymous usage data",
+    "usageSub": "This demo collects nothing",
+    "switcher": "Hide content in app switcher",
+    "switcherSub": "Show a blank preview when you switch apps"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "sub": "Choose which alerts you want",
+    "incoming": "Incoming transfers",
+    "incomingSub": "When funds arrive in your wallet",
+    "sent": "Sent transactions",
+    "sentSub": "When a transaction you sent is confirmed",
+    "security": "Security alerts",
+    "securitySub": "New sign-ins and security changes",
+    "price": "Price alerts",
+    "priceSub": "Large moves in tokens you hold",
+    "note": "This demo does not send push notifications. These preferences are saved on this device only."
   }
 }

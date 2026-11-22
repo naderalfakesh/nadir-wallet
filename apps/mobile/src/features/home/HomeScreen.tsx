@@ -14,7 +14,6 @@ import { useSheets } from "@/providers/SheetProvider";
 import { useWallet } from "@/providers/WalletDataProvider";
 import { useTheme } from "@/theme";
 import { AccountBar } from "./components/AccountBar";
-import { BackendStatusNotice } from "./components/BackendStatusNotice";
 import { BackupReminder } from "./components/BackupReminder";
 import { BalanceSummary } from "./components/BalanceSummary";
 import { QuickActions } from "./components/QuickActions";
@@ -101,8 +100,6 @@ export function HomeScreen() {
           onOpenAccounts={() => sheets.open("accounts")}
           onOpenScan={openScanner}
         />
-
-        <BackendStatusNotice status={backend} onRetry={refresh} />
 
         <BalanceSummary
           hidden={hidden}

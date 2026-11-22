@@ -1,5 +1,9 @@
+import { formatWhenDay } from "./when";
+
 export const RANGES = ["1H", "1D", "1W", "1M", "1Y", "All"] as const;
 export type Range = (typeof RANGES)[number];
+
+export const CHART_POINTS = 30;
 
 const RANGE_SCALE: Record<Range, number> = {
   "1H": 0.18,
@@ -19,11 +23,54 @@ export function getDemoChart(id: string, range: Range, change24h: number) {
   const scale = RANGE_SCALE[range];
   const change = Math.max(-99, change24h * scale);
   const start = 100 / (1 + change / 100);
-  const data = Array.from({ length: 30 }, (_, index) => {
-    const progress = index / 29;
+  const data = Array.from({ length: CHART_POINTS }, (_, index) => {
+    const progress = index / (CHART_POINTS - 1);
     seed = (Math.imul(1664525, seed) + 1013904223) >>> 0;
     const noise = (seed / 2 ** 32 - 0.5) * Math.sqrt(scale) * 2;
     return start + (100 - start) * progress + Math.sin(Math.PI * progress) * noise;
   });
   return { change, data };
+}
+
+const HOUR = 3_600_000;
+const DAY = 24 * HOUR;
+const RANGE_SPAN_MS: Record<Range, number> = {
+  "1H": HOUR,
+  "1D": DAY,
+  "1W": 7 * DAY,
+  "1M": 30 * DAY,
+  "1Y": 365 * DAY,
+  All: 730 * DAY,
+};
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** Evenly spaced timestamps (epoch ms) for chart points, the last one being `now`. */
+export function getChartTimestamps(range: Range, count: number, now: number): number[] {
+  const span = RANGE_SPAN_MS[range];
+  const last = Math.max(count - 1, 1);
+  return Array.from({ length: count }, (_, index) => now - span + (span * index) / last);
+}
+
+/** Time of day for 1H, day and time for 1D, calendar date for longer ranges. */
+export function formatChartTime(ts: number, range: Range, now: Date): string {
+  const d = new Date(ts);
+  if (range === "1H") {
+    const h = d.getHours() % 12 || 12;
+    const ampm = d.getHours() >= 12 ? "PM" : "AM";
+    return `${h}:${String(d.getMinutes()).padStart(2, "0")} ${ampm}`;
+  }
+  if (range === "1D") return formatWhenDay(ts, now).when;
+  const date = `${MONTHS[d.getMonth()]} ${d.getDate()}`;
+  return range === "1Y" || range === "All" ? `${date}, ${d.getFullYear()}` : date;
+}
+
+/** Value at a scrubbed point, given the series ends at the displayed `total`. */
+export function valueAtPoint(total: number, data: number[], index: number): number {
+  return total * (data[index] / data[data.length - 1]);
+}
+
+/** Percent change from the start of the series to a scrubbed point. */
+export function changeAtPoint(data: number[], index: number): number {
+  return (data[index] / data[0] - 1) * 100;
 }

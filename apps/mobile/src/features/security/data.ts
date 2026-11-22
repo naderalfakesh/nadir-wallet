@@ -2,33 +2,6 @@ import { t } from "@/i18n";
 import type { SecurityEvent } from "@/types/status";
 import { makeSecurityEvent } from "./events";
 
-export interface SecurityState {
-  backedUp: boolean;
-  biometricOn: boolean;
-  autoLockMin: number;
-  pinOn: boolean;
-  txSigning: boolean;
-  deviceSecure: boolean;
-  txProtection: boolean;
-}
-
-export const DEFAULT_SECURITY: SecurityState = {
-  backedUp: false,
-  biometricOn: true,
-  autoLockMin: 1,
-  pinOn: true,
-  txSigning: true,
-  deviceSecure: true,
-  txProtection: true,
-};
-
-export const DEVICE_CHECK_KEYS = [
-  "screenLock",
-  "notRooted",
-  "latestVersion",
-  "secureEnclave",
-] as const;
-
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;

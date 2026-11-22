@@ -4,8 +4,10 @@ import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ROUTE_GROUPS, groupGuards } from "@/features/lock/routeAccess";
 import onboarding from "@/i18n/locales/en/onboarding.json";
+import { persistNewWallet } from "@/providers/walletPersistence";
 import { INTRO_SEEN_VALUE, parseIntroSeen } from "@/services/storage/introSeen";
-import { INTRO_STEPS, initialOnboardingStep, nextIntroIndex } from "./firstRun";
+import { DEFAULT_PREFS } from "@/services/storage/storage.constants";
+import { INTRO_STEPS, initialOnboardingStep, nextIntroIndex, stepAfterIdentity } from "./firstRun";
 
 const secure = vi.hoisted(() => ({
   getItemAsync: vi.fn(),
@@ -143,5 +145,51 @@ describe("intro copy", () => {
   // History is sample data and prices are estimates, so "only testnet data" overstates it.
   it("doesn't claim everything shown is testnet data", () => {
     expect(JSON.stringify(onboarding)).not.toMatch(/only shows testnet data/i);
+  });
+});
+
+describe("identity check step", () => {
+  it("leads to the phrase explainer when creating and to phrase entry when importing", () => {
+    expect(stepAfterIdentity(false)).toBe("explain");
+    expect(stepAfterIdentity(true)).toBe("import");
+  });
+
+  it("is offered right after the welcome choice, with a way to continue without it", () => {
+    const flow = readFileSync(join(__dirname, "OnboardingFlow.tsx"), "utf8");
+    expect(flow).toMatch(/onCreate=\{[^}]*setStep\("identity"\)/s);
+    expect(flow).toMatch(/onImport=\{[^}]*setStep\("identity"\)/s);
+    expect(flow).toMatch(/onSkip=\{\(\) => setStep\(stepAfterIdentity/);
+    expect(flow).toMatch(/onCancel=\{\(\) => setStep\("identity"\)\}/);
+  });
+
+  it("records the pass only from the liveness onPass callback", () => {
+    const flow = readFileSync(join(__dirname, "OnboardingFlow.tsx"), "utf8");
+    expect(flow.match(/identityVerifiedAt/g)).toHaveLength(1);
+  });
+
+  it("has copy for the step", () => {
+    expect(onboarding.identity.title).toBe("Verify it's you");
+    expect(onboarding.identity.start).toBe("Start face check");
+    expect(onboarding.identity.skip).toBe("Not now");
+  });
+
+  it("starts unverified and survives wallet creation", async () => {
+    expect(DEFAULT_PREFS.identityVerifiedAt).toBe(0);
+    const writes = {
+      saveMnemonic: vi.fn().mockResolvedValue(undefined),
+      savePrefs: vi.fn().mockResolvedValue(undefined),
+    };
+    const verified = { ...DEFAULT_PREFS, identityVerifiedAt: 1_700_000_000_000 };
+    const next = await persistNewWallet(
+      "m",
+      "0xabc",
+      verified,
+      { imported: false, now: 5 },
+      writes,
+    );
+    expect(next.identityVerifiedAt).toBe(1_700_000_000_000);
+    expect(writes.savePrefs).toHaveBeenCalledWith(
+      expect.objectContaining({ identityVerifiedAt: 1_700_000_000_000 }),
+    );
   });
 });

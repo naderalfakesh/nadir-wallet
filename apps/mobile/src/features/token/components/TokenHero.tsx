@@ -7,6 +7,7 @@ import { fmtToken, fmtUSD } from "@/utils/format";
 
 interface TokenHeroProps {
   token: PortfolioToken;
+  value: number;
   change: number;
   historyLabel: string;
   priceUnavailable: boolean;
@@ -17,6 +18,7 @@ interface TokenHeroProps {
 
 export function TokenHero({
   token,
+  value,
   change,
   historyLabel,
   priceUnavailable,
@@ -31,7 +33,7 @@ export function TokenHero({
         {fmtToken(token.amount, token.symbol)}
       </AppText>
       <AppText size={16} muted tnum style={styles.heroValue}>
-        {priceUnavailable ? unavailableLabel : fmtUSD(token.value)}
+        {priceUnavailable ? unavailableLabel : fmtUSD(value)}
       </AppText>
       {!priceUnavailable && (
         <View style={styles.heroChange}>

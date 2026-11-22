@@ -8,6 +8,8 @@ test.describe("Nadir Wallet", () => {
     await app.clearState();
     await screen.getByRole("button", "Skip", { exact: true }).tap();
     await screen.getByRole("button", "I already have a wallet").tap();
+    await expect(screen.getByText("Verify it's you", { exact: true })).toBeVisible();
+    await screen.getByRole("button", "Not now", { exact: true }).tap();
     await screen.getByRole("button", "Generate sample").tap();
     await expect(screen.getByText("12 words", { exact: true })).toBeVisible();
 
@@ -66,7 +68,7 @@ test.describe("Nadir Wallet", () => {
     const liveApi = screen.getByTestId("live-api-data");
     await screen.scrollUntilVisible(liveApi);
     await liveApi.tap();
-    await expect(screen.getByText("Using bundled demo data", { exact: true })).toBeVisible();
+    await expect(screen.getByText("Using bundled sample data", { exact: true })).toBeVisible();
 
     await screen.getByTestId("tab-home").tap();
     await screen.getByText("Receive", { exact: true }).tap();

@@ -102,4 +102,4 @@ Vitest coverage from the repo root (`pnpm test`).
 
 Settings has a "Demo controls" card that flips the backend, price, simulation,
 and send-outcome states so every UI state can be shown without a real chain.
-Turning "Live API data" off switches the whole app to bundled data.
+Choosing "Sample data" as the data source switches the whole app to bundled data.

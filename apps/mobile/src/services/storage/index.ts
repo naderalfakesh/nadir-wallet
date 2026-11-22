@@ -2,14 +2,21 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { hashPasscode, isPasscodeRecord } from "@nadir-wallet/crypto-core";
 import { EMPTY_LOCKOUT, sanitizeLockout, type LockoutState } from "@/services/auth/lockout";
-import type { ColorScheme } from "@/theme";
+import { parseThemePreference, type ThemePreference } from "@/theme";
 import type { SecurityEvent } from "@/types/status";
 import { INTRO_SEEN_VALUE, parseIntroSeen } from "./introSeen";
 import { deleteMnemonic, saveMnemonic } from "./mnemonic";
+import { normalizePrefs } from "./prefs";
 import { DEFAULT_DEMO, DEFAULT_PREFS } from "./storage.constants";
 import type { DemoPrefs, PersistedState, Prefs } from "./storage.types";
 
-export type { Prefs, DemoPrefs, PersistedState } from "./storage.types";
+export type {
+  Prefs,
+  DemoPrefs,
+  PersistedState,
+  PrivacyPrefs,
+  NotificationPrefs,
+} from "./storage.types";
 export { DEFAULT_PREFS, DEFAULT_DEMO } from "./storage.constants";
 
 // Centralised so screens never touch storage keys directly.
@@ -63,7 +70,7 @@ async function getLockout(): Promise<LockoutState> {
 
 export async function loadPersistedState(): Promise<PersistedState> {
   const [prefs, demo, events, passcodeHash, theme, lockout, introSeen] = await Promise.all([
-    readJson<Prefs>(KEYS.prefs, DEFAULT_PREFS),
+    readJson<Prefs>(KEYS.prefs, DEFAULT_PREFS).then(normalizePrefs),
     readJson<DemoPrefs>(KEYS.demo, DEFAULT_DEMO),
     AsyncStorage.getItem(KEYS.events).then((raw) => {
       try {
@@ -73,7 +80,7 @@ export async function loadPersistedState(): Promise<PersistedState> {
       }
     }),
     getPasscodeHash(),
-    AsyncStorage.getItem(KEYS.theme).then((v) => (v === "light" ? "light" : "dark") as ColorScheme),
+    AsyncStorage.getItem(KEYS.theme).then(parseThemePreference),
     getLockout(),
     AsyncStorage.getItem(KEYS.intro).then(parseIntroSeen, () => false),
   ]);
@@ -82,7 +89,7 @@ export async function loadPersistedState(): Promise<PersistedState> {
 
 export const storage = {
   savePrefs: (prefs: Prefs) => AsyncStorage.setItem(KEYS.prefs, JSON.stringify(prefs)),
-  saveTheme: (theme: ColorScheme) => AsyncStorage.setItem(KEYS.theme, theme),
+  saveTheme: (theme: ThemePreference) => AsyncStorage.setItem(KEYS.theme, theme),
   saveDemo: (demo: DemoPrefs) => AsyncStorage.setItem(KEYS.demo, JSON.stringify(demo)),
   saveEvents: (events: SecurityEvent[]) =>
     AsyncStorage.setItem(KEYS.events, JSON.stringify(events)),

@@ -1,10 +1,13 @@
+import type { IconName } from "@/components/Icon";
+
 export type SecurityTier = "excellent" | "actionNeeded" | "atRisk";
 
-export interface ChecklistItem {
+export interface SecurityRowModel {
   key: string;
+  icon: IconName;
+  tone: "neutral" | "accent" | "pos" | "warn";
   label: string;
-  done: boolean;
   sub: string;
   onPress?: () => void;
-  toggle?: () => void;
+  toggle?: { on: boolean; onChange: () => void };
 }

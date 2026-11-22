@@ -12,6 +12,11 @@ export const DEFAULT_PREFS: Prefs = {
   lastAccountId: "main",
   walletAddress: "",
   walletCreatedAt: 0,
+  identityVerifiedAt: 0,
+  currency: "USD",
+  enabledNetworks: ["ethereum", "base", "arbitrum", "optimism", "polygon"],
+  privacy: { shareUsageData: false, hideInSwitcher: true },
+  notifications: { incoming: true, sent: true, security: true, price: false },
 };
 
 export const DEFAULT_DEMO: DemoPrefs = {

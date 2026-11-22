@@ -73,7 +73,6 @@ describe("biometric strings", () => {
       "onboarding.biometric.body",
       "onboarding.intro.keys.body",
       "onboarding.backup.revealGate",
-      "security.advanced.revealSub",
       "security.log.biometricOffDetail",
     ] satisfies TranslationKey[]) {
       expect(t(key)).not.toMatch(/Face ID|\{\{/);
@@ -108,9 +107,6 @@ describe("biometric strings", () => {
       "lock.osAuth.unavailable",
       "onboarding.intro.keys.body",
       "onboarding.backup.revealGate",
-      "security.advanced.revealSub",
-      "security.model.signBody",
-      "sheets.howItWorks.signBody",
     ] satisfies TranslationKey[]) {
       expect(t(key)).not.toBe(key);
       expect(t(key)).toBe(t(key, { biometry: "X", Biometry: "X" }));

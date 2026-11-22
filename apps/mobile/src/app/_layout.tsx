@@ -28,11 +28,11 @@ import { SheetProvider } from "@/providers/SheetProvider";
 import { WalletDataProvider } from "@/providers/WalletDataProvider";
 import { loadBiometryKind } from "@/services/auth/biometry";
 import { loadPersistedState, storage, type PersistedState } from "@/services/storage";
-import { ThemeProvider, useThemeControls, type ColorScheme } from "@/theme";
+import { ThemeProvider, useThemeControls, type ThemePreference } from "@/theme";
 
 SplashScreen.preventAutoHideAsync();
 
-const persistScheme = (scheme: ColorScheme) => void storage.saveTheme(scheme);
+const persistPreference = (preference: ThemePreference) => void storage.saveTheme(preference);
 
 // The in-app theme can differ from the system one, so both system bars follow
 // it: dark icons on the light theme, light icons on the dark theme.
@@ -111,7 +111,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <AppProvider initial={boot}>
-          <ThemeProvider initialScheme={boot.theme} onSchemeChange={persistScheme}>
+          <ThemeProvider initialPreference={boot.theme} onPreferenceChange={persistPreference}>
             <DemoStateProvider initial={boot.demo}>
               <WalletDataProvider>
                 <SheetProvider>

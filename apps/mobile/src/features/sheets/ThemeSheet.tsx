@@ -2,16 +2,33 @@ import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { SheetHeader, AppText, Icon } from "@/components";
 import { useTranslation } from "@/i18n/useTranslation";
-import { useTheme, useThemeControls, useThemedStyles, type ColorScheme, type Theme } from "@/theme";
+import {
+  useTheme,
+  useThemeControls,
+  useThemedStyles,
+  type Theme,
+  type ThemePreference,
+} from "@/theme";
 import type { SheetCloseProps } from "./types";
 
 export function ThemeSheet({ close }: SheetCloseProps) {
   const theme = useTheme();
   const styles = useThemedStyles(createStyles);
-  const { scheme, setScheme } = useThemeControls();
+  const { preference, setPreference } = useThemeControls();
   const { t } = useTranslation();
 
-  const options: { value: ColorScheme; label: string; sub: string; swatch: [string, string] }[] = [
+  const options: {
+    value: ThemePreference;
+    label: string;
+    sub: string;
+    swatch: [string, string];
+  }[] = [
+    {
+      value: "system",
+      label: t("sheets.theme.system"),
+      sub: t("sheets.theme.systemSub"),
+      swatch: ["#14171d", "#ffffff"],
+    },
     {
       value: "dark",
       label: t("sheets.theme.dark"),
@@ -35,12 +52,12 @@ export function ThemeSheet({ close }: SheetCloseProps) {
       />
       <View style={styles.list}>
         {options.map((o) => {
-          const on = scheme === o.value;
+          const on = preference === o.value;
           return (
             <Pressable
               key={o.value}
               onPress={() => {
-                setScheme(o.value);
+                setPreference(o.value);
                 setTimeout(close, 220);
               }}
               style={[
