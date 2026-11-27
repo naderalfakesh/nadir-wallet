@@ -33,7 +33,7 @@ export function AmountStep({
 
   return (
     <ScrollView contentContainerStyle={styles.amountStep}>
-      <Pressable onPress={onPickToken} style={styles.tokenPicker}>
+      <Pressable onPress={onPickToken} accessibilityRole="button" style={styles.tokenPicker}>
         <TokenGlyph symbol={token.symbol} color={token.color} size={32} />
         <AppText weight="bold" size={15}>
           {token.symbol}
@@ -59,7 +59,7 @@ export function AmountStep({
         <AppText size={16} muted tnum style={styles.fiatText}>
           {t("send.amount.demoApprox", { value: fmtUSD(fiat) })}
         </AppText>
-        <Pressable onPress={onMax} style={styles.maxButton}>
+        <Pressable onPress={onMax} accessibilityRole="button" style={styles.maxButton}>
           <AppText weight="semibold" size={13.5} muted>
             {t("send.amount.max")} ·
           </AppText>

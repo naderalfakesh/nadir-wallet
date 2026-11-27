@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { StyleSheet, View } from "react-native";
 import { AppText, Card, IconButton, TestnetBadge } from "@/components";
 import { ACCOUNT } from "@/features/wallet/demoData";
+import { useCopyFeedback } from "@/hooks";
 import { useTranslation } from "@/i18n/useTranslation";
-import { copyText } from "@/services/device";
 import { displayAddress } from "@/services/wallet/account";
 import { useTheme, useThemedStyles, type Theme } from "@/theme";
 
@@ -15,13 +15,7 @@ export function AccountCard({ address }: AccountCardProps) {
   const theme = useTheme();
   const styles = useThemedStyles(createStyles);
   const { t } = useTranslation();
-  const [copied, setCopied] = useState(false);
-
-  const copy = () => {
-    void copyText(address);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1400);
-  };
+  const { copied, copy } = useCopyFeedback(1400);
 
   return (
     <Card padding={18}>
@@ -48,7 +42,7 @@ export function AccountCard({ address }: AccountCardProps) {
         </View>
         <IconButton
           name={copied ? "check" : "copy"}
-          onPress={copy}
+          onPress={() => copy(address)}
           size={19}
           color={copied ? theme.colors.pos : undefined}
           accessibilityLabel={t("common.a11y.copyAddress")}

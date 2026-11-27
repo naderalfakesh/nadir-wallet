@@ -1,5 +1,6 @@
 import { t, type TranslationKey } from "@/i18n";
 import type { SecurityEvent, SecurityEventSeverity, SecurityEventType } from "@/types/status";
+import { calendarDaysBetween, formatShortMonthDay, formatTime12h } from "@/utils/date";
 
 const META: Record<
   SecurityEventType,
@@ -70,27 +71,16 @@ const META: Record<
   },
 };
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-function startOfDay(date: Date): number {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-}
-
 /** "Today · 2:14 PM", "Yesterday · 6:30 PM" or "May 28 · 4:00 PM", relative to `now`. */
 export function formatEventWhen(at: Date, now: Date): string {
-  let h = at.getHours();
-  const m = at.getMinutes();
-  const ampm = h >= 12 ? "PM" : "AM";
-  h = h % 12 || 12;
-  const time = `${h}:${String(m).padStart(2, "0")} ${ampm}`;
-  const days = Math.round((startOfDay(now) - startOfDay(at)) / 86_400_000);
+  const days = calendarDaysBetween(at, now);
   const day =
     days === 0
       ? t("security.log.today")
       : days === 1
         ? t("security.log.yesterday")
-        : `${MONTHS[at.getMonth()]} ${at.getDate()}`;
-  return `${day} · ${time}`;
+        : formatShortMonthDay(at);
+  return `${day} · ${formatTime12h(at)}`;
 }
 
 /** The label to show for an event now. */

@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { generateMnemonic } from "@nadir-wallet/crypto-core";
-import { Screen, ScreenHeader } from "@/components";
+import { Screen } from "@/components";
 import { LivenessFlow } from "@/features/liveness/LivenessFlow";
 import { useBlockScreenCapture } from "@/features/security/useBlockScreenCapture";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useApp } from "@/providers/AppProvider";
-import { useThemedStyles, type Theme } from "@/theme";
 import { BiometricStep } from "./components/BiometricStep";
 import { CreatePasscode } from "./components/CreatePasscode";
 import { ExplainStep } from "./components/ExplainStep";
@@ -16,33 +15,21 @@ import { ImportScreen } from "./components/ImportScreen";
 import { IntroScreen } from "./components/IntroScreen";
 import { ReadyStep } from "./components/ReadyStep";
 import { SeedReveal } from "./components/SeedReveal";
+import { SeedStepFrame } from "./components/SeedStepFrame";
 import { SeedVerify } from "./components/SeedVerify";
 import { WelcomeScreen } from "./components/WelcomeScreen";
 import { initialOnboardingStep, stepAfterIdentity } from "./firstRun";
-
-type Step =
-  | "intro"
-  | "welcome"
-  | "identity"
-  | "liveness"
-  | "explain"
-  | "reveal"
-  | "verify"
-  | "import"
-  | "passcode"
-  | "biometric"
-  | "ready";
+import type { FinishState, OnboardingStep } from "./onboarding.types";
 
 export function OnboardingFlow() {
-  const styles = useThemedStyles(createStyles);
   const { t } = useTranslation();
   const { setPref, setPasscode, logEvent, createWallet, introSeen, markIntroSeen } = useApp();
-  const [step, setStep] = useState<Step>(() => initialOnboardingStep(introSeen));
+  const [step, setStep] = useState<OnboardingStep>(() => initialOnboardingStep(introSeen));
   const [viaImport, setViaImport] = useState(false);
   // The fresh/imported phrase lives only in memory until the user confirms.
   const [mnemonic, setMnemonic] = useState("");
   const words = mnemonic ? mnemonic.split(" ") : [];
-  const [finishState, setFinishState] = useState<"idle" | "saving" | "failed">("idle");
+  const [finishState, setFinishState] = useState<FinishState>("idle");
   // The phrase is on screen (or being typed) in these steps.
   useBlockScreenCapture(step === "reveal" || step === "verify" || step === "import");
 
@@ -118,35 +105,29 @@ export function OnboardingFlow() {
 
   if (step === "reveal") {
     return (
-      <Screen>
-        <ScreenHeader
-          title={t("onboarding.reveal.title")}
-          subtitle={t("onboarding.reveal.step")}
-          onBack={() => setStep("explain")}
+      <SeedStepFrame
+        title={t("onboarding.reveal.title")}
+        subtitle={t("onboarding.reveal.step")}
+        onBack={() => setStep("explain")}
+      >
+        <SeedReveal
+          words={words}
+          onContinue={() => setStep("verify")}
+          ctaLabel={t("onboarding.reveal.cta")}
         />
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <SeedReveal
-            words={words}
-            onContinue={() => setStep("verify")}
-            ctaLabel={t("onboarding.reveal.cta")}
-          />
-        </ScrollView>
-      </Screen>
+      </SeedStepFrame>
     );
   }
 
   if (step === "verify") {
     return (
-      <Screen>
-        <ScreenHeader
-          title={t("onboarding.verify.title")}
-          subtitle={t("onboarding.verify.step")}
-          onBack={() => setStep("reveal")}
-        />
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <SeedVerify words={words} onContinue={() => setStep("passcode")} />
-        </ScrollView>
-      </Screen>
+      <SeedStepFrame
+        title={t("onboarding.verify.title")}
+        subtitle={t("onboarding.verify.step")}
+        onBack={() => setStep("reveal")}
+      >
+        <SeedVerify words={words} onContinue={() => setStep("passcode")} />
+      </SeedStepFrame>
     );
   }
 
@@ -208,8 +189,6 @@ export function OnboardingFlow() {
   );
 }
 
-const createStyles = (theme: Theme) =>
-  StyleSheet.create({
-    explain: { flex: 1 },
-    scrollContent: { paddingHorizontal: theme.spacing.pad, paddingBottom: theme.spacing.pad },
-  });
+const styles = StyleSheet.create({
+  explain: { flex: 1 },
+});

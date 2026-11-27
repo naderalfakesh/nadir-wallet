@@ -11,7 +11,7 @@ export function useLockoutState(initial: LockoutState) {
   const commitLockout = useCallback((next: LockoutState) => {
     lockoutRef.current = next;
     setLockout(next);
-    void storage.saveLockout(next);
+    void storage.saveLockout(next).catch(() => undefined);
   }, []);
 
   /** Records a failed passcode entry and returns the new lockout state. */

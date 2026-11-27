@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
-import { getNetwork } from "@nadir-wallet/crypto-core";
-import { SheetHeader, AppText, Button, Icon, QRCode, TestnetBadge } from "@/components";
-import { CHAINS, chainToNetworkId } from "@/features/wallet/chains";
+import { StyleSheet, View } from "react-native";
+import { AppText, Button, Icon, QRCode, SheetHeader, TestnetBadge } from "@/components";
+import { CHAINS } from "@/features/wallet/chains";
 import type { ChainId } from "@/features/wallet/types";
+import { useCopyFeedback } from "@/hooks";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useApp } from "@/providers/AppProvider";
-import { copyText, shareText } from "@/services/device";
-import { useTheme, useThemedStyles, alpha, type Theme } from "@/theme";
+import { shareText } from "@/services/device";
+import { useTheme, useThemedStyles, type Theme } from "@/theme";
+import { ChainSelector } from "./components/ChainSelector";
+import { buildReceiveQrPayload } from "./receive.utils";
 import type { SheetBodyProps } from "./types";
+
+const QR_BG_COLOR = "#ffffff";
 
 export function ReceiveSheet({ params, close }: SheetBodyProps<"receive">) {
   const theme = useTheme();
@@ -16,14 +20,11 @@ export function ReceiveSheet({ params, close }: SheetBodyProps<"receive">) {
   const { t } = useTranslation();
   const { prefs } = useApp();
   const address = prefs.walletAddress;
-  const symbol = params?.token;
   const [chain, setChain] = useState<ChainId>(params?.chain ?? "ethereum");
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyFeedback();
+
   const ch = CHAINS[chain];
-  const networkId = chainToNetworkId(chain);
-  const network = networkId ? getNetwork(networkId) : undefined;
-  const chainQualified = network && (!symbol || symbol === network.nativeCurrency.symbol);
-  const qrValue = chainQualified ? `ethereum:${address}@${network.chainId}` : address;
+  const { value: qrValue, chainQualified } = buildReceiveQrPayload(address, chain, params?.token);
 
   return (
     <View>
@@ -33,33 +34,7 @@ export function ReceiveSheet({ params, close }: SheetBodyProps<"receive">) {
         <TestnetBadge label={t("receive.testnetBadge", { chain: ch.name })} />
       </View>
 
-      <View style={styles.chains}>
-        {Object.values(CHAINS).map((c) => {
-          const on = chain === c.id;
-          return (
-            <Pressable
-              key={c.id}
-              onPress={() => setChain(c.id)}
-              style={[
-                styles.chip,
-                {
-                  backgroundColor: on ? alpha(theme.colors.accent, 0.15) : theme.colors.surface2,
-                  borderColor: on ? "transparent" : theme.colors.hairline,
-                },
-              ]}
-            >
-              <View style={[styles.chipDot, { backgroundColor: c.color }]} />
-              <AppText
-                weight="semibold"
-                size={13.5}
-                color={on ? theme.colors.accent : theme.colors.textMuted}
-              >
-                {c.name}
-              </AppText>
-            </Pressable>
-          );
-        })}
-      </View>
+      <ChainSelector selected={chain} onSelect={setChain} />
 
       <View style={styles.qrWrap}>
         <View style={styles.qrBox}>
@@ -88,11 +63,7 @@ export function ReceiveSheet({ params, close }: SheetBodyProps<"receive">) {
           variant="ghost"
           height={52}
           style={styles.actionButton}
-          onPress={() => {
-            void copyText(address);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1500);
-          }}
+          onPress={() => copy(address)}
         />
         <Button
           label={t("common.actions.share")}
@@ -119,32 +90,12 @@ const createStyles = (theme: Theme) =>
       alignItems: "center",
       marginBottom: 14,
     },
-    chains: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: 8,
-      marginBottom: 16,
-    },
-    chip: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 7,
-      height: 36,
-      paddingHorizontal: 13,
-      borderRadius: theme.radius.chip,
-      borderWidth: 1,
-    },
-    chipDot: {
-      width: 9,
-      height: 9,
-      borderRadius: 5,
-    },
     qrWrap: {
       alignItems: "center",
     },
     qrBox: {
       padding: 16,
-      backgroundColor: "#fff",
+      backgroundColor: QR_BG_COLOR,
       borderRadius: 22,
     },
     qrLabelRow: {

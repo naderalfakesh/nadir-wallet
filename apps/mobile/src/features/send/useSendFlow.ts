@@ -1,37 +1,30 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import { beginScan } from "@/features/scan/scanBridge";
-import { CHAINS, chainToNetworkId } from "@/features/wallet/chains";
-import { RECIPIENTS, tokenById } from "@/features/wallet/demoData";
-import { assessRecipient, recipientNetwork, type AddressRisk } from "@/features/wallet/risk";
+import { CHAINS } from "@/features/wallet/chains";
+import { tokenById } from "@/features/wallet/demoData";
 import type { PortfolioToken } from "@/features/wallet/types";
 import { useApp } from "@/providers/AppProvider";
 import { useDemoState } from "@/providers/DemoStateProvider";
 import { useSheets } from "@/providers/SheetProvider";
 import { useWallet } from "@/providers/WalletDataProvider";
 import { haptics } from "@/services/device/haptics";
-import type { SimulationStatus } from "@/types/status";
 import { shortAddr } from "@/utils/format";
-import { FEE_NATIVE, GAS_SYMBOL, HIGH_VALUE_USD, SEND_STEPS } from "./send.constants";
+import { HIGH_VALUE_USD, SEND_STEPS } from "./send.constants";
 import type { SendPhase, SendStep } from "./send.types";
 import {
+  applyAmountKey,
   checkScanForToken,
-  getBalanceAfter,
   getInitialToken,
-  getLiveSimulationStatus,
-  getLocalSimulationStatus,
   getRecipientValidation,
-  getSendTotal,
   pickTokenForScan,
-  type SendFee,
 } from "./send.utils";
 import { takeScanHandoff } from "./sendHandoff";
-import { useRiskCheck, useSimulation } from "./useSendChecks";
+import { useSendQuote } from "./useSendQuote";
 
 /**
- * State and derived values for the three-step send flow (recipient, amount,
- * review) and its confirmation overlay. The screen only renders what this
- * returns; every risk, simulation and fee rule lives here.
+ * State and navigation orchestration for the three-step send flow (recipient,
+ * amount, review) and its confirmation overlay.
  */
 export function useSendFlow(tokenId?: string) {
   const router = useRouter();
@@ -39,7 +32,7 @@ export function useSendFlow(tokenId?: string) {
   const sheets = useSheets();
   const { logEvent, prefs } = useApp();
   const { tokens } = useWallet();
-  const logged = useRef<Set<string>>(new Set());
+  const loggedKeys = useRef<Set<string>>(new Set());
 
   // A code scanned from Home arrives here with its recipient and network.
   const [handoff] = useState(takeScanHandoff);
@@ -58,105 +51,58 @@ export function useSendFlow(tokenId?: string) {
   const amtNum = parseFloat(amt) || 0;
   const fiat = amtNum * token.price;
   const chain = CHAINS[token.chain];
-  const { trimmedTo, looksAddr, looksEns, toValid, toError } = getRecipientValidation(to);
-  const networkId = chainToNetworkId(token.chain);
-  const resolvedTo = looksEns
-    ? RECIPIENTS.find((recipient) => recipient.label?.toLowerCase() === trimmedTo.toLowerCase())
-        ?.addr
-    : looksAddr
-      ? trimmedTo
-      : null;
-  const liveMode = liveApi && networkId != null;
-  const canCheckLive = liveMode && resolvedTo != null;
-  const knownContact = RECIPIENTS.some(
-    (recipient) => recipient.addr.toLowerCase() === resolvedTo?.toLowerCase() && recipient.known,
-  );
-
-  const liveRisk = useRiskCheck({
-    enabled: prefs.txProtection && canCheckLive,
-    address: resolvedTo ?? "",
-    networkId,
-    amount: amtNum,
-    knownContact,
+  const validation = getRecipientValidation(to);
+  const quote = useSendQuote({
+    step,
+    token,
+    validation,
+    amt,
+    amtNum,
+    scanChainId,
+    walletAddress: prefs.walletAddress,
+    txProtection: prefs.txProtection,
+    liveApi,
+    backend,
+    sendSim,
   });
-  const liveSim = useSimulation({
-    enabled: canCheckLive && step === "review" && amtNum > 0,
-    networkId,
-    from: prefs.walletAddress,
-    to: resolvedTo ?? "",
-    value: amt,
-  });
-
-  const localRisk =
-    prefs.txProtection && toValid && backend === "online" ? assessRecipient(trimmedTo) : null;
-  const risk: AddressRisk | null = liveMode
-    ? liveRisk.status === "ok"
-      ? liveRisk.risk
-      : null
-    : localRisk;
-  const checksAvailable = liveMode ? liveRisk.status !== "unavailable" : backend === "online";
-  const showRiskUnavailable =
-    prefs.txProtection && (!checksAvailable || (liveMode && !canCheckLive));
-  const riskLoading = prefs.txProtection && canCheckLive && liveRisk.status === "idle";
-  const blocked = Boolean(risk?.blocked);
-  const recipientNet = recipientNetwork(trimmedTo);
-  const netMismatch = Boolean(recipientNet && recipientNet !== token.chain);
-  const scanMismatch =
-    scanChainId !== null &&
-    checkScanForToken({ chainId: scanChainId, tokenContract: null }, token) !== null;
-  const simStatus: SimulationStatus = liveMode
-    ? getLiveSimulationStatus(liveSim.status)
-    : getLocalSimulationStatus({ checksAvailable, sendSim });
-  const simulationLoading = canCheckLive && step === "review" && liveSim.status === "idle";
-  const estimate = liveSim.data?.estimatedFee;
-  const sendFee: SendFee | null = estimate
-    ? { amount: Number(estimate.feeNative) || 0, symbol: estimate.symbol }
-    : liveMode
-      ? null
-      : { amount: FEE_NATIVE, symbol: GAS_SYMBOL[token.chain] };
-  const fee = estimate
-    ? `${estimate.feeNative} ${estimate.symbol}`
-    : sendFee
-      ? `${sendFee.amount} ${sendFee.symbol}`
-      : null;
-  const total = getSendTotal(amtNum, token.symbol, sendFee);
-  const balanceAfter = getBalanceAfter(token.amount, amtNum, token.symbol, sendFee);
-  const stepIndex = SEND_STEPS.indexOf(step);
 
   useEffect(() => {
-    if (blocked && !logged.current.has("block")) {
-      logged.current.add("block");
+    const key = `block:${quote.recipient}`;
+    if (quote.blocked && !loggedKeys.current.has(key)) {
+      loggedKeys.current.add(key);
       logEvent("risk_block");
       haptics.error();
     }
-  }, [blocked, logEvent]);
+  }, [quote.blocked, quote.recipient, logEvent]);
 
   useEffect(() => {
-    if (step === "review" && simStatus === "failed" && !logged.current.has("sim")) {
-      logged.current.add("sim");
+    const key = `sim:${quote.recipient}:${token.id}:${amt}`;
+    if (step === "review" && quote.simStatus === "failed" && !loggedKeys.current.has(key)) {
+      loggedKeys.current.add(key);
       logEvent("sim_fail");
     }
-  }, [step, simStatus, logEvent]);
+  }, [step, quote.simStatus, quote.recipient, token.id, amt, logEvent]);
 
-  const onKey = (key: string) => {
-    setAmt((prev) => {
-      if (key === "del") return prev.length <= 1 ? "0" : prev.slice(0, -1);
-      if (key === ".") return prev.includes(".") ? prev : `${prev}.`;
-      if (prev === "0") return key;
-      return prev + key;
-    });
-  };
+  const onKey = useCallback((key: string) => setAmt((prev) => applyAmountKey(prev, key)), []);
+  const setMax = useCallback(() => setAmt(String(token.amount)), [token.amount]);
+  const goToReview = useCallback(() => setStep("review"), []);
 
-  const back = () => (step === "to" ? router.back() : setStep(step === "review" ? "amount" : "to"));
-  const backToReview = () => {
+  const back = useCallback(() => {
+    if (step === "to") router.back();
+    else setStep(step === "review" ? "amount" : "to");
+  }, [step, router]);
+
+  const backToReview = useCallback(() => {
     setPhase(null);
     setStep("review");
-  };
-  const editTo = (value: string) => {
+  }, []);
+
+  const editTo = useCallback((value: string) => {
     setScanChainId(null);
     setTo(value);
-  };
-  const openScanner = () => {
+  }, []);
+
+  const openScanner = useCallback(() => {
     beginScan(
       (target) => {
         if (!target) return;
@@ -166,61 +112,53 @@ export function useSendFlow(tokenId?: string) {
       (target) => checkScanForToken(target, token),
     );
     router.push("/scan");
-  };
-  const continueFromTo = () => {
-    if (risk && !logged.current.has("check")) {
-      logged.current.add("check");
-      logEvent("risk_check", { detail: shortAddr(trimmedTo, 8, 6) });
+  }, [router, token]);
+
+  const continueFromTo = useCallback(() => {
+    const key = `check:${validation.trimmedTo}`;
+    if (quote.risk && !loggedKeys.current.has(key)) {
+      loggedKeys.current.add(key);
+      logEvent("risk_check", { detail: shortAddr(validation.trimmedTo, 8, 6) });
     }
     setStep("amount");
-  };
+  }, [quote.risk, validation.trimmedTo, logEvent]);
 
-  const pickToken = () =>
+  const pickToken = useCallback(() => {
     sheets.open("pickToken", {
       current: token.id,
       onPick: (picked: PortfolioToken) => setToken(picked),
     });
+  }, [sheets, token.id]);
+
   // High-value sends pass a liveness check first when the user asked for one.
-  const startConfirm = () =>
+  const startConfirm = useCallback(() => {
     setPhase(prefs.requireLivenessSend && fiat >= HIGH_VALUE_USD ? "liveness" : "auth");
+  }, [prefs.requireLivenessSend, fiat]);
 
   return {
     step,
-    stepIndex,
+    stepIndex: SEND_STEPS.indexOf(step),
     phase,
     setPhase,
     sendOutcome,
     token,
     chain,
     to,
-    toValid,
-    toError,
-    recipient: resolvedTo ?? trimmedTo,
+    toValid: validation.toValid,
+    toError: validation.toError,
     amt,
     amtNum,
     fiat,
-    risk,
-    riskLoading,
-    showRiskUnavailable,
-    blocked,
-    netMismatch,
-    recipientNet,
-    scanMismatch,
-    simStatus,
-    simulationLoading,
-    warnings: liveSim.data?.warnings,
-    fee,
-    total,
-    balanceAfter,
+    ...quote,
     onKey,
-    setMax: () => setAmt(String(token.amount)),
+    setMax,
     pickToken,
     back,
     backToReview,
     editTo,
     openScanner,
     continueFromTo,
-    goToReview: () => setStep("review"),
+    goToReview,
     startConfirm,
   };
 }

@@ -1,3 +1,4 @@
+import { formatShortDate, formatShortMonthDay, formatTime12h, TIME_MS } from "@/utils/date";
 import { formatWhenDay } from "./when";
 
 export const RANGES = ["1H", "1D", "1W", "1M", "1Y", "All"] as const;
@@ -32,18 +33,14 @@ export function getDemoChart(id: string, range: Range, change24h: number) {
   return { change, data };
 }
 
-const HOUR = 3_600_000;
-const DAY = 24 * HOUR;
 const RANGE_SPAN_MS: Record<Range, number> = {
-  "1H": HOUR,
-  "1D": DAY,
-  "1W": 7 * DAY,
-  "1M": 30 * DAY,
-  "1Y": 365 * DAY,
-  All: 730 * DAY,
+  "1H": TIME_MS.hour,
+  "1D": TIME_MS.day,
+  "1W": 7 * TIME_MS.day,
+  "1M": 30 * TIME_MS.day,
+  "1Y": 365 * TIME_MS.day,
+  All: 730 * TIME_MS.day,
 };
-
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /** Evenly spaced timestamps (epoch ms) for chart points, the last one being `now`. */
 export function getChartTimestamps(range: Range, count: number, now: number): number[] {
@@ -55,14 +52,9 @@ export function getChartTimestamps(range: Range, count: number, now: number): nu
 /** Time of day for 1H, day and time for 1D, calendar date for longer ranges. */
 export function formatChartTime(ts: number, range: Range, now: Date): string {
   const d = new Date(ts);
-  if (range === "1H") {
-    const h = d.getHours() % 12 || 12;
-    const ampm = d.getHours() >= 12 ? "PM" : "AM";
-    return `${h}:${String(d.getMinutes()).padStart(2, "0")} ${ampm}`;
-  }
+  if (range === "1H") return formatTime12h(d);
   if (range === "1D") return formatWhenDay(ts, now).when;
-  const date = `${MONTHS[d.getMonth()]} ${d.getDate()}`;
-  return range === "1Y" || range === "All" ? `${date}, ${d.getFullYear()}` : date;
+  return range === "1Y" || range === "All" ? formatShortDate(d) : formatShortMonthDay(d);
 }
 
 /** Value at a scrubbed point, given the series ends at the displayed `total`. */

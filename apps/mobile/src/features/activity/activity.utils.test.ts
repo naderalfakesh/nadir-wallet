@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { PortfolioTransaction } from "@/features/wallet/types";
-import { matchesSearch, searchTransactions, type SearchContext } from "./activity.utils";
+import {
+  groupTransactionsByDay,
+  matchesSearch,
+  searchTransactions,
+  type SearchContext,
+} from "./activity.utils";
 
 const context: SearchContext = {
   typeLabels: { send: "Sent", receive: "Received", swap: "Swapped" },
@@ -56,5 +61,19 @@ describe("searchTransactions", () => {
     const list = [tx({ id: "a" }), tx({ id: "b", token: "USDC", type: "receive" })];
     expect(searchTransactions(list, "usd coin", context).map((t) => t.id)).toEqual(["b"]);
     expect(searchTransactions(list, "", context)).toBe(list);
+  });
+});
+
+describe("groupTransactionsByDay", () => {
+  it("groups transactions by day while preserving order", () => {
+    const groups = groupTransactionsByDay([
+      tx({ id: "1", day: "Today" }),
+      tx({ id: "2", day: "Yesterday" }),
+      tx({ id: "3", day: "Today" }),
+    ]);
+    expect(groups.map((g) => [g.day, g.transactions.map((item) => item.id)])).toEqual([
+      ["Today", ["1", "3"]],
+      ["Yesterday", ["2"]],
+    ]);
   });
 });

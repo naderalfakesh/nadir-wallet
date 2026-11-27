@@ -29,7 +29,7 @@ export function DemoStateProvider({
   const update = useCallback((partial: Partial<DemoPrefs>) => {
     setState((prev) => {
       const next = { ...prev, ...partial };
-      void storage.saveDemo(next);
+      void storage.saveDemo(next).catch(() => undefined);
       return next;
     });
   }, []);

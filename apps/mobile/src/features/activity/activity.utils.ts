@@ -2,7 +2,7 @@ import { getTransactionTime } from "@/features/wallet/transactions";
 import type { PortfolioToken, PortfolioTransaction, TxType } from "@/features/wallet/types";
 import type { TFunction } from "@/i18n";
 import { fmtToken } from "@/utils/format";
-import type { ActivityFilter } from "./activity.types";
+import type { ActivityDayGroup, ActivityFilter } from "./activity.types";
 
 export function filterTransactions(
   transactions: PortfolioTransaction[],
@@ -13,6 +13,17 @@ export function filterTransactions(
 
 export function getActivityDays(transactions: PortfolioTransaction[]): string[] {
   return [...new Set(transactions.map((tx) => tx.day))];
+}
+
+/** Groups transactions by day label in a single pass, preserving input order. */
+export function groupTransactionsByDay(transactions: PortfolioTransaction[]): ActivityDayGroup[] {
+  const byDay = new Map<string, PortfolioTransaction[]>();
+  for (const tx of transactions) {
+    const bucket = byDay.get(tx.day);
+    if (bucket) bucket.push(tx);
+    else byDay.set(tx.day, [tx]);
+  }
+  return Array.from(byDay, ([day, items]) => ({ day, transactions: items }));
 }
 
 export function getActivitySubtitle(tx: PortfolioTransaction, t: TFunction): string {

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { AppText, Button, Icon, StatusPill } from "@/components";
@@ -6,9 +6,9 @@ import { LivenessFlow } from "@/features/liveness/LivenessFlow";
 import { CHAINS } from "@/features/wallet/chains";
 import type { PortfolioToken } from "@/features/wallet/types";
 import { useTranslation } from "@/i18n/useTranslation";
-import { useTheme, useThemedStyles, alpha } from "@/theme";
+import { alpha, useTheme } from "@/theme";
 import type { SendOutcome } from "@/types/status";
-import { fmtUSD, fmtToken, shortAddr } from "@/utils/format";
+import { fmtToken, fmtUSD, shortAddr } from "@/utils/format";
 import { SendAuthStep } from "./components/SendAuthStep";
 import { SendResultLayout } from "./components/SendResultLayout";
 import type { SendPhase } from "./send.types";
@@ -38,11 +38,10 @@ export function SendConfirmOverlay({
   onCancel,
 }: OverlayProps) {
   const theme = useTheme();
-  const styles = useThemedStyles(createStyles);
   const router = useRouter();
   const { t } = useTranslation();
   const chain = CHAINS[token.chain];
-  const goWallet = () => router.replace("/home");
+  const goWallet = useCallback(() => router.replace("/home"), [router]);
 
   useEffect(() => {
     if (phase === "pending" && outcome === "success") {
@@ -125,26 +124,25 @@ export function SendConfirmOverlay({
   );
 }
 
-const createStyles = () =>
-  StyleSheet.create({
-    sentAmount: {
-      marginTop: 6,
-    },
-    sentTo: {
-      marginTop: 6,
-    },
-    resultBody: {
-      marginTop: 8,
-      lineHeight: 21,
-      textAlign: "center",
-    },
-    maxWidth260: {
-      maxWidth: 260,
-    },
-    maxWidth270: {
-      maxWidth: 270,
-    },
-    pillGap: {
-      marginTop: 16,
-    },
-  });
+const styles = StyleSheet.create({
+  sentAmount: {
+    marginTop: 6,
+  },
+  sentTo: {
+    marginTop: 6,
+  },
+  resultBody: {
+    marginTop: 8,
+    lineHeight: 21,
+    textAlign: "center",
+  },
+  maxWidth260: {
+    maxWidth: 260,
+  },
+  maxWidth270: {
+    maxWidth: 270,
+  },
+  pillGap: {
+    marginTop: 16,
+  },
+});

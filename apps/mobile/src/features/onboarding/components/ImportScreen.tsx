@@ -1,9 +1,11 @@
 import React from "react";
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
-import { ScreenHeader, AppText, Button, Icon } from "@/components";
+import { ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { AppText, Button, Icon, ScreenHeader } from "@/components";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useTheme, useThemedStyles, type Theme } from "@/theme";
 import { useMnemonicInput } from "../useMnemonicInput";
+import { ImportActionsBar } from "./ImportActionsBar";
+import { WordSuggestions } from "./WordSuggestions";
 
 interface ImportScreenProps {
   onBack: () => void;
@@ -63,48 +65,14 @@ export function ImportScreen({ onBack, onDone }: ImportScreenProps) {
           style={[styles.input, { borderColor: error ? theme.colors.neg : theme.colors.hairline }]}
         />
 
-        <View style={styles.actionsRow}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => void paste()}
-            style={styles.pasteButton}
-          >
-            <Icon name="paste" size={16} color={theme.colors.textMuted} />
-            <AppText weight="semibold" size={13.5} muted>
-              {t("onboarding.import.paste")}
-            </AppText>
-          </Pressable>
-          <Pressable accessibilityRole="button" onPress={fillSample} style={styles.sampleButton}>
-            <AppText weight="semibold" size={13} color={theme.colors.accent}>
-              {t("onboarding.import.sample")}
-            </AppText>
-          </Pressable>
-          <AppText
-            weight="semibold"
-            size={13}
-            tnum
-            color={result.wordCountValid ? theme.colors.pos : theme.colors.textFaint}
-          >
-            {t("onboarding.import.words", { count: result.wordCount })}
-          </AppText>
-        </View>
+        <ImportActionsBar
+          wordCount={result.wordCount}
+          wordCountValid={result.wordCountValid}
+          onPaste={() => void paste()}
+          onFillSample={fillSample}
+        />
 
-        {suggestions.length > 0 && (
-          <View style={styles.suggestions}>
-            {suggestions.map((word) => (
-              <Pressable
-                key={word}
-                accessibilityRole="button"
-                onPress={() => applySuggestion(word)}
-                style={styles.suggestion}
-              >
-                <AppText mono size={13}>
-                  {word}
-                </AppText>
-              </Pressable>
-            ))}
-          </View>
-        )}
+        <WordSuggestions suggestions={suggestions} onSelect={applySuggestion} />
 
         {clipboardEmpty && (
           <AppText size={12.5} muted accessibilityLiveRegion="polite" style={styles.clipboardEmpty}>
@@ -158,30 +126,6 @@ const createStyles = (theme: Theme) =>
       lineHeight: 26,
       padding: 16,
       textAlignVertical: "top",
-    },
-    actionsRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginTop: 12,
-    },
-    pasteButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 7,
-      height: 36,
-      paddingHorizontal: 13,
-      borderRadius: theme.radius.chip,
-      backgroundColor: theme.colors.surface2,
-      borderWidth: 1,
-      borderColor: theme.colors.hairline,
-    },
-    sampleButton: { paddingVertical: 10 },
-    suggestions: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10 },
-    suggestion: {
-      backgroundColor: theme.colors.surface2,
-      borderRadius: theme.radius.chip,
-      padding: 10,
     },
     clipboardEmpty: { marginTop: 8 },
     errorRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 12 },

@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CameraErrorBoundary } from "@/features/camera/components/CameraErrorBoundary";
 import { CameraStatusPanel } from "@/features/camera/components/CameraStatusPanel";
+import { useTimeout } from "@/hooks";
 import { ScanCamera } from "./components/ScanCamera";
 import { ScanHeader } from "./components/ScanHeader";
 import { currentScanSession, deliverScan } from "./scanBridge";
@@ -18,6 +19,7 @@ import type { ScanTarget } from "./scanPayload";
 export function ScanScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { schedule } = useTimeout();
   const handledRef = useRef(false);
   const [scanSession] = useState(currentScanSession);
 
@@ -57,7 +59,7 @@ export function ScanScreen() {
           onAccept={(target) => {
             if (!deliverOnce(target)) return;
             // Brief beat so the success frame is visible, then return.
-            setTimeout(() => router.back(), 350);
+            schedule(() => router.back(), 350);
           }}
         />
       </CameraErrorBoundary>

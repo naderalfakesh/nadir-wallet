@@ -1,3 +1,4 @@
+import { formatShortDate } from "@/utils/date";
 import type { SecurityTier } from "./security.types";
 
 export function getSecurityTier(pct: number): SecurityTier {
@@ -24,12 +25,9 @@ export function getSecurityScore(prefs: SecurityScoreInput): { score: number; to
   return { score: done.filter(Boolean).length, total: done.length };
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
 /** "Nov 22, 2026" */
 export function formatVerifiedDate(at: number): string {
-  const date = new Date(at);
-  return `${MONTHS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  return formatShortDate(new Date(at));
 }
 
 /** The newest events first; the log is stored newest-first, so this is a cap. */

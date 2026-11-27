@@ -1,14 +1,15 @@
 import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { AppText, Card, Row, Icon, TokenGlyph, RiskResult, TrustNote } from "@/components";
+import { AppText, Card, RiskResult, Row, TokenGlyph, TrustNote } from "@/components";
 import { CHAINS, chainBadgeColor } from "@/features/wallet/chains";
 import type { AddressRisk } from "@/features/wallet/risk";
 import type { Chain, ChainId, PortfolioToken } from "@/features/wallet/types";
 import { useTranslation } from "@/i18n/useTranslation";
-import { alpha, useTheme, useThemedStyles, type Theme } from "@/theme";
+import { useThemedStyles, type Theme } from "@/theme";
 import type { SimulationStatus } from "@/types/status";
-import { fmtUSD, fmtToken, shortAddr } from "@/utils/format";
+import { fmtToken, fmtUSD, shortAddr } from "@/utils/format";
 import { getRiskCopy } from "../send.utils";
+import { NetworkMismatchBanner } from "./NetworkMismatchBanner";
 import { OfflineRiskNote } from "./OfflineRiskNote";
 import { SimulationCard } from "./SimulationCard";
 
@@ -47,7 +48,6 @@ export function ReviewStep({
   simStatus,
   balanceAfter,
 }: ReviewStepProps) {
-  const theme = useTheme();
   const styles = useThemedStyles(createStyles);
   const { t } = useTranslation();
 
@@ -68,7 +68,7 @@ export function ReviewStep({
         </AppText>
       </View>
 
-      <Card padding={0} style={styles.recipientsCard}>
+      <Card padding={0} style={styles.summaryCard}>
         <Row
           title={t("send.review.to")}
           right={
@@ -94,24 +94,14 @@ export function ReviewStep({
       </Card>
 
       {risk && (
-        <View style={styles.riskResult}>
+        <View style={styles.sectionGap}>
           <RiskResult level={risk.level} {...getRiskCopy(risk, t)} compact />
         </View>
       )}
       {riskUnavailable && <OfflineRiskNote text={t("send.review.riskUnavailable")} />}
 
       {netMismatch && recipientNet && (
-        <View style={styles.mismatch}>
-          <Icon name="alert" size={20} color={theme.colors.warn} />
-          <View style={styles.mismatchBody}>
-            <AppText weight="bold" size={13.5} color={theme.colors.warn}>
-              {t("send.mismatch.title")}
-            </AppText>
-            <AppText size={12.5} muted style={styles.mismatchText}>
-              {t("send.mismatch.body", { from: chain.name, to: CHAINS[recipientNet].name })}
-            </AppText>
-          </View>
-        </View>
+        <NetworkMismatchBanner fromChainName={chain.name} toChainName={CHAINS[recipientNet].name} />
       )}
 
       <SimulationCard
@@ -123,7 +113,7 @@ export function ReviewStep({
         warnings={warnings}
       />
 
-      <View style={styles.trustNote}>
+      <View style={styles.sectionGap}>
         <TrustNote icon="lock">{t("send.review.trustNote")}</TrustNote>
       </View>
     </ScrollView>
@@ -135,10 +125,10 @@ const createStyles = (theme: Theme) =>
     stepScroll: {
       padding: theme.spacing.pad,
     },
-    recipientsCard: {
+    summaryCard: {
       paddingHorizontal: 16,
     },
-    riskResult: {
+    sectionGap: {
       marginTop: 12,
     },
     reviewHero: {
@@ -151,25 +141,5 @@ const createStyles = (theme: Theme) =>
     },
     reviewFiat: {
       marginTop: 3,
-    },
-    mismatch: {
-      flexDirection: "row",
-      gap: 11,
-      marginTop: 12,
-      padding: 13,
-      borderRadius: 14,
-      backgroundColor: alpha(theme.colors.warn, 0.12),
-      borderWidth: 1,
-      borderColor: alpha(theme.colors.warn, 0.3),
-    },
-    mismatchBody: {
-      flex: 1,
-    },
-    mismatchText: {
-      lineHeight: 18,
-      marginTop: 2,
-    },
-    trustNote: {
-      marginTop: 12,
     },
   });

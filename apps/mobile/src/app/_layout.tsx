@@ -43,7 +43,8 @@ import {
 
 SplashScreen.preventAutoHideAsync();
 
-const persistPreference = (preference: ThemePreference) => void storage.saveTheme(preference);
+const persistPreference = (preference: ThemePreference) =>
+  void storage.saveTheme(preference).catch(() => undefined);
 
 // The in-app theme can differ from the system one, so both system bars follow
 // it: dark icons on the light theme, light icons on the dark theme.

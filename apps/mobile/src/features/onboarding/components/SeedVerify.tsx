@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { AppText } from "@/components";
+import { useTimeout } from "@/hooks";
 import { useTranslation } from "@/i18n/useTranslation";
-import { useTheme, useThemedStyles, alpha, type Theme } from "@/theme";
+import { alpha, useTheme, useThemedStyles, type Theme } from "@/theme";
+import { buildSeedQuizRounds } from "../seedQuiz";
 
-const QUIZ_POSITIONS = [2, 6, 9];
+const WRONG_FLASH_MS = 600;
 
 interface SeedVerifyProps {
   words: string[];
@@ -15,41 +17,33 @@ export function SeedVerify({ words, onContinue }: SeedVerifyProps) {
   const theme = useTheme();
   const styles = useThemedStyles(createStyles);
   const { t } = useTranslation();
+  const { schedule, cancel } = useTimeout();
 
-  // Deterministic distractors and ordering keep render pure (no Math.random),
-  // while still placing the correct answer in a different slot each round.
-  const rounds = useMemo(
-    () =>
-      QUIZ_POSITIONS.map((pos) => {
-        const correct = words[pos];
-        const opts = [correct, words[(pos + 4) % words.length], words[(pos + 7) % words.length]];
-        const rot = pos % 3;
-        return { pos, correct, options: [...opts.slice(rot), ...opts.slice(0, rot)] };
-      }),
-    [words],
-  );
-
+  const rounds = useMemo(() => buildSeedQuizRounds(words), [words]);
   const [round, setRound] = useState(0);
   const [wrong, setWrong] = useState<string | null>(null);
   const current = rounds[round];
 
+  if (!current) return null;
+
   const pick = (opt: string) => {
     if (opt === current.correct) {
+      cancel();
       setWrong(null);
       if (round + 1 >= rounds.length) onContinue();
       else setRound(round + 1);
     } else {
       setWrong(opt);
-      setTimeout(() => setWrong(null), 600);
+      schedule(() => setWrong(null), WRONG_FLASH_MS);
     }
   };
 
   return (
     <View>
       <View style={styles.progress}>
-        {rounds.map((_, i) => (
+        {rounds.map((r, i) => (
           <View
-            key={i}
+            key={r.pos}
             style={[
               styles.progressBar,
               { backgroundColor: i <= round ? theme.colors.accent : theme.colors.surface3 },
@@ -69,6 +63,7 @@ export function SeedVerify({ words, onContinue }: SeedVerifyProps) {
           return (
             <Pressable
               key={opt}
+              accessibilityRole="button"
               onPress={() => pick(opt)}
               style={[
                 styles.option,

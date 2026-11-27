@@ -1,27 +1,20 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
-  Screen,
-  ScreenHeader,
   Button,
   IconButton,
+  Screen,
+  ScreenHeader,
+  ScrubbableChart,
   SectionLabel,
   Segmented,
-  ScrubbableChart,
 } from "@/components";
 import { CHAINS } from "@/features/wallet/chains";
-import {
-  RANGES,
-  changeAtPoint,
-  formatChartTime,
-  getChartTimestamps,
-  getDemoChart,
-  valueAtPoint,
-  type Range,
-} from "@/features/wallet/chart";
+import { RANGES, type Range } from "@/features/wallet/chart";
 import { BackendNotice } from "@/features/wallet/components/BackendNotice";
 import { tokenById } from "@/features/wallet/demoData";
+import { useChartScrub } from "@/features/wallet/useChartScrub";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useSheets } from "@/providers/SheetProvider";
 import { useWallet } from "@/providers/WalletDataProvider";
@@ -40,22 +33,27 @@ export function TokenDetailScreen({ id }: { id: string }) {
   const sheets = useSheets();
   const [range, setRange] = useState<Range>("1W");
 
-  const token = tokens.find((x) => x.id === id) ?? tokenById(id);
+  const token = tokens.find((item) => item.id === id) ?? tokenById(id);
   const chain = CHAINS[token.chain];
-  const chart = getDemoChart(token.id, range, token.change);
-  const [scrub, setScrub] = useState<{ range: Range; index: number; now: number } | null>(null);
-  const active = scrub && scrub.range === range ? scrub : null;
   const priceUnavailable = price === "unavailable";
   const dimChart = backend === "rpc_unavailable" || priceUnavailable;
-  const scrubbed =
-    !active || priceUnavailable
-      ? null
-      : {
-          change: changeAtPoint(chart.data, active.index),
-          value: valueAtPoint(token.value, chart.data, active.index),
-          label: `${formatChartTime(getChartTimestamps(range, chart.data.length, active.now)[active.index], range, new Date(active.now))} · ${fmtUSD(valueAtPoint(token.price, chart.data, active.index))}`,
-        };
-  const txs = transactions.filter((x) => x.token === token.symbol).slice(0, 3);
+  const { chart, scrubbed, onScrub } = useChartScrub({
+    seriesId: token.id,
+    range,
+    change24h: token.change,
+    totalValue: token.value,
+    unitPrice: token.price,
+    disabled: priceUnavailable,
+  });
+
+  const historyLabel = scrubbed
+    ? `${scrubbed.timeLabel} · ${fmtUSD(scrubbed.price ?? token.price)}`
+    : t("home.demoHistory", { range });
+
+  const recentTransactions = useMemo(
+    () => transactions.filter((item) => item.token === token.symbol).slice(0, 3),
+    [transactions, token.symbol],
+  );
 
   return (
     <Screen>
@@ -94,7 +92,7 @@ export function TokenDetailScreen({ id }: { id: string }) {
             token={token}
             value={scrubbed?.value ?? token.value}
             change={scrubbed?.change ?? chart.change}
-            historyLabel={scrubbed?.label ?? t("home.demoHistory", { range })}
+            historyLabel={historyLabel}
             priceUnavailable={priceUnavailable}
             priceStatus={price}
             unavailableLabel={t("token.valueUnavailable")}
@@ -106,9 +104,7 @@ export function TokenDetailScreen({ id }: { id: string }) {
               data={chart.data}
               up={chart.change >= 0}
               height={104}
-              onScrub={(index) =>
-                setScrub(index === null ? null : { range, index, now: Date.now() })
-              }
+              onScrub={onScrub}
             />
           </View>
           <Segmented options={RANGES} value={range} onChange={setRange} small />
@@ -134,11 +130,11 @@ export function TokenDetailScreen({ id }: { id: string }) {
           <SectionLabel>{t("token.market")}</SectionLabel>
           <MarketCard token={token} chainName={chain.name} priceUnavailable={priceUnavailable} />
 
-          {txs.length > 0 && (
+          {recentTransactions.length > 0 && (
             <>
               <View style={styles.spacer} />
               <RecentTransactions
-                transactions={txs}
+                transactions={recentTransactions}
                 onTransactionPress={(txId) => sheets.open("txDetail", { id: txId })}
               />
             </>

@@ -1,15 +1,15 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 import { Button, Screen, ScreenHeader, TestnetBadge } from "@/components";
 import { useTranslation } from "@/i18n/useTranslation";
 import { biometryIcon } from "@/services/auth/biometry";
-import { useTheme, useThemedStyles, type Theme } from "@/theme";
 import { AmountStep } from "./components/AmountStep";
 import { FooterButton } from "./components/FooterButton";
 import { ReviewStep } from "./components/ReviewStep";
+import { SendProgressBar } from "./components/SendProgressBar";
 import { ToStep } from "./components/ToStep";
-import { SEND_STEPS } from "./send.constants";
+import { getReviewCtaState } from "./send.utils";
 import { SendConfirmOverlay } from "./SendConfirmOverlay";
 import { useSendFlow } from "./useSendFlow";
 
@@ -18,8 +18,6 @@ interface SendScreenProps {
 }
 
 export function SendScreen({ tokenId }: SendScreenProps) {
-  const theme = useTheme();
-  const styles = useThemedStyles(createStyles);
   const { t } = useTranslation();
   const flow = useSendFlow(tokenId);
   const { step, stepIndex, token, risk, blocked, simStatus } = flow;
@@ -40,6 +38,14 @@ export function SendScreen({ tokenId }: SendScreenProps) {
     );
   }
 
+  const reviewCta = getReviewCtaState({
+    blocked,
+    riskLoading: flow.riskLoading,
+    scanMismatch: flow.scanMismatch,
+    simulationLoading: flow.simulationLoading,
+    simStatus,
+  });
+
   return (
     <Screen avoidKeyboard>
       <ScreenHeader
@@ -48,17 +54,7 @@ export function SendScreen({ tokenId }: SendScreenProps) {
         onBack={flow.back}
         trailing={<TestnetBadge label={flow.chain.short} />}
       />
-      <View style={styles.progress}>
-        {SEND_STEPS.map((item, index) => (
-          <View
-            key={item}
-            style={[
-              styles.progressTrack,
-              { backgroundColor: stepIndex >= index ? theme.colors.accent : theme.colors.surface3 },
-            ]}
-          />
-        ))}
-      </View>
+      <SendProgressBar stepIndex={stepIndex} />
 
       <Animated.View key={step} entering={FadeInRight.duration(180)} style={styles.stepContainer}>
         {step === "to" && (
@@ -116,23 +112,9 @@ export function SendScreen({ tokenId }: SendScreenProps) {
             />
             <FooterButton>
               <Button
-                label={
-                  blocked
-                    ? t("send.confirm.blocked")
-                    : flow.scanMismatch
-                      ? t("send.confirm.scanMismatch")
-                      : simStatus === "failed"
-                        ? t("send.confirm.simFailed")
-                        : t("send.confirm.cta")
-                }
+                label={t(reviewCta.labelKey)}
                 icon={biometryIcon()}
-                disabled={
-                  blocked ||
-                  flow.riskLoading ||
-                  flow.scanMismatch ||
-                  flow.simulationLoading ||
-                  simStatus === "failed"
-                }
+                disabled={reviewCta.disabled}
                 onPress={flow.startConfirm}
               />
             </FooterButton>
@@ -143,20 +125,8 @@ export function SendScreen({ tokenId }: SendScreenProps) {
   );
 }
 
-const createStyles = (theme: Theme) =>
-  StyleSheet.create({
-    progress: {
-      flexDirection: "row",
-      gap: 5,
-      paddingHorizontal: theme.spacing.pad,
-      paddingBottom: 8,
-    },
-    progressTrack: {
-      flex: 1,
-      height: 3,
-      borderRadius: 9,
-    },
-    stepContainer: {
-      flex: 1,
-    },
-  });
+const styles = StyleSheet.create({
+  stepContainer: {
+    flex: 1,
+  },
+});

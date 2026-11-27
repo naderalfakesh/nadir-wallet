@@ -4,7 +4,8 @@ const expoConfig = require("eslint-config-expo/flat");
 
 // Shared layers sit below the app: features, providers and routes may import
 // them, never the other way round.
-const SHARED_LAYERS = "src/{components,services,theme,utils,i18n,types,constants}/**/*.{ts,tsx}";
+const SHARED_LAYERS =
+  "src/{components,hooks,services,theme,utils,i18n,types,constants}/**/*.{ts,tsx}";
 
 module.exports = defineConfig([
   expoConfig,

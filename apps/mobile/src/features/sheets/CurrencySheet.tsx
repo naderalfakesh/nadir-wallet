@@ -2,9 +2,11 @@ import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { AppText, Card, Icon, SheetHeader } from "@/components";
 import { CURRENCIES, currencyCode } from "@/features/settings/currencies";
+import { useTimeout } from "@/hooks";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useApp } from "@/providers/AppProvider";
 import { useTheme, useThemedStyles, type Theme } from "@/theme";
+import { SHEET_DISMISS_DELAY_MS } from "./sheets.constants";
 import type { SheetCloseProps } from "./types";
 
 export function CurrencySheet({ close }: SheetCloseProps) {
@@ -12,6 +14,7 @@ export function CurrencySheet({ close }: SheetCloseProps) {
   const styles = useThemedStyles(createStyles);
   const { t } = useTranslation();
   const { prefs, setPref } = useApp();
+  const { schedule } = useTimeout();
   const selected = currencyCode(prefs.currency);
 
   return (
@@ -31,7 +34,7 @@ export function CurrencySheet({ close }: SheetCloseProps) {
               accessibilityState={{ selected: on }}
               onPress={() => {
                 setPref("currency", c.code);
-                setTimeout(close, 220);
+                schedule(close, SHEET_DISMISS_DELAY_MS);
               }}
               style={[styles.option, i < CURRENCIES.length - 1 && styles.divider]}
             >

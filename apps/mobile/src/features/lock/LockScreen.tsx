@@ -88,7 +88,11 @@ export function LockScreen() {
           )}
         </View>
 
-        <Pressable onPress={() => setMode("passcode")} style={styles.passcodeLink}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setMode("passcode")}
+          style={styles.passcodeLink}
+        >
           <Icon name="lock" size={17} color={theme.colors.textMuted} />
           <AppText size={14} muted>
             {t("lock.usePasscode")}

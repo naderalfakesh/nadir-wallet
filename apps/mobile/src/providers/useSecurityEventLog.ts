@@ -25,7 +25,7 @@ export function useSecurityEventLog(stored: SecurityEvent[]) {
     const event = makeSecurityEvent(id, type, new Date(), opts);
     setEvents((prev) => {
       const next = [event, ...prev].slice(0, MAX_EVENTS);
-      void storage.saveEvents(next);
+      void storage.saveEvents(next).catch(() => undefined);
       return next;
     });
   }, []);

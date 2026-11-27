@@ -104,7 +104,7 @@ export function PasscodeUnlock({
         <PinKeypad onKey={onKey} onBiometric={onUseBiometric} biometric={biometricAvailable} />
       </View>
       {biometricAvailable && (
-        <Pressable onPress={onUseBiometric} style={styles.biometricLink}>
+        <Pressable accessibilityRole="button" onPress={onUseBiometric} style={styles.biometricLink}>
           <Icon name={biometryIcon()} size={18} color={theme.colors.textMuted} />
           <AppText size={13.5} muted>
             {t("lock.useBiometricInstead")}
