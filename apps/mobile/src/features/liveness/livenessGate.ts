@@ -1,15 +1,6 @@
-// One-shot token so a route can enforce a liveness gate on *itself*, instead of
-// trusting every caller to route through /liveness first. The liveness flow
-// grants a short-lived pass for a target route on success; the target route
-// consumes it once on mount. No valid token → the route bounces to /liveness.
-//
-// Any entry point that pushes the protected route (Security Center, Settings,
-// a deep link) is gated the same way. The pass lives in memory only.
-
+// In-memory one-shot pass so protected routes enforce liveness regardless of entry point.
 const TTL_MS = 30_000;
 
-// Routes that enforce a liveness pass on themselves. `next` arrives from the
-// URL, so anything else is ignored rather than navigated to.
 const GATED_TARGETS = ["/reveal"] as const;
 export type LivenessTarget = (typeof GATED_TARGETS)[number];
 
@@ -20,21 +11,15 @@ export function parseLivenessTarget(next: unknown): LivenessTarget | null {
 let grantedFor = "";
 let grantedAt = 0;
 
-/** Called by the liveness flow on a successful pass, just before navigating. */
 export function grantLiveness(target: string): void {
   grantedFor = target;
   grantedAt = Date.now();
 }
 
-/** Non-clearing check - true when a fresh pass for this target exists. */
 export function peekLiveness(target: string): boolean {
   return grantedFor === target && Date.now() - grantedAt < TTL_MS;
 }
 
-/**
- * Called once by the protected route on mount. Returns true (and clears the
- * token) when a fresh pass for this exact target exists.
- */
 export function consumeLiveness(target: string): boolean {
   const ok = grantedFor === target && Date.now() - grantedAt < TTL_MS;
   grantedFor = "";

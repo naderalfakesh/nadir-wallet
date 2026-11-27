@@ -30,10 +30,6 @@ interface UseSendQuoteOptions {
   sendSim: SendSim;
 }
 
-/**
- * Resolves live or demo risk assessment, transaction simulation, network
- * mismatch flags, and fee/balance projections for the current send draft.
- */
 export function useSendQuote({
   step,
   token,

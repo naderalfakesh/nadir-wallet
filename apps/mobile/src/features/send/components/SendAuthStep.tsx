@@ -21,8 +21,6 @@ export function SendAuthStep({ outcome, setPhase, onCancel }: SendAuthStepProps)
   const styles = useThemedStyles(createStyles);
   const { t } = useTranslation();
   const { verifyPasscode, lockout, recordUnlockFailure, clearLockout } = useApp();
-  // A device with no screen lock has nothing for the OS to check, so the app
-  // passcode confirms the simulated send there instead.
   const [usePasscode, setUsePasscode] = useState(false);
 
   const [guard] = useState(createStaleGuard);

@@ -32,7 +32,6 @@ export function AppProvider({
   const { events, logEvent, clearEvents } = useSecurityEventLog(initial.events);
   const [sessionUnlocked, setSessionUnlocked] = useState(false);
   const [introSeen, setIntroSeen] = useState(initial.introSeen);
-  // Mirror of prefs so createWallet can persist the exact object it commits.
   const prefsRef = useRef(initial.prefs);
 
   const setPref = useCallback(<K extends keyof Prefs>(key: K, value: Prefs[K]) => {
@@ -45,8 +44,6 @@ export function AppProvider({
   }, []);
 
   const setPasscode = useCallback(async (pin: string) => {
-    // Only adopt the new hash once it is stored, so a failed write can't leave
-    // the app verifying against a PIN that won't exist after a restart.
     const record = await persistPasscode(pin, hashPasscodeAsync, storage.savePasscodeHash);
     setPasscodeHash(record);
   }, []);
@@ -87,15 +84,13 @@ export function AppProvider({
     clearEvents();
   }, [resetLockout, clearEvents]);
 
-  // A failed write only means the intro shows once more next launch, so the
-  // user is never held on it.
   const markIntroSeen = useCallback(() => {
     setIntroSeen(true);
     void storage.saveIntroSeen().catch(() => undefined);
   }, []);
 
   const unlockSession = useCallback(() => setSessionUnlocked(true), []);
-  // A scan waiting for Send must not survive a lock and fill Send after unlock.
+  // Drop any queued scan so it cannot prefill Send after an unlock.
   const lockSession = useCallback(() => {
     clearScanHandoff();
     setSessionUnlocked(false);

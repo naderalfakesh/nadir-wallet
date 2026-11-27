@@ -71,7 +71,6 @@ const META: Record<
   },
 };
 
-/** "Today · 2:14 PM", "Yesterday · 6:30 PM" or "May 28 · 4:00 PM", relative to `now`. */
 export function formatEventWhen(at: Date, now: Date): string {
   const days = calendarDaysBetween(at, now);
   const day =
@@ -83,7 +82,6 @@ export function formatEventWhen(at: Date, now: Date): string {
   return `${day} · ${formatTime12h(at)}`;
 }
 
-/** The label to show for an event now. */
 export function eventWhen(event: SecurityEvent, now: Date): string {
   return event.at === undefined ? event.when : formatEventWhen(new Date(event.at), now);
 }

@@ -9,8 +9,6 @@ import { useApp } from "@/providers/AppProvider";
 import { haptics } from "@/services/device/haptics";
 import { useTheme, useThemedStyles, type Theme } from "@/theme";
 
-// Derive the exact props expo-router passes to a custom `tabBar` so this stays
-// in sync with expo-router's bundled react-navigation types.
 type TabBarFn = NonNullable<ComponentProps<typeof Tabs>["tabBar"]>;
 type TabBarProps = Parameters<TabBarFn>[0];
 
@@ -27,7 +25,6 @@ export function TabBar({ state, emitter, navigateToTab }: TabBarProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { prefs } = useApp();
-  // Nudge the Security tab until the recovery phrase is backed up.
   const securityAlert = !prefs.backupConfirmed;
 
   return (

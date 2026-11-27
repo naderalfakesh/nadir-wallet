@@ -1,17 +1,9 @@
 import { Platform } from "react-native";
 import * as ScreenCapture from "expo-screen-capture";
 
-/**
- * Screens that show the recovery phrase hold a capture block while mounted.
- * Android: FLAG_SECURE blocks screenshots, recordings and the recents thumbnail.
- * iOS: screenshots and recordings come out blank, and a full blur covers the
- * window whenever the app resigns active, so the app-switcher snapshot is blurred.
- *
- * Native calls run one after another so a release can never overtake the
- * block it undoes (a quick mount/unmount would otherwise leave capture blocked).
- */
 const APP_SWITCHER_BLUR = 1;
 
+// Serialize native calls so a quick unmount release cannot overtake the block it undoes.
 let queue: Promise<void> = Promise.resolve();
 const holders = new Set<string>();
 
@@ -22,7 +14,6 @@ function enqueue(task: () => Promise<void>): Promise<void> {
   return queue;
 }
 
-/** Blocks capture under `key` and returns an idempotent release. */
 export function holdScreenCaptureBlock(key: string): () => void {
   enqueue(async () => {
     holders.add(key);
@@ -50,7 +41,6 @@ export function holdScreenCaptureBlock(key: string): () => void {
   };
 }
 
-/** Resolves once every queued native call has settled. For tests. */
 export function screenCaptureIdle(): Promise<void> {
   return queue;
 }

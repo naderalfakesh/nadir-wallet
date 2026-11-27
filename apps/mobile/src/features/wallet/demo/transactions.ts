@@ -2,8 +2,6 @@ import { TIME_MS } from "@/utils/date";
 import type { PortfolioTransaction } from "../types";
 import { formatWhenDay } from "../when";
 
-// Newest first. `ago` is how long before `now` each entry happened, so the
-// history never shows a time that hasn't happened yet or a stale calendar date.
 const RAW_TRANSACTIONS: (Omit<PortfolioTransaction, "when" | "day"> & { ago: number })[] = [
   {
     id: "t3",
@@ -106,7 +104,6 @@ const RAW_TRANSACTIONS: (Omit<PortfolioTransaction, "when" | "day"> & { ago: num
   },
 ];
 
-/** Demo history dated in the recent past relative to `now`. */
 export function demoTransactions(now: Date): PortfolioTransaction[] {
   return RAW_TRANSACTIONS.map(({ ago, ...tx }) => ({
     ...tx,

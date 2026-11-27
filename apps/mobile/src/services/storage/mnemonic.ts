@@ -1,8 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 import { requireOsAuth, type OsAuthFailure } from "@/services/auth/osAuth";
 
-// Same key and keychain options as earlier builds, so existing phrases keep
-// working without a migration.
+// Preserves legacy keychain key/options so existing phrases need no migration.
 const SECURE_MNEMONIC = "nadir.mnemonic";
 
 export type RevealResult =
@@ -17,7 +16,6 @@ export function deleteMnemonic(): Promise<void> {
   return SecureStore.deleteItemAsync(SECURE_MNEMONIC);
 }
 
-/** The only read path for the phrase: the keychain is not touched unless OS authentication succeeds. */
 export async function revealMnemonic(promptMessage: string): Promise<RevealResult> {
   const auth = await requireOsAuth(promptMessage);
   if (!auth.ok) return auth;

@@ -3,7 +3,7 @@ import { z } from "zod";
 try {
   process.loadEnvFile();
 } catch {
-  // No local .env file; fall back to real environment variables and defaults.
+  // Optional local .env file.
 }
 
 const EnvSchema = z.object({

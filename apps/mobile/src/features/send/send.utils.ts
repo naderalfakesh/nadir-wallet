@@ -23,7 +23,6 @@ export function getRecipientValidation(to: string): RecipientValidation {
   return { trimmedTo, looksAddr, looksEns, toValid, toError };
 }
 
-/** Resolves a validated raw address or known ENS label to a hex address when possible. */
 export function resolveRecipientAddress(
   validation: RecipientValidation,
   recipients: readonly SavedRecipient[],
@@ -44,7 +43,6 @@ export function isKnownRecipient(
   return recipients.some((r) => r.addr.toLowerCase() === needle && r.known);
 }
 
-/** Pure keypad reducer for numeric amount entry. */
 export function applyAmountKey(prev: string, key: string): string {
   if (key === "del") return prev.length <= 1 ? "0" : prev.slice(0, -1);
   if (key === ".") return prev.includes(".") ? prev : `${prev}.`;
@@ -102,7 +100,6 @@ type FeeEstimate = Pick<
   "feeNative" | "symbol"
 >;
 
-/** Resolves the fee structure and display text from a live estimate or demo fallback. */
 export function resolveSendFee(
   estimate: FeeEstimate | undefined,
   chain: ChainId,
@@ -119,14 +116,12 @@ export function resolveSendFee(
   return { sendFee, feeLabel: `${sendFee.amount} ${sendFee.symbol}` };
 }
 
-/** Amount plus fee as one figure when both are the same token, otherwise the two side by side. */
 export function getSendTotal(amount: number, symbol: string, fee: SendFee | null): string {
   if (!fee) return fmtToken(amount, symbol);
   if (fee.symbol === symbol) return fmtToken(amount + fee.amount, symbol);
   return `${fmtToken(amount, symbol)} + ${fmtToken(fee.amount, fee.symbol)}`;
 }
 
-/** What is left of the sent token; the fee only comes out of it when it is paid in that token. */
 export function getBalanceAfter(
   balance: number,
   amount: number,
@@ -137,7 +132,6 @@ export function getBalanceAfter(
   return Math.max(0, balance - spent);
 }
 
-/** Determines the review confirmation button's copy key and disabled state. */
 export function getReviewCtaState({
   blocked,
   riskLoading,

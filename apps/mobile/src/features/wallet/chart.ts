@@ -15,7 +15,6 @@ const RANGE_SCALE: Record<Range, number> = {
   All: 9.2,
 };
 
-/** Deterministic sample history ending at the displayed value. */
 export function getDemoChart(id: string, range: Range, change24h: number) {
   let seed = 0;
   for (const char of id + range) {
@@ -42,14 +41,12 @@ const RANGE_SPAN_MS: Record<Range, number> = {
   All: 730 * TIME_MS.day,
 };
 
-/** Evenly spaced timestamps (epoch ms) for chart points, the last one being `now`. */
 export function getChartTimestamps(range: Range, count: number, now: number): number[] {
   const span = RANGE_SPAN_MS[range];
   const last = Math.max(count - 1, 1);
   return Array.from({ length: count }, (_, index) => now - span + (span * index) / last);
 }
 
-/** Time of day for 1H, day and time for 1D, calendar date for longer ranges. */
 export function formatChartTime(ts: number, range: Range, now: Date): string {
   const d = new Date(ts);
   if (range === "1H") return formatTime12h(d);
@@ -57,12 +54,10 @@ export function formatChartTime(ts: number, range: Range, now: Date): string {
   return range === "1Y" || range === "All" ? formatShortDate(d) : formatShortMonthDay(d);
 }
 
-/** Value at a scrubbed point, given the series ends at the displayed `total`. */
 export function valueAtPoint(total: number, data: number[], index: number): number {
   return total * (data[index] / data[data.length - 1]);
 }
 
-/** Percent change from the start of the series to a scrubbed point. */
 export function changeAtPoint(data: number[], index: number): number {
   return (data[index] / data[0] - 1) * 100;
 }

@@ -11,8 +11,6 @@ const HISTORY_LENGTH = 8;
 const DAY_MS = 86_400_000;
 const NATIVE_DECIMALS = 18;
 
-// Realistic mock history derived deterministically from the address. Replace with
-// an indexer/RPC log query when real testnet history is wired up.
 export function getTransactions(address: string, networkId: NetworkId): WalletTransaction[] {
   const network = getNetwork(networkId);
   const symbol = network?.nativeCurrency.symbol ?? "ETH";

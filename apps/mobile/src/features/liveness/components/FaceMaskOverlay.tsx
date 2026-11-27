@@ -8,7 +8,6 @@ import type { FaceFit, LivenessPhase } from "../liveness.types";
 
 const AnimatedEllipse = Animated.createAnimatedComponent(Ellipse);
 
-/** Ramanujan approximation - plenty accurate for a dash ring. */
 function ellipsePerimeter(rx: number, ry: number): number {
   const h = (rx - ry) ** 2 / (rx + ry) ** 2;
   return Math.PI * (rx + ry) * (1 + (3 * h) / (10 + Math.sqrt(4 - 3 * h)));
@@ -17,15 +16,9 @@ function ellipsePerimeter(rx: number, ry: number): number {
 interface FaceMaskOverlayProps {
   fit: FaceFit;
   phase: LivenessPhase;
-  /** 0..1 - completed challenges over total. */
   progress: number;
 }
 
-/**
- * Dims everything outside an egg-shaped cutout and draws two strokes around
- * it: a state-colored guide (gray → warn → accent/pos) and an animated
- * progress ring that fills as challenges complete.
- */
 export function FaceMaskOverlay({ fit, phase, progress }: FaceMaskOverlayProps) {
   const { width, height } = useWindowDimensions();
   const { colors } = useTheme();

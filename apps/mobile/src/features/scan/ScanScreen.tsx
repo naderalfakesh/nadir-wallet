@@ -10,12 +10,6 @@ import { ScanHeader } from "./components/ScanHeader";
 import { currentScanSession, deliverScan } from "./scanBridge";
 import type { ScanTarget } from "./scanPayload";
 
-/**
- * Full-screen QR scanner. Reads frames through the custom ML Kit barcode Nitro
- * plugin and hands the first accepted payment target back to the opener via
- * {@link scanBridge}. Rejected codes keep the camera running and show why.
- * Open it with `beginScan(onResult, check)` then `router.push("/scan")`.
- */
 export function ScanScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -23,7 +17,6 @@ export function ScanScreen() {
   const handledRef = useRef(false);
   const [scanSession] = useState(currentScanSession);
 
-  // Resolves the opener exactly once, whatever happens to the camera below.
   const deliverOnce = useCallback(
     (value: ScanTarget | null) => {
       if (handledRef.current) return false;
@@ -34,8 +27,7 @@ export function ScanScreen() {
     [scanSession],
   );
 
-  // Swipe-down and hardware back skip `cancel`; resolve here so a frame callback
-  // queued before unmount can't fill the opener after the scanner is gone.
+  // Swipe-down and hardware back skip `cancel`; settle on unmount so queued frames cannot leak out.
   useEffect(() => () => void deliverOnce(null), [deliverOnce]);
 
   const cancel = () => {

@@ -10,7 +10,6 @@ type Shadow = {
 };
 
 export function makeShadows(colors: ThemeColors, scheme: "dark" | "light") {
-  // Dark cards lean on hairline borders; light cards get a soft lift.
   const card: Shadow =
     scheme === "light"
       ? {
@@ -36,7 +35,6 @@ export function makeShadows(colors: ThemeColors, scheme: "dark" | "light") {
     elevation: 6,
   };
 
-  // Lift under the switch knob so it reads on both the on/off tracks.
   const toggleKnob: Shadow = {
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },

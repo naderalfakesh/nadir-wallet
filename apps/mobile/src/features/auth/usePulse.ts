@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { Animated } from "react-native";
 
-/**
- * The looping scale "pulse" behind the biometric icon while a scan is running.
- * Returns the shared value to drive the ring's transform.
- */
 export function usePulse(active: boolean) {
   const [scale] = useState(() => new Animated.Value(0.9));
 

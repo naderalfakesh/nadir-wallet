@@ -7,10 +7,6 @@ export interface ReceiveQrPayload {
   chainQualified: boolean;
 }
 
-/**
- * Builds the receive QR payload. Uses an EIP-681 chain-qualified URI for native
- * assets on API-supported testnets, and falls back to the bare EVM address otherwise.
- */
 export function buildReceiveQrPayload(
   address: string,
   chain: ChainId,

@@ -1,5 +1,3 @@
-// Approximates the design's `color-mix(in oklab, <color> N%, transparent)` tints,
-// which behave like the color at N% opacity over the background.
 export function alpha(color: string, amount: number): string {
   const a = Math.max(0, Math.min(1, amount));
 

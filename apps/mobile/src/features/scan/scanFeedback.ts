@@ -8,10 +8,7 @@ export type ScanFeedback =
   | "tokenRequest"
   | "assetMismatch";
 
-/**
- * Collapses reject reasons into the few messages a user can act on. Scanned
- * content is never echoed back: a QR may hold a private key or phrase.
- */
+// Never echo raw scanned text back to the UI: a QR code may contain a private key or seed phrase.
 export function scanFeedback(reason: ScanRejectReason): ScanFeedback {
   switch (reason) {
     case "bad-checksum":

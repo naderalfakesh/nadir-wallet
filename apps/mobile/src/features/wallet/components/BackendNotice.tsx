@@ -4,7 +4,6 @@ import { useTranslation } from "@/i18n/useTranslation";
 import { useDemoState } from "@/providers/DemoStateProvider";
 import type { BackendStatus } from "@/types/status";
 
-// Explains an unreachable API or RPC and offers a retry or the built-in demo data.
 export function BackendNotice({
   status,
   onRetry,

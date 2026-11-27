@@ -12,8 +12,6 @@ interface ImportScreenProps {
   onDone: (phrase: string) => void;
 }
 
-// Real BIP39 validation. On success the phrase is handed up and the wallet is
-// derived; the phrase never leaves the device.
 export function ImportScreen({ onBack, onDone }: ImportScreenProps) {
   const theme = useTheme();
   const styles = useThemedStyles(createStyles);
@@ -54,8 +52,7 @@ export function ImportScreen({ onBack, onDone }: ImportScreenProps) {
           spellCheck={false}
           autoFocus
           multiline
-          // Words are space-separated, so Return closes the keyboard instead of
-          // adding a newline. No onSubmitEditing: import stays an explicit press.
+          // Return closes the keyboard; keep import as an explicit button press.
           submitBehavior="blurAndSubmit"
           returnKeyType="done"
           autoCapitalize="none"

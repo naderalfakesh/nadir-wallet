@@ -8,7 +8,6 @@ export const fontFamily = {
   monoSemibold: "IBMPlexMono_600SemiBold",
 } as const;
 
-// Balances use tabular figures so digits never shift width.
 export const tabularNums = { fontVariant: ["tabular-nums"] as const };
 
 export type FontFamily = typeof fontFamily;

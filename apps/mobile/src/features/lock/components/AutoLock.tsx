@@ -3,9 +3,6 @@ import { AppState } from "react-native";
 import { useApp } from "@/providers/AppProvider";
 import { createAutoLockTracker } from "../autoLockTracker";
 
-// Locks the session when the app returns to the foreground after being away
-// longer than the persisted auto-lock window. Locking closes the wallet route
-// group, which unmounts every wallet screen and routes back to the lock screen.
 export function AutoLock() {
   const { prefs, sessionUnlocked, lockSession, logEvent } = useApp();
   const [tracker] = useState(createAutoLockTracker);

@@ -8,11 +8,7 @@ export interface SeedQuizRound {
 
 const PREFERRED_OFFSETS = [4, 7, 1, 2, 3, 5, 6, 8, 9, 10, 11];
 
-/**
- * Builds deterministic quiz rounds for recovery phrase verification.
- * Deduplicates distractors so valid BIP39 phrases containing repeated words
- * never produce duplicate options or colliding React keys.
- */
+// Deduplicates distractors because valid BIP39 phrases may contain repeated words.
 export function buildSeedQuizRounds(words: readonly string[]): SeedQuizRound[] {
   if (words.length === 0) return [];
   return QUIZ_POSITIONS.filter((pos) => pos < words.length).map((pos) => {

@@ -5,7 +5,6 @@ import { useThemedStyles, type Theme } from "@/theme";
 
 interface ScreenProps {
   children: React.ReactNode;
-  /** Tab screens sit above a tab bar that already handles the bottom inset. */
   bottomInset?: boolean;
   avoidKeyboard?: boolean;
 }

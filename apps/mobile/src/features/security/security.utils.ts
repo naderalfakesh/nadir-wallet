@@ -14,7 +14,6 @@ export interface SecurityScoreInput {
   txProtection: boolean;
 }
 
-/** Counts only protections the user can change; nothing here is always on. */
 export function getSecurityScore(prefs: SecurityScoreInput): { score: number; total: number } {
   const done = [
     prefs.backupConfirmed,
@@ -25,12 +24,10 @@ export function getSecurityScore(prefs: SecurityScoreInput): { score: number; to
   return { score: done.filter(Boolean).length, total: done.length };
 }
 
-/** "Nov 22, 2026" */
 export function formatVerifiedDate(at: number): string {
   return formatShortDate(new Date(at));
 }
 
-/** The newest events first; the log is stored newest-first, so this is a cap. */
 export function latestEvents<T>(events: T[], limit = 5): T[] {
   return events.slice(0, limit);
 }

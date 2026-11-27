@@ -1,4 +1,3 @@
-// Small deterministic hash so mock data stays stable per address without randomness.
 export function hashString(value: string): number {
   let hash = 2166136261;
   for (let i = 0; i < value.length; i++) {

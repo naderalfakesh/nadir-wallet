@@ -16,8 +16,6 @@ interface IntroScreenProps {
   onDone: () => void;
 }
 
-// No timers or auto-advance and no transition animation between steps, so it
-// needs no reduced-motion branch and never holds anyone on a screen.
 export function IntroScreen({ onDone }: IntroScreenProps) {
   const theme = useTheme();
   const styles = useThemedStyles(createStyles);

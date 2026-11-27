@@ -3,7 +3,6 @@ import type { SecurityEvent } from "@/types/status";
 import { TIME_MS } from "@/utils/date";
 import { makeSecurityEvent } from "./events";
 
-/** Demo history for a fresh install, dated in the recent past relative to `now`. */
 export function demoSecurityEvents(now: Date): SecurityEvent[] {
   const ago = (ms: number) => new Date(now.getTime() - ms);
   return [
@@ -24,13 +23,9 @@ export function demoSecurityEvents(now: Date): SecurityEvent[] {
   ];
 }
 
-// The old fixed-label demo entries ("Today · 2:14 PM" whatever the time).
+// Legacy fixed-label demo IDs from older builds (stored without `at`).
 const LEGACY_DEMO_IDS = new Set(["e1", "e2", "e3", "e4", "e5", "e6"]);
 
-/**
- * The log to start with: stored events minus the old fixed-label demo entries,
- * or fresh demo history when nothing real is left.
- */
 export function initialSecurityEvents(stored: SecurityEvent[], now: Date): SecurityEvent[] {
   const real = stored.filter((event) => !(LEGACY_DEMO_IDS.has(event.id) && event.at === undefined));
   return real.length ? real : demoSecurityEvents(now);

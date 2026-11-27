@@ -2,13 +2,8 @@ import { pbkdf2, pbkdf2Async } from "@noble/hashes/pbkdf2";
 import { sha256 } from "@noble/hashes/sha2";
 import { bytesToHex, hexToBytes, randomBytes, utf8ToBytes } from "@noble/hashes/utils";
 
-// The app-lock PIN is never stored in the clear. It is stretched with
-// PBKDF2-SHA256 and a per-device random salt, and only the resulting record is
-// written to the keychain. A 6-digit PIN has a tiny keyspace, so this is
-// defense in depth against a leaked keychain item rather than a substitute for
-// the OS gate; the iteration count is kept modest so verification stays quick
-// on the JS thread of a mid-range phone.
 const SCHEME = "pbkdf2-sha256";
+// Modest iteration count keeps JS-thread verification snappy on mid-range phones.
 const DEFAULT_ITERATIONS = 4096;
 const SALT_BYTES = 16;
 const KEY_BYTES = 32;
@@ -22,7 +17,6 @@ export interface PasscodeRecord {
 
 export interface HashPasscodeOptions {
   iterations?: number;
-  /** Test hook. Production callers let a fresh salt be drawn. */
   salt?: Uint8Array;
 }
 
@@ -32,7 +26,6 @@ function serialize(record: PasscodeRecord): string {
   );
 }
 
-/** Parses a serialized record, or returns null for anything that is not one. */
 export function parsePasscodeRecord(value: string): PasscodeRecord | null {
   const [scheme, rawIterations, rawSalt, rawHash, ...rest] = value.split("$");
   if (rest.length > 0 || scheme !== SCHEME || !rawIterations || !rawSalt || !rawHash) return null;
@@ -60,7 +53,6 @@ function newRecord(opts: HashPasscodeOptions): Omit<PasscodeRecord, "hash"> {
   };
 }
 
-/** Derives a fresh record for `pin`. Synchronous; prefer the async variant on the UI thread. */
 export function hashPasscode(pin: string, opts: HashPasscodeOptions = {}): string {
   const base = newRecord(opts);
   const hash = pbkdf2(sha256, utf8ToBytes(pin), base.salt, {
@@ -89,7 +81,6 @@ function constantTimeEqual(a: Uint8Array, b: Uint8Array): boolean {
   return diff === 0;
 }
 
-/** Checks `pin` against a serialized record. Malformed records never verify. */
 export function verifyPasscode(pin: string, stored: string): boolean {
   const record = parsePasscodeRecord(stored);
   if (!record) return false;

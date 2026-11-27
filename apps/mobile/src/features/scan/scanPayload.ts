@@ -1,11 +1,8 @@
 import { normalizeAddress, SUPPORTED_NETWORKS } from "@nadir-wallet/crypto-core";
 
 export interface ScanTarget {
-  /** Who the funds go to. For an ERC-20 transfer this is the `address` param, never the token. */
   recipient: string;
-  /** Null only for a bare address / bare `ethereum:<address>` with no chain stated. */
   chainId: number | null;
-  /** Set only for an ERC-20 `transfer` URI. */
   tokenContract: string | null;
 }
 
@@ -21,13 +18,11 @@ export type ScanRejectReason =
   | "unsupported-parameter"
   | "malformed-parameter"
   | "recipient-is-token"
-  // Raised by the opener's check, not the parser.
   | "token-request"
   | "asset-mismatch";
 
 export type ScanParseResult = ({ ok: true } & ScanTarget) | { ok: false; reason: ScanRejectReason };
 
-// QR payloads are small; anything bigger is not something we should be parsing.
 const MAX_PAYLOAD_LENGTH = 512;
 
 const SUPPORTED_CHAIN_IDS: ReadonlySet<number> = new Set(
@@ -36,10 +31,8 @@ const SUPPORTED_CHAIN_IDS: ReadonlySet<number> = new Set(
 
 const HEX_ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 const ZERO_ADDRESS = /^0x0{40}$/;
-// EIP-681: [pay-]<address>[@<chain_id>][/<function>][?<params>], matched in full so a
-// longer hex string (tx hash, private key) can never yield a 40-char slice.
+// Full-string EIP-681 match prevents slicing a 40-char address out of a tx hash or private key.
 const EIP681_BODY = /^(?:pay-)?(0x[0-9a-fA-F]{40})(?:@([0-9]+))?(?:\/([A-Za-z0-9_]+))?(?:\?(.*))?$/;
-// Unsigned decimal, optionally with fraction and exponent (EIP-681 `number`).
 const EIP681_NUMBER = /^(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][0-9]+)?$/;
 
 const NATIVE_PARAMS: ReadonlySet<string> = new Set(["value", "gas", "gasLimit", "gasPrice"]);
@@ -76,14 +69,6 @@ function parseParams(query: string): Map<string, string> | null {
   return params;
 }
 
-/**
- * Strictly parses a scanned payload into a send recipient. Supported forms:
- * - a bare `0x` address (EIP-55 checked when mixed-case);
- * - `ethereum:[pay-]<address>` with no chain and no params (EIP-681: current network);
- * - `ethereum:[pay-]<address>@<testnet chain>[?value=&gas=&gasLimit=&gasPrice=]`;
- * - `ethereum:[pay-]<token>@<testnet chain>/transfer?address=<recipient>[&uint256=…]`.
- * Everything else, including mainnet or unknown chains, is rejected.
- */
 export function parseScanPayload(raw: string): ScanParseResult {
   const input = raw.trim();
   if (input.length === 0) return { ok: false, reason: "empty" };
@@ -150,7 +135,6 @@ export function parseScanPayload(raw: string): ScanParseResult {
   };
 }
 
-/** The send recipient from a scanned payload, or null if it isn't a supported form. */
 export function extractEvmAddress(raw: string): string | null {
   const result = parseScanPayload(raw);
   return result.ok ? result.recipient : null;

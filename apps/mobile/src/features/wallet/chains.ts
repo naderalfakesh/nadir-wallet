@@ -1,7 +1,6 @@
 import type { NetworkId } from "@nadir-wallet/types";
 import type { Chain, ChainId } from "./types";
 
-// Maps the mobile's chain ids to the two API-supported testnet networks.
 export const CHAIN_TO_NETWORK: Partial<Record<ChainId, NetworkId>> = {
   ethereum: "ethereum-sepolia",
   polygon: "polygon-amoy",
@@ -58,6 +57,5 @@ export const CHAINS: Record<ChainId, Chain> = {
 };
 
 export function chainBadgeColor(chain: ChainId): string | undefined {
-  // The primary network (Sepolia) shows no chain badge in the design.
   return chain === "ethereum" ? undefined : CHAINS[chain].color;
 }

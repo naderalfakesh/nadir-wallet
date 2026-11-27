@@ -9,10 +9,7 @@ interface ActivitySubtitleProps {
   tx: PortfolioTransaction;
 }
 
-/**
- * Row subtitle. Addresses are set in the mono face: the display font draws the
- * "x" in "0x44Ae" as a multiplication sign.
- */
+// Addresses use the mono font because the display font renders "x" in "0x..." as a multiplication sign.
 export function ActivitySubtitle({ tx }: ActivitySubtitleProps) {
   const { t } = useTranslation();
   if (!tx.party.startsWith("0x")) {

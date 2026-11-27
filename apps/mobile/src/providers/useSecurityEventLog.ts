@@ -11,9 +11,7 @@ export type LogSecurityEvent = (
   opts?: { detail?: string; detailVars?: Record<string, string | number> },
 ) => void;
 
-/** The security activity log, newest first, capped and persisted on every entry. */
 export function useSecurityEventLog(stored: SecurityEvent[]) {
-  // Seed the log with demo history on first launch so the screen isn't empty.
   const [events, setEvents] = useState<SecurityEvent[]>(() =>
     initialSecurityEvents(stored, new Date()),
   );
@@ -30,7 +28,6 @@ export function useSecurityEventLog(stored: SecurityEvent[]) {
     });
   }, []);
 
-  /** Empties the log in memory only; a wallet reset has already cleared storage. */
   const clearEvents = useCallback(() => setEvents([]), []);
 
   return { events, logEvent, clearEvents };

@@ -2,15 +2,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { haptics } from "@/services/device/haptics";
 
 const PIN_LENGTH = 6;
-// Brief beat after the last digit so the final dot fills before we react.
 const SUBMIT_DELAY_MS = 120;
-// How long the dots stay red on a wrong entry before clearing.
 const ERROR_FLASH_MS = 600;
 
 export interface PinEntryHelpers {
-  /** Clear the entered digits (and any error) immediately - e.g. when advancing a stage. */
   clear: () => void;
-  /** Flash the dots red, then clear; `after` runs once the flash ends. */
   fail: (after?: () => void) => void;
 }
 
@@ -19,12 +15,6 @@ interface UsePinEntryOptions {
   onComplete: (pin: string, helpers: PinEntryHelpers) => void;
 }
 
-/**
- * The keypad entry state machine shared by every passcode screen (create,
- * unlock, change). Owns the digit buffer plus the error/shake flash; callers
- * decide what a completed code means via `onComplete`, using the supplied
- * helpers to advance, finish, or reject.
- */
 export function usePinEntry({ length = PIN_LENGTH, onComplete }: UsePinEntryOptions) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);

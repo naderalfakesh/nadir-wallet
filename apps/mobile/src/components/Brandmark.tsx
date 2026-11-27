@@ -2,9 +2,7 @@ import React from "react";
 import Svg, { Path } from "react-native-svg";
 import { useTheme } from "@/theme";
 
-// A rounded hexagon (a block) with the initial N cut out of it. Same geometry
-// as the app icon and splash. The N is drawn in the backdrop colour, so pass
-// `backdrop` when the mark sits on something other than the screen background.
+// Pass `backdrop` when sitting on a non-screen surface so the cutout "N" matches.
 export function Brandmark({ size = 64, backdrop }: { size?: number; backdrop?: string }) {
   const { colors } = useTheme();
   return (

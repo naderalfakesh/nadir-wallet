@@ -5,15 +5,7 @@ import {
   parseScanPayload,
 } from "./scanPayload";
 
-/**
- * A tiny one-shot channel so the full-screen scanner can hand a result back to
- * whoever opened it. The opener (e.g. the send screen) stays mounted beneath
- * the pushed `/scan` route, registers a resolver, and the scanner delivers to
- * it on success or cancel. Single-scanner app → a module singleton is enough.
- */
-
 type ScanResolver = (value: ScanTarget | null) => void;
-/** Lets the opener veto a well-formed target that doesn't fit what it is doing. */
 export type ScanTargetCheck = (target: ScanTarget) => ScanRejectReason | null;
 
 let resolver: ScanResolver | null = null;
@@ -26,16 +18,12 @@ export function beginScan(onResult: ScanResolver, check?: ScanTargetCheck): void
   targetCheck = check ?? null;
 }
 
-/** The scan a scanner screen serves; capture it on mount and pass it to {@link deliverScan}. */
 export function currentScanSession(): number {
   return session;
 }
 
-/**
- * Hands the result to the opener once. A stale `forSession` is ignored so a
- * scanner unmounting late can't resolve or cancel a newer scan.
- */
 export function deliverScan(value: ScanTarget | null, forSession: number = session): void {
+  // Ignore stale sessions so a late unmount cannot resolve or cancel a newer scan.
   if (forSession !== session) return;
   const r = resolver;
   resolver = null;
@@ -43,7 +31,6 @@ export function deliverScan(value: ScanTarget | null, forSession: number = sessi
   r?.(value);
 }
 
-/** Parses a payload and applies the active opener's check, if any. */
 export function evaluateScan(raw: string): ScanParseResult {
   const result = parseScanPayload(raw);
   if (!result.ok) return result;

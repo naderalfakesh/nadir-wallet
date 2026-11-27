@@ -18,7 +18,6 @@ export interface Theme {
 
 interface ThemeContextValue {
   theme: Theme;
-  /** The scheme being rendered: the preference resolved against the device. */
   scheme: ColorScheme;
   preference: ThemePreference;
   setPreference: (preference: ThemePreference) => void;
@@ -45,16 +44,13 @@ export function ThemeProvider({
 }: {
   children: React.ReactNode;
   initialPreference?: ThemePreference;
-  /** Called with every preference the user picks, so the app shell can persist it. */
   onPreferenceChange?: (preference: ThemePreference) => void;
 }) {
   const [preference, setPreferenceState] = useState<ThemePreference>(initialPreference);
-  // Re-renders when the device switches between light and dark.
   const system = useColorScheme();
   const scheme = resolveScheme(preference, system);
 
-  // Without this the keyboard and system prompts keep the device appearance
-  // when the user picks the opposite theme in the app.
+  // Sync OS appearance so keyboards and system alerts match the in-app theme override.
   useEffect(() => {
     Appearance.setColorScheme(nativeColorScheme(preference));
   }, [preference]);

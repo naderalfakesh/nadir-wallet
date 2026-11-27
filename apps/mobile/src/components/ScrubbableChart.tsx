@@ -15,14 +15,12 @@ interface ScrubbableChartProps {
   data: number[];
   up?: boolean;
   height?: number;
-  /** Called with the active point while the chart is touched, and with null on release. */
   onScrub?: (index: number | null) => void;
 }
 
 const DOT = 11;
 
-// A horizontal drag or a short hold starts scrubbing; a vertical drag fails the
-// pan before it activates, so the page scrolls as usual.
+// Horizontal drag or hold scrubs; vertical drag fails the pan so ScrollView still scrolls.
 export function ScrubbableChart({ data, up = true, height = 96, onScrub }: ScrubbableChartProps) {
   const { colors } = useTheme();
   const [width, setWidth] = useState(0);

@@ -1,7 +1,5 @@
 import type { PortfolioToken } from "../types";
 
-// Testnet-only demo tokens. Balances, prices and values are estimated and hold
-// no real-world worth — they exist to validate the UI, not to track funds.
 const RAW_TOKENS: Omit<PortfolioToken, "value">[] = [
   {
     id: "eth",

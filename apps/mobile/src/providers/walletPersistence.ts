@@ -5,11 +5,6 @@ export interface WalletWrites {
   savePrefs: (prefs: Prefs) => Promise<void>;
 }
 
-/**
- * Stores the phrase, then the prefs that mark onboarding complete, and only
- * then returns them for the caller to commit. Either write failing rejects, so
- * the app never treats a wallet as set up when the next launch wouldn't.
- */
 export async function persistNewWallet(
   mnemonic: string,
   address: string,
@@ -21,7 +16,6 @@ export async function persistNewWallet(
   const next: Prefs = {
     ...current,
     onboardingCompleted: true,
-    // Create flow verifies the phrase; import assumes the user has it.
     backupConfirmed: !opts.imported,
     walletAddress: address,
     walletCreatedAt: opts.now,
@@ -30,7 +24,6 @@ export async function persistNewWallet(
   return next;
 }
 
-/** Hashes and stores a PIN; resolves with the record only after the keychain write succeeds. */
 export async function persistPasscode(
   pin: string,
   hash: (pin: string) => Promise<string>,

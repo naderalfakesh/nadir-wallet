@@ -7,7 +7,6 @@ interface SendResultLayoutProps {
   badgeColor: string;
   icon: React.ReactNode;
   title: string;
-  /** Top margin of the title, below the badge. */
   titleGap: number;
   children: React.ReactNode;
   footer: React.ReactNode;

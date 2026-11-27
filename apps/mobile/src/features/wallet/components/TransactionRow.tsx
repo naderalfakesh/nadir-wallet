@@ -11,7 +11,6 @@ interface TransactionRowProps {
   subtitle: React.ReactNode;
   last?: boolean;
   iconSize?: number;
-  /** When true, confirmed rows show fiat and pending/failed rows show a status pill. */
   showValue?: boolean;
   onPress?: () => void;
 }

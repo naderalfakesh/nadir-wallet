@@ -20,8 +20,7 @@ function escalate(current: AddressRiskLevel, next: AddressRiskLevel): AddressRis
   return rank(next) > rank(current) ? next : current;
 }
 
-// Real contract detection needs an RPC `eth_getCode` call; until that exists we
-// flag zero-padded burn/sink style addresses that are rarely valid recipients.
+// Heuristic until real RPC `eth_getCode` contract detection is wired up.
 function looksLikeContractAddress(address: string): boolean {
   return /^0x0{8,}/i.test(address) || /0{8,}$/i.test(address);
 }

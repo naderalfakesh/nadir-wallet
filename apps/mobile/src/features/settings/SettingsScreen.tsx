@@ -33,7 +33,6 @@ export function SettingsScreen() {
         text: t("settings.reset.confirm"),
         style: "destructive",
         onPress: () => {
-          // Resetting closes the wallet route group; index then routes to onboarding.
           void resetWallet();
         },
       },

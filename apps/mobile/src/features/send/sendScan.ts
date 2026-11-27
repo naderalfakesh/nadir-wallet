@@ -4,12 +4,7 @@ import { chainToNetworkId } from "@/features/wallet/chains";
 import type { PortfolioToken } from "@/features/wallet/types";
 import type { ScanTokenPick } from "./send.types";
 
-/**
- * Whether a scanned target can be sent with the selected token. A chain-less
- * address keeps the current network (EIP-681). A chain-qualified code must
- * name the selected token's network, and that token must be its native asset.
- * ERC-20 requests are refused: demo tokens carry no contract to match against.
- */
+// ERC-20 requests are refused because demo tokens carry no contract address to match against.
 export function checkScanForToken(
   target: Pick<ScanTarget, "chainId" | "tokenContract">,
   token: PortfolioToken,
@@ -24,11 +19,6 @@ export function checkScanForToken(
   return null;
 }
 
-/**
- * For a scan started outside Send, where no token is selected yet: the wallet
- * token a scanned target pays with. A chain-less address keeps the default
- * token; a chain-qualified code picks that network's native token.
- */
 export function pickTokenForScan(
   target: Pick<ScanTarget, "chainId" | "tokenContract">,
   tokens: PortfolioToken[],

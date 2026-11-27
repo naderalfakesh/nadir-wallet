@@ -1,18 +1,9 @@
 import type { TranslationKey } from "@/i18n";
 
-/**
- * What a camera screen can show:
- * - `request`: permission not asked yet, so the system prompt can still appear
- * - `settings`: denied or restricted, only system Settings can change it
- * - `noDevice`: permission granted, but no camera faces the needed way
- * - `unavailable`: the native module is missing or the camera/frame processing failed
- */
 export type CameraStatus = "ready" | "request" | "settings" | "noDevice" | "unavailable";
 
 export interface CameraInputs {
-  /** The ML Kit hybrid object was created. */
   nativeReady: boolean;
-  /** The camera session or a frame worklet reported an error. */
   failed: boolean;
   hasPermission: boolean;
   canRequestPermission: boolean;
@@ -35,7 +26,6 @@ export interface CameraPanelCopy {
   actionKey: TranslationKey | null;
 }
 
-/** i18n keys for the panel shown instead of the preview; the body explains what the feature needs. */
 export function cameraPanelCopy(
   feature: "scan" | "liveness",
   status: Exclude<CameraStatus, "ready">,

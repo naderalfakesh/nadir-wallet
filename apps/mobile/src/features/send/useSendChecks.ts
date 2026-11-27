@@ -3,7 +3,6 @@ import type { NetworkId, TransactionSimulationResponse } from "@nadir-wallet/typ
 import type { AddressRisk, RiskReason } from "@/features/wallet/risk";
 import { api } from "@/services/api";
 
-// Live risk check. Sends a public recipient address + networkId only.
 export function useRiskCheck(opts: {
   enabled: boolean;
   address: string;
@@ -61,7 +60,6 @@ type SimulationResult =
   | { status: "idle" | "unavailable"; data?: undefined }
   | { status: "passed" | "failed"; data: TransactionSimulationResponse };
 
-// Live transaction simulation. Sends a public transaction draft only.
 export function useSimulation(opts: {
   enabled: boolean;
   networkId: NetworkId | null;

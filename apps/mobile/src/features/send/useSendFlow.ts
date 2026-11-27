@@ -22,10 +22,6 @@ import {
 import { takeScanHandoff } from "./sendHandoff";
 import { useSendQuote } from "./useSendQuote";
 
-/**
- * State and navigation orchestration for the three-step send flow (recipient,
- * amount, review) and its confirmation overlay.
- */
 export function useSendFlow(tokenId?: string) {
   const router = useRouter();
   const { liveApi, backend, sendSim, sendOutcome } = useDemoState();
@@ -34,7 +30,6 @@ export function useSendFlow(tokenId?: string) {
   const { tokens } = useWallet();
   const loggedKeys = useRef<Set<string>>(new Set());
 
-  // A code scanned from Home arrives here with its recipient and network.
   const [handoff] = useState(takeScanHandoff);
   const [step, setStep] = useState<SendStep>("to");
   const [token, setToken] = useState<PortfolioToken>(() => {
@@ -43,7 +38,6 @@ export function useSendFlow(tokenId?: string) {
     return picked?.ok ? picked.token : getInitialToken(tokens, tokenId, fallback);
   });
   const [to, setTo] = useState(handoff?.recipient ?? "");
-  // Network the recipient was scanned for; the token can still change on the amount step.
   const [scanChainId, setScanChainId] = useState<number | null>(handoff?.chainId ?? null);
   const [amt, setAmt] = useState("0");
   const [phase, setPhase] = useState<SendPhase | null>(null);
@@ -130,7 +124,6 @@ export function useSendFlow(tokenId?: string) {
     });
   }, [sheets, token.id]);
 
-  // High-value sends pass a liveness check first when the user asked for one.
   const startConfirm = useCallback(() => {
     setPhase(prefs.requireLivenessSend && fiat >= HIGH_VALUE_USD ? "liveness" : "auth");
   }, [prefs.requireLivenessSend, fiat]);

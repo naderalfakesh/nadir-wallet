@@ -2,9 +2,6 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 import { storage, type DemoPrefs } from "@/services/storage";
 import type { BackendStatus, PriceStatus, SendOutcome, SendSim } from "@/types/status";
 
-// Showcase-only switches that let a reviewer exercise every backend/price/send
-// state from the running app - the equivalent of the design's tweak panel.
-// None of this affects the local wallet, which is never "down".
 interface DemoStateValue extends DemoPrefs {
   setLiveApi: (v: boolean) => void;
   useDemoData: () => void;
@@ -42,7 +39,6 @@ export function DemoStateProvider({
     (sendOutcome: SendOutcome) => update({ sendOutcome }),
     [update],
   );
-  // Transient backend/price errors clear on retry; keys are local, always safe.
   const retry = useCallback(() => update({ backend: "online", price: "fresh" }), [update]);
 
   const useDemoData = useCallback(

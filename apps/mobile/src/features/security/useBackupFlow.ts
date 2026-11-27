@@ -13,8 +13,6 @@ export function useBackupFlow() {
   const [step, setStep] = useState<Step>("intro");
   const [words, setWords] = useState<string[]>([]);
 
-  // Leaving the reveal/verify steps (back, background, done) drops the words,
-  // so seeing them again needs a fresh OS prompt.
   const clear = useCallback(() => {
     setWords([]);
     setStep((prev) => (prev === "done" ? prev : "intro"));

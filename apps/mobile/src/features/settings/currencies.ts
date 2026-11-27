@@ -17,7 +17,6 @@ export const CURRENCIES: readonly CurrencyOption[] = [
   { code: "JPY", symbol: "¥", nameKey: "settings.currencies.JPY" },
 ];
 
-/** The stored code, or USD when it isn't a supported one. */
 export function currencyCode(stored: string): CurrencyCode {
   return CURRENCIES.find((c) => c.code === stored)?.code ?? "USD";
 }

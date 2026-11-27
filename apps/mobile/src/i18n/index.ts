@@ -14,8 +14,6 @@ import status from "./locales/en/status.json";
 import token from "./locales/en/token.json";
 import tx from "./locales/en/tx.json";
 
-// English is the source and fallback language. Strings live in per-domain files
-// so the app can become multilingual without a rewrite.
 const resources = {
   common,
   onboarding,
@@ -36,20 +34,16 @@ const resources = {
 
 export type TranslationVars = Record<string, string | number>;
 
-// Every dotted path to a string in the resources, e.g. "send.review.total".
 type LeafPaths<T, Prefix extends string = ""> = T extends string
   ? Prefix
   : {
       [K in keyof T & string]: LeafPaths<T[K], Prefix extends "" ? K : `${Prefix}.${K}`>;
     }[keyof T & string];
 
-/** A key that exists in the English resources; a typo fails typecheck. */
 export type TranslationKey = LeafPaths<typeof resources>;
 
 export type TFunction = (key: TranslationKey, vars?: TranslationVars) => string;
 
-// Values every string may use without the caller passing them (the device's
-// biometry name, set once at boot).
 let defaultVars: TranslationVars = {};
 
 export function setDefaultVars(vars: TranslationVars): void {

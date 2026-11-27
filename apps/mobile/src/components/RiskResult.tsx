@@ -16,7 +16,6 @@ interface RiskResultProps {
   level: RiskLevel;
   title: string;
   detail: string;
-  // Short label for the "<level> RISK" pill, e.g. "low".
   levelLabel: string;
   compact?: boolean;
 }

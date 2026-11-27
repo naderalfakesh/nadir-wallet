@@ -1,15 +1,10 @@
 import type { AddressRiskLevel } from "@nadir-wallet/types";
 
-// UI-facing state taxonomy shared across screens. The backend health and
-// price-cache age map onto these; the wallet itself is never "down" because
-// keys are local.
 export type DataAvailabilityState = "available" | "stale" | "unavailable";
 export type BackendStatus = "online" | "api_unavailable" | "rpc_unavailable";
 export type PriceStatus = "fresh" | "stale" | "unavailable";
 export type SimulationStatus = "passed" | "failed" | "unavailable";
 
-// Showcase switches for the simulated send: how the simulation and the final
-// outcome should turn out.
 export type SendSim = "pass" | "fail";
 export type SendOutcome = "success" | "pending" | "failed";
 
@@ -40,8 +35,6 @@ export interface SecurityEvent {
   severity: SecurityEventSeverity;
   title: string;
   detail: string;
-  /** Label saved with the event; shown only for events stored before `at` existed. */
   when: string;
-  /** When it happened, epoch ms. The shown label is derived from it at render time. */
   at?: number;
 }

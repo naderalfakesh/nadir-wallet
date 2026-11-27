@@ -22,7 +22,6 @@ interface OverlayProps {
   fiat: number;
   to: string;
   onRetry: () => void;
-  /** Dismiss the overlay back to the review step (used by the liveness gate). */
   onCancel: () => void;
 }
 
@@ -50,8 +49,6 @@ export function SendConfirmOverlay({
     }
   }, [phase, outcome, setPhase]);
 
-  // Step-up liveness gate before confirming a high-value send (after hooks, so
-  // hook order stays stable across phases).
   if (phase === "liveness") {
     return <LivenessFlow mode="gate" onPass={() => setPhase("auth")} onCancel={onCancel} />;
   }

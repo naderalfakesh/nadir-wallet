@@ -10,8 +10,6 @@ export function useChangePasscode() {
   const [stage, setStage] = useState<Stage>("current");
   const [first, setFirst] = useState("");
   const [entryError, setEntryError] = useState<EntryError>("incorrect");
-  // Hashing and the keychain write take a moment; ignore keys until it settles
-  // so a re-entered PIN can't start a second save or log the change twice.
   const saving = useRef(false);
 
   const { pin, error, shake, press, clear } = usePinEntry({
@@ -41,7 +39,6 @@ export function useChangePasscode() {
               logEvent("passcode_changed");
               setStage("done");
             },
-            // The old PIN stays in place; start the new-PIN entry over.
             () => {
               saving.current = false;
               setEntryError("saveFailed");

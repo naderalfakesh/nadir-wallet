@@ -6,7 +6,6 @@ import { priceCache } from "../db/schema";
 const PRICE_TTL_MS = 60_000;
 const PRICE_SOURCE = "mock";
 
-// Deterministic baseline USD prices for the testnet showcase.
 const BASE_PRICES: Record<string, number> = {
   ETH: 3142.5,
   WETH: 3142.5,
@@ -23,7 +22,6 @@ function basePrice(symbol: string): number {
   if (known !== undefined) {
     return known;
   }
-  // Stable pseudo price for unknown symbols, kept in a sensible range.
   let hash = 0;
   for (let i = 0; i < symbol.length; i++) {
     hash = (hash * 31 + symbol.charCodeAt(i)) >>> 0;

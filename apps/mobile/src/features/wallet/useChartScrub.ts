@@ -30,10 +30,6 @@ interface UseChartScrubOptions {
   disabled?: boolean;
 }
 
-/**
- * Manages interactive scrub state for a demo price/balance sparkline, deriving
- * the scrubbed value, percent change, and formatted timestamp for the active range.
- */
 export function useChartScrub({
   seriesId,
   range,

@@ -19,7 +19,6 @@ export function useBiometricUnlock() {
       haptics.success();
       clearLockout();
       logEvent("unlock", { detail: methodLabel });
-      // Opening the wallet group removes this screen; index then routes to home.
       unlockSession();
     },
     [clearLockout, logEvent, unlockSession],
@@ -50,7 +49,6 @@ export function useBiometricUnlock() {
     }
   }, [unlock]);
 
-  // Probe hardware once, then auto-prompt or fall back to passcode.
   useEffect(() => {
     if (started.current) return;
     started.current = true;
@@ -60,9 +58,7 @@ export function useBiometricUnlock() {
         ok =
           (await LocalAuthentication.hasHardwareAsync()) &&
           (await LocalAuthentication.isEnrolledAsync());
-      } catch {
-        // Treated as no biometrics: the passcode path still guards the wallet.
-      }
+      } catch {}
       setAvailable(ok);
       if (prefs.biometricEnabled && ok) {
         authenticate();

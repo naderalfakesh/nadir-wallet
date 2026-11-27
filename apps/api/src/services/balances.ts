@@ -2,9 +2,6 @@ import type { NetworkId, TokenBalance } from "@nadir-wallet/types";
 import { formatTokenAmount, getTokens, parseTokenAmount } from "@nadir-wallet/crypto-core";
 import { hashString } from "../lib/mock";
 
-// Mock balances derived deterministically from the address so the same wallet
-// always returns the same holdings. Swap this for viem `getBalance` / ERC-20
-// `balanceOf` calls once an RPC URL is configured.
 export function getBalances(address: string, networkId: NetworkId): TokenBalance[] {
   return getTokens(networkId).map((token) => {
     const seed = hashString(`${address.toLowerCase()}:${networkId}:${token.symbol}`);

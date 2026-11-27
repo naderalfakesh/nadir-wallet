@@ -6,9 +6,7 @@ export interface TransactionSimulationRequest {
   networkId: NetworkId;
   from: string;
   to: string;
-  /** Human-readable native amount. */
   value?: string;
-  /** Optional calldata hex for contract interactions. */
   data?: string;
   tokenAddress?: string;
 }

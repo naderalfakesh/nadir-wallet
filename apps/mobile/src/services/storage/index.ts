@@ -19,20 +19,16 @@ export type {
 } from "./storage.types";
 export { DEFAULT_PREFS, DEFAULT_DEMO } from "./storage.constants";
 
-// Centralised so screens never touch storage keys directly.
 const KEYS = {
   prefs: "nadir.prefs",
   theme: "nadir.theme",
   demo: "nadir.demo",
   events: "nadir.events",
   lockout: "nadir.lockout",
-  // Device-level, so clearWallet leaves it: a reset shouldn't replay the intro.
+  // Device-level key: intentionally kept across clearWallet so reset does not replay intro.
   intro: "nadir.intro",
 } as const;
 
-// SecureStore (device keychain) holds the only real secret, the BIP39
-// mnemonic (see ./mnemonic), plus the salted hash of the app-lock PIN.
-// Never AsyncStorage.
 const SECURE_PASSCODE = "nadir.passcode";
 
 async function readJson<T>(key: string, fallback: T): Promise<T> {
@@ -95,12 +91,8 @@ export const storage = {
     AsyncStorage.setItem(KEYS.events, JSON.stringify(events)),
   saveLockout: (state: LockoutState) => AsyncStorage.setItem(KEYS.lockout, JSON.stringify(state)),
   saveIntroSeen: () => AsyncStorage.setItem(KEYS.intro, INTRO_SEEN_VALUE),
-  // Only the salted hash is written; the PIN itself is never persisted.
-  // Failures propagate so the UI never reports a PIN that wasn't stored.
   savePasscodeHash: (record: string) => SecureStore.setItemAsync(SECURE_PASSCODE, record),
-  // Write-only here; reading it back goes through revealMnemonic's OS prompt.
   saveMnemonic,
-  // Wipes all device-stored wallet state (secret + non-secret) for reset.
   clearWallet: async () => {
     await Promise.all([
       deleteMnemonic().catch(() => undefined),

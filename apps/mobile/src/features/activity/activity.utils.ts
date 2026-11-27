@@ -15,7 +15,6 @@ export function getActivityDays(transactions: PortfolioTransaction[]): string[] 
   return [...new Set(transactions.map((tx) => tx.day))];
 }
 
-/** Groups transactions by day label in a single pass, preserving input order. */
 export function groupTransactionsByDay(transactions: PortfolioTransaction[]): ActivityDayGroup[] {
   const byDay = new Map<string, PortfolioTransaction[]>();
   for (const tx of transactions) {
@@ -39,7 +38,6 @@ export interface SearchContext {
   tokens: Pick<PortfolioToken, "symbol" | "name">[];
 }
 
-/** Case-insensitive match over party, token symbol and name, type label, amount, hash and chain. */
 export function matchesSearch(
   tx: PortfolioTransaction,
   query: string,

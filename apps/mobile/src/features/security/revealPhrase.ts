@@ -2,7 +2,6 @@ import type { GateOutcome } from "@/features/auth/components/DeviceAuthGate";
 import type { StaleGuard } from "@/features/auth/staleGuard";
 import type { RevealResult } from "@/services/storage/mnemonic";
 
-/** Commits the revealed words only if nothing cleared the screen while the prompt and read ran. */
 export async function revealWhileCurrent(
   guard: StaleGuard,
   reveal: () => Promise<RevealResult>,

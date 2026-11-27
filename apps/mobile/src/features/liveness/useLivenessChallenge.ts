@@ -17,8 +17,6 @@ export function useLivenessChallenge() {
   const machineRef = useRef(initialMachine);
   const [snapshot, setSnapshot] = useState<LivenessSnapshot>(initialMachine.snapshot);
 
-  // Driven from the camera worklet at ~30 fps; only publishes to React when the
-  // user-visible snapshot actually changes.
   const process = useCallback((obs: FaceObservation) => {
     const previous = machineRef.current.snapshot;
     const next = reduceLiveness(machineRef.current, obs, Date.now());

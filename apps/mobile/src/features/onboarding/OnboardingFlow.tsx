@@ -26,15 +26,11 @@ export function OnboardingFlow() {
   const { setPref, setPasscode, logEvent, createWallet, introSeen, markIntroSeen } = useApp();
   const [step, setStep] = useState<OnboardingStep>(() => initialOnboardingStep(introSeen));
   const [viaImport, setViaImport] = useState(false);
-  // The fresh/imported phrase lives only in memory until the user confirms.
   const [mnemonic, setMnemonic] = useState("");
   const words = mnemonic ? mnemonic.split(" ") : [];
   const [finishState, setFinishState] = useState<FinishState>("idle");
-  // The phrase is on screen (or being typed) in these steps.
   useBlockScreenCapture(step === "reveal" || step === "verify" || step === "import");
 
-  // createWallet unlocks the session, which closes this route group; index then
-  // routes to home. On failure the wallet stays un-onboarded and can retry.
   const finish = async () => {
     if (finishState === "saving") return;
     setFinishState("saving");

@@ -12,9 +12,6 @@ interface CreatePasscodeProps {
   onBack: () => void;
 }
 
-// Two-stage set/confirm entry. Nothing is persisted here: the PIN is handed
-// back so the flow can hash it and store the record in the device keychain.
-// `onDone` resolves false when that write failed, and entry starts over.
 export function CreatePasscode({ onDone, onBack }: CreatePasscodeProps) {
   const theme = useTheme();
   const styles = useThemedStyles(createStyles);
@@ -22,8 +19,6 @@ export function CreatePasscode({ onDone, onBack }: CreatePasscodeProps) {
   const [stage, setStage] = useState<"set" | "confirm">("set");
   const [first, setFirst] = useState("");
   const [saveFailed, setSaveFailed] = useState(false);
-  // Hashing and the keychain write take a moment; keys pressed meanwhile would
-  // start a second save of a PIN the user is still looking at.
   const saving = useRef(false);
 
   const { pin, error, shake, press, clear } = usePinEntry({

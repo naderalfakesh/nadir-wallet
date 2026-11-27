@@ -19,7 +19,6 @@ export function useCameraAccess(position: "front" | "back", nativeReady: boolean
     requestPermission().catch(markFailed);
   }, [requestPermission, markFailed]);
 
-  // Only a not-yet-asked permission prompts on its own; a denied one waits for the user.
   useEffect(() => {
     if (status === "request") askPermission();
   }, [status, askPermission]);

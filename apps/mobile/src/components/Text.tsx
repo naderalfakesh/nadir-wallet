@@ -9,7 +9,6 @@ interface AppTextProps extends RNTextProps {
   size?: number;
   color?: string;
   mono?: boolean;
-  // Tabular figures keep balances from shifting width as digits change.
   tnum?: boolean;
   muted?: boolean;
   faint?: boolean;

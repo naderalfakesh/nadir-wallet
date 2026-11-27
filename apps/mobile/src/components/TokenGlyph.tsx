@@ -7,7 +7,6 @@ interface TokenGlyphProps {
   symbol: string;
   color: string;
   size?: number;
-  // Chain badge: pass a color to show it (omitted for the primary network).
   chainColor?: string;
 }
 

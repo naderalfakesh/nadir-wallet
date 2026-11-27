@@ -8,7 +8,6 @@ import { formatWhenDay } from "./when";
 
 const NETWORKS: NetworkId[] = ["ethereum-sepolia", "polygon-amoy"];
 
-// Display metadata the API doesn't carry (brand colour, a demo 24h change).
 const SYMBOL_COLOR: Record<string, string> = {
   ETH: "#7C93F0",
   USDC: "#3B7BFF",
@@ -75,9 +74,6 @@ export interface LivePortfolio {
   priceStatus: PriceStatus;
 }
 
-// Fetches public balances/transactions/prices for a demo address across the two
-// supported testnets. Returns null only when every network request fails, so
-// callers can fall back to demo data. Sends a public address only.
 export async function fetchLivePortfolio(address: string): Promise<LivePortfolio | null> {
   const perNetwork = await Promise.all(
     NETWORKS.map(async (net) => {

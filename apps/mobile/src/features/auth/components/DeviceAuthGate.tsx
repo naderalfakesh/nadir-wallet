@@ -14,13 +14,9 @@ export type GateOutcome = { ok: true } | { ok: false; reason: GateFailure };
 interface DeviceAuthGateProps {
   title: string;
   subtitle: string;
-  /** Runs the OS prompt (and any protected read); the gate only renders the outcome. */
   authenticate: () => Promise<GateOutcome>;
-  /** Prompt as soon as the gate mounts. */
   auto?: boolean;
-  /** Wording for failures where the default ("Nothing was shown") doesn't fit the action. */
   failureCopy?: Partial<Record<GateFailure, string>>;
-  /** Another way through, offered only when the device has no credential the OS can check. */
   unavailableFallback?: { message: string; label: string; onPress: () => void };
 }
 
@@ -40,7 +36,6 @@ export function DeviceAuthGate({
   const autoStarted = useRef(false);
   const pulse = usePulse(status === "authenticating");
 
-  // On success the parent swaps the gate out, so only failures update status.
   const go = useCallback(async () => {
     setStatus("authenticating");
     let res: GateOutcome;

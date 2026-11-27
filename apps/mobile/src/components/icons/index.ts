@@ -42,11 +42,6 @@ import { TrendGlyph } from "./TrendGlyph";
 import { UserGlyph } from "./UserGlyph";
 import { WifiOffGlyph } from "./WifiOffGlyph";
 
-/**
- * 24x24 line glyphs, single stroke, one file each. They draw inside the
- * `<Svg>` of `Icon` and inherit its stroke; render them through `Icon`.
- * To add an icon: create `<Name>Glyph.tsx` here and register it below.
- */
 export const iconGlyphs = {
   home: HomeGlyph,
   activity: ActivityGlyph,

@@ -8,7 +8,6 @@ interface TestnetBadgeProps {
   label?: string;
 }
 
-// Persistent testnet / demo positioning.
 export function TestnetBadge({ label }: TestnetBadgeProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);

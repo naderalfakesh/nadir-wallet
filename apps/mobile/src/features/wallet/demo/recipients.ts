@@ -1,7 +1,5 @@
 import type { SavedRecipient } from "../types";
 
-// Full 40-char addresses so the live risk API (which validates address format)
-// returns the intended low/medium/high for each sample recipient.
 export const RECIPIENTS: SavedRecipient[] = [
   {
     addr: "0x6b2fA0e1c4D9b8721a3F5e0c91A4D3b21f9C0e57",
@@ -24,8 +22,6 @@ export const RECIPIENTS: SavedRecipient[] = [
   },
 ];
 
-// The real address comes from prefs.walletAddress (derived on-device); this is
-// just the display name shown alongside it.
 export const ACCOUNT = {
   label: "Main Wallet",
   caption: "Testnet account",

@@ -48,8 +48,6 @@ const createStyles = (theme: Theme) =>
       width: 24,
       height: 24,
       borderRadius: 12,
-      // White knob in both schemes - the standard switch look; it leans on
-      // the shadow for separation on the light off-state track.
       backgroundColor: "#fff",
       ...theme.shadows.toggleKnob,
     },

@@ -17,8 +17,6 @@ function findRecipient(address: string) {
   );
 }
 
-// Demo risk service - the on-device equivalent of the backend address check.
-// It only ever inspects a public address.
 export function assessRecipient(address: string): AddressRisk | null {
   const a = address.trim().toLowerCase();
   if (a.length < 4) return null;
@@ -30,7 +28,6 @@ export function assessRecipient(address: string): AddressRisk | null {
   return { level: "medium", blocked: false, reason: "firstTime" };
 }
 
-// Infers the network a recipient is known on, to flag network mismatches.
 export function recipientNetwork(address: string): ChainId | null {
   const hit = findRecipient(address);
   if (hit) return hit.network;

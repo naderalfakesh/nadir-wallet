@@ -11,7 +11,6 @@ interface CameraStatusPanelProps {
   onRequestPermission: () => void;
 }
 
-/** Shown in place of the preview whenever the camera can't run. */
 export function CameraStatusPanel({
   feature,
   status,

@@ -23,10 +23,7 @@ export function RevealScreen() {
   const guard = useSensitiveReveal(hide);
   useBlockScreenCapture();
 
-  // Enforce the optional liveness step-up here, on the route itself, so every
-  // entry point (Security Center, Settings, a deep link) is gated identically.
-  // Decide once on mount (peek, pure); the effect then either consumes the
-  // one-shot pass or bounces to the liveness flow.
+  // Peek once on mount so the effect either consumes the one-shot pass or bounces to /liveness.
   const [allowed] = useState(() => !prefs.requireLivenessReveal || peekLiveness("/reveal"));
   useEffect(() => {
     if (allowed) consumeLiveness("/reveal");
@@ -43,7 +40,6 @@ export function RevealScreen() {
     [guard, t],
   );
 
-  // Render nothing while bouncing to the liveness gate.
   if (!allowed) return null;
 
   return (

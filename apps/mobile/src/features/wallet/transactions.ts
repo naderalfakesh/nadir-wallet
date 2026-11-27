@@ -33,7 +33,6 @@ export function getTransactionAmount(tx: PortfolioTransaction, theme: Theme): Tr
   return { color, prefix, text: fmtToken(tx.amount, tx.token), style };
 }
 
-/** The time portion of a "Today · 2:14 PM" timestamp, falling back to the whole label. */
 export function getTransactionTime(tx: PortfolioTransaction): string {
   return tx.when.split(" · ")[1] ?? tx.when;
 }

@@ -7,7 +7,6 @@ import { useTheme, useThemedStyles, type Theme } from "@/theme";
 interface BiometricBadgeProps {
   pulse: Animated.Value;
   active: boolean;
-  /** Diameter of the pulsing ring; the inner Face ID tile stays a fixed 96. */
   ringSize?: number;
 }
 

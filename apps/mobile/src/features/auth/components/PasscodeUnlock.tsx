@@ -10,15 +10,12 @@ import { PinKeypad } from "./PinKeypad";
 import { usePinEntry } from "../usePinEntry";
 
 interface PasscodeUnlockProps {
-  /** Resolves true when the entered PIN matches the stored hash. */
   verify: (pin: string) => Promise<boolean>;
   lockout: LockoutState;
   onUnlock: () => void;
-  /** Called on a wrong entry; the owner persists the new lockout state. */
   onFailure: () => void;
   onUseBiometric: () => void;
   biometricAvailable: boolean;
-  /** Line under the title while idle; defaults to the unlock hint. */
   hint?: string;
 }
 
@@ -55,8 +52,6 @@ export function PasscodeUnlock({
     },
   });
 
-  // Re-sync the countdown whenever the owner reports a new lockout state, then
-  // tick it down once a second while locked.
   useEffect(() => {
     const update = () => setLockLeft(Math.ceil(lockRemainingMs(lockout, Date.now()) / 1000));
     update();

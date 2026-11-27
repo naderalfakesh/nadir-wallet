@@ -69,9 +69,6 @@ async function request<T>(
   }
 }
 
-// Only public-safe data is ever sent: addresses, network ids, token symbols and
-// transaction drafts for simulation. Mnemonics, private keys and signing
-// material never touch this client.
 export const api = {
   health: () => request<HealthResponse>("/health"),
 

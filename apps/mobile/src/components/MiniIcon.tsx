@@ -5,7 +5,6 @@ import { Icon, type IconName } from "./Icon";
 
 interface MiniIconProps {
   name: IconName;
-  // Tone tints the disc; omit for the neutral surface treatment.
   tone?: "neutral" | "accent" | "pos" | "warn" | "neg";
 }
 

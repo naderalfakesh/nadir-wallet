@@ -1,14 +1,5 @@
-// Passcode lockout policy. Pure so it can be unit-tested and so the state can
-// be persisted: a relaunch must not hand an attacker a fresh set of attempts.
-//
-// Every fifth consecutive failure locks the keypad, and each lock lasts twice
-// as long as the previous one (30s, 60s, 120s, ...) up to an hour. A successful
-// unlock resets everything.
-
 export interface LockoutState {
-  /** Consecutive failed attempts since the last successful unlock. */
   failures: number;
-  /** Epoch ms until which the keypad is locked; 0 when not locked. */
   lockedUntil: number;
 }
 
@@ -26,14 +17,11 @@ export function lockRemainingMs(state: LockoutState, now: number): number {
   return Math.max(0, state.lockedUntil - now);
 }
 
-/** Attempts left before the next lock kicks in. */
 export function attemptsLeft(state: LockoutState): number {
   return LOCKOUT_THRESHOLD - (state.failures % LOCKOUT_THRESHOLD);
 }
 
 export function recordFailure(state: LockoutState, now: number): LockoutState {
-  // Entries while locked are ignored by the UI; guard anyway so a stray call
-  // cannot extend the lock.
   if (isLocked(state, now)) return state;
   const failures = state.failures + 1;
   if (failures % LOCKOUT_THRESHOLD !== 0) return { failures, lockedUntil: 0 };
@@ -42,7 +30,6 @@ export function recordFailure(state: LockoutState, now: number): LockoutState {
   return { failures, lockedUntil: now + duration };
 }
 
-/** Coerces whatever was persisted into a valid state. */
 export function sanitizeLockout(value: unknown): LockoutState {
   if (!value || typeof value !== "object") return EMPTY_LOCKOUT;
   const { failures, lockedUntil } = value as Partial<LockoutState>;

@@ -28,7 +28,6 @@ interface WalletData {
   backend: BackendStatus;
   price: PriceStatus;
   source: "live" | "demo";
-  /** Whether the live API answered: null while the first load is in flight or live mode is off. */
   apiReachable: boolean | null;
   loading: boolean;
   initialLoading: boolean;
@@ -74,7 +73,6 @@ export function WalletDataProvider({ children }: { children: React.ReactNode }) 
     else retry();
   }, [liveApi, load, retry]);
 
-  // Keep portfolio results tied to the current wallet and the latest refresh.
   useEffect(() => {
     if (!liveApi) return;
     let active = true;
@@ -87,7 +85,6 @@ export function WalletDataProvider({ children }: { children: React.ReactNode }) 
     };
   }, [liveApi, load]);
 
-  // Dated once per app session, relative to when the wallet data first loads.
   const demoTx = useMemo(() => demoTransactions(new Date()), []);
 
   const value = useMemo<WalletData>(() => {
@@ -119,8 +116,6 @@ export function WalletDataProvider({ children }: { children: React.ReactNode }) 
         refresh,
       };
     }
-    // Live mode without a portfolio (still loading, or the API is unreachable): show the
-    // bundled sample data as if healthy. Only Demo controls report the real connection.
     return {
       ...DEMO_VIEW,
       transactions: demoTx,

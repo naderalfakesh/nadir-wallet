@@ -1,9 +1,7 @@
 import type { AppStateLike } from "@/features/auth/sensitiveState";
 
 export interface AutoLockTracker {
-  /** Returns true when the session must lock on this transition. */
   onAppState: (next: AppStateLike, now: number, thresholdMs: number) => boolean;
-  /** Forgets any recorded absence, e.g. one caused by the unlock prompt itself. */
   reset: () => void;
 }
 

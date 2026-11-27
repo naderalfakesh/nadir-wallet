@@ -1,5 +1,4 @@
-// Note: the crypto.getRandomValues polyfill is loaded in the app entry
-// (index.js), which must run before any module that reads crypto at import time.
+// crypto.getRandomValues polyfill is loaded in index.js before any module imports crypto.
 import React, { useEffect, useState } from "react";
 import {
   IBMPlexMono_400Regular,
@@ -46,8 +45,6 @@ SplashScreen.preventAutoHideAsync();
 const persistPreference = (preference: ThemePreference) =>
   void storage.saveTheme(preference).catch(() => undefined);
 
-// The in-app theme can differ from the system one, so both system bars follow
-// it: dark icons on the light theme, light icons on the dark theme.
 function ThemedSystemBars() {
   const { scheme } = useThemeControls();
   const style = scheme === "light" ? "dark" : "light";
@@ -59,10 +56,7 @@ function ThemedSystemBars() {
   );
 }
 
-// Each group is registered only while it is open (see routeAccess). A closed
-// group's screens leave the navigator, so a cold-start or warm deep link to
-// one can't mount it, and closing a group (lock, reset) unmounts its screens
-// and falls back to `index`, which redirects to whichever group is open.
+// Closed Stack.Protected groups leave the navigator, blocking deep links and unmounting on lock/reset.
 function RootStack() {
   const { prefs, sessionUnlocked } = useApp();
   const guard = groupGuards({ onboarded: prefs.onboardingCompleted, unlocked: sessionUnlocked });
@@ -109,7 +103,6 @@ export default function RootLayout() {
   const [boot, setBoot] = useState<PersistedState | null>(null);
 
   useEffect(() => {
-    // Resolve the biometry name before the first screen renders its strings.
     Promise.all([loadPersistedState(), loadBiometryKind()]).then(([state]) => setBoot(state));
   }, []);
 
